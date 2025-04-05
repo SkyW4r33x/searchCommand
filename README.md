@@ -1,5 +1,3 @@
-# searchCommand
-
 ![Banner](https://i.imgur.com/NII8Wbr.jpeg)  
 *Herramienta de búsqueda interactiva para comandos de pentesting en Linux.*
 
