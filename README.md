@@ -5,7 +5,7 @@
 
 **Autor**: Jordan aka SkyW4r33x  
 **Versión**: 0.1  
-**Repositorio**: [https://github.com/SkyW4r33x/](https://github.com/SkyW4r33x/searchCommand)
+**Linkedin**: [https://www.linkedin.com/jordan](https://www.linkedin.com/in/jordan-edilberto-cueva-mendoza-080b19283/)
 
 ## Características
 
