@@ -5,7 +5,6 @@
 
 **Autor**: Jordan aka SkyW4r33x  
 **Versión**: 0.1  
-**Linkedin**: [https://www.linkedin.com/skyw4r33x](https://www.linkedin.com/in/jordan-edilberto-cueva-mendoza-080b19283/)
 
 ## Características
 
