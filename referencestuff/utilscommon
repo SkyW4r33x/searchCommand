@@ -11,7 +11,7 @@
   nmap -p- --script=vuln $IP -oN vulns
 
 ▶ Escaneo Rápido (Puertos abiertos rápidamente):
-  nmap -p- --open -sS --min-rate 5000 -vvv -n -Pn $IP -oA allPorts
+  nmap -p- --open -sS --min-rate 5000 -vvv -n -Pn $IP -oG allPorts
 
 ▶ Versiones/Servicios (Análisis detallado de puertos):
   nmap -sCV -p<puertos> $IP -oN targeted
