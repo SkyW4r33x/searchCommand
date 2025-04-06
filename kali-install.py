@@ -184,16 +184,18 @@ def install_search_command():
             shutil.copytree("referencestuff", destino, dirs_exist_ok=True)
             for root, dirs, files in os.walk(destino):
                 for d in dirs:
-                    os.chmod(os.path.join(root, d), 0o755)
-                    os.chown(os.path.join(root, d), pw.pw_uid, pw.pw_gid)
+                    dir_path = os.path.join(root, d)
+                    os.chmod(dir_path, 0o755)  
+                    os.chown(dir_path, pw.pw_uid, pw.pw_gid)
                 for f in files:
-                    os.chmod(os.path.join(root, f), 0o755)
-                    os.chown(os.path.join(root, f), pw.pw_uid, pw.pw_gid)
-            os.chmod(destino, 0o755)
+                    file_path = os.path.join(root, f)
+                    os.chmod(file_path, 0o644)  
+                    os.chown(file_path, pw.pw_uid, pw.pw_gid)
+            os.chmod(destino, 0o755) 
             os.chown(destino, pw.pw_uid, pw.pw_gid)
         else:
             shutil.copy("referencestuff", destino)
-            os.chmod(destino, 0o755)
+            os.chmod(destino, 0o644) 
             os.chown(destino, pw.pw_uid, pw.pw_gid)
         log_info(f"Copiado {BOLD}{BLUE}referencestuff{RESET} a {BOLD}{YELLOW}{destino}{RESET}", secondary=True, delay=0.2)
 
@@ -228,8 +230,8 @@ def install_search_command():
         with open("searchCommand", "w") as f:
             f.write(script_content)
         shutil.move("searchCommand", script_path)
-        os.chmod(target_script, 0o755)
-        os.chmod(script_path, 0o755)
+        os.chmod(target_script, 0o755)  
+        os.chmod(script_path, 0o755)    
         log_info("Script ejecutable creado y permisos asignados.", secondary=True, delay=0.2)
 
         print(SEPARATOR + "\n")
