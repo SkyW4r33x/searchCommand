@@ -3,7 +3,7 @@
 
 """
 ═════════════════════════[searchCommand]════════════════════════════
-Autor       : Jordan Edilberto Cueva Mendoza (aka SkyW4r33x)
+Autor       : Jordan Cueva Mendoza (aka SkyW4r33x)
 Repositorio : https://github.com/SkyW4r33x
 
 Descripción :
@@ -16,6 +16,9 @@ avanzados que buscan una forma rápida y ordenada de acceder a comandos
 ═══════════════════════════════════════════════════════════════════
 """
 
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
 import os
 import re
 import sys
@@ -24,6 +27,7 @@ import difflib
 import argparse
 import time
 import unicodedata
+import urllib.parse
 from typing import List, Dict, Optional, Tuple
 from prompt_toolkit import PromptSession
 from prompt_toolkit.styles import Style
@@ -66,6 +70,10 @@ class SearchCommand:
             user_home = os.path.expanduser('~')
         
         self.file_path = file_path if file_path else os.path.join(user_home, 'referencestuff/utilscommon')
+        self.ip_value = None  
+        self.url_value = None  
+        self.recent_ips = []  
+        self.recent_urls = []  
         self.last_command_success = True
         self.last_results_count = 0
         self.current_category = ""
@@ -126,7 +134,9 @@ class SearchCommand:
             self.completer = EnhancedCompleter(
                 categories=list(self.categories.keys()),
                 tools=self.tools,
-                tools_by_category=self.tools_by_category
+                tools_by_category=self.tools_by_category,
+                recent_ips=self.recent_ips,
+                recent_urls=self.recent_urls
             )
         except TypeError as e:
             self._handle_exception("⚠️ Error al inicializar autocompletado", e, True)
@@ -230,6 +240,38 @@ class SearchCommand:
         categories, _ = self._validate_and_parse(lines)
         return categories
 
+    def _normalize_url(self, url: str) -> str:
+        """Normaliza una URL eliminando dobles barras y asegurando un formato correcto."""
+        # Parsear la URL
+        parsed = urllib.parse.urlparse(url)
+        # Reconstruir la URL, eliminando dobles barras en el path
+        path = re.sub(r'/+', '/', parsed.path.lstrip('/'))
+        # Asegurar que la URL tenga un esquema (http por defecto si no se especifica)
+        scheme = parsed.scheme if parsed.scheme else 'http'
+        # Reconstruir la URL
+        normalized = urllib.parse.urlunparse((
+            scheme,
+            parsed.netloc,
+            path,
+            parsed.params,
+            parsed.query,
+            parsed.fragment
+        ))
+        return normalized
+
+    def _replace_variables(self, command: str) -> str:
+        """Reemplaza $IP y $URL en un comando con los valores almacenados, si existen."""
+        if '$IP' in command and self.ip_value:
+            command = command.replace('$IP', self.ip_value)
+        if '$URL' in command and self.url_value:
+            # Normalizar la URL antes de reemplazar
+            normalized_url = self._normalize_url(self.url_value)
+            # Reemplazar $URL y limpiar dobles barras
+            command = command.replace('$URL', normalized_url)
+            # Limpiar cualquier doble barra resultante
+            command = re.sub(r'(https?://[^/]+)//+', r'\1/', command)
+        return command
+
     def _search_generic(self, query: str, search_type: str) -> List[str]:
         try:
             query_normalized = normalize_text(query)
@@ -308,6 +350,8 @@ class SearchCommand:
         print(f"   {Colors.GREEN}•{Colors.RESET}  help (h)             Mostrar este mensaje de ayuda")
         print(f"   {Colors.GREEN}•{Colors.RESET}  list tools (lt)      Listar todas las herramientas")
         print(f"   {Colors.GREEN}•{Colors.RESET}  list categories (lc) Listar todas las categorías")
+        print(f"   {Colors.GREEN}•{Colors.RESET}  setip <IP>           Configurar $IP para comandos")
+        print(f"   {Colors.GREEN}•{Colors.RESET}  seturl <URL>         Configurar $URL para comandos")
         print(f"   {Colors.GREEN}•{Colors.RESET}  clear (c)            Limpiar la pantalla")
         print(f"   {Colors.GREEN}•{Colors.RESET}  exit (q)             Salir del programa")
         print("")
@@ -414,7 +458,6 @@ class SearchCommand:
 
     def _format_results(self, results: List[str]) -> List[str]:
         formatted_results = []
-        first_subtitle = True
         
         i = 0
         while i < len(results):
@@ -427,37 +470,36 @@ class SearchCommand:
                 if len(parts) < 2 or not parts[1].strip():
                     i += 1
                     continue
-                if not first_subtitle:
-                    formatted_results.append("")
+                formatted_results.append("")  
                 tool_name = parts[1].strip()
                 formatted_results.append(f"{Colors.INTENSE_RED}{Colors.BOLD}[+] ══════════[ {tool_name} ]══════════ [+]{Colors.RESET}")
-                first_subtitle = False
                 i += 1
             elif line.strip().startswith('*'):
-                if not first_subtitle:
-                    formatted_results.append("")
+                formatted_results.append("")  
                 subtitle = line.strip().lstrip('*').strip()
                 formatted_results.append(f"{Colors.INTENSE_RED}{Colors.BOLD}[+] ══════════[ {subtitle} ]══════════ [+]{Colors.RESET}")
-                first_subtitle = False
                 i += 1
             elif '▶' in line:
-                formatted_results.append(self._colorize_command(line))
+                modified_line = self._replace_variables(line)
+                formatted_results.append(self._colorize_command(modified_line))
                 block_lines = []
                 j = i + 1
                 while j < len(results):
                     next_line = results[j]
-                    if next_line.startswith('[*]') or next_line.startswith('[+]') or next_line.startswith('▶') or next_line.strip().startswith('*'):
+                    if next_line.startswith('[*]') or next_line.startswith('[+]') or next_line.strip().startswith('*') or '▶' in next_line:
                         break
                     if next_line.strip():
-                        block_lines.append(self._colorize_command(next_line))
+                        modified_next_line = self._replace_variables(next_line)
+                        block_lines.append(self._colorize_command(modified_next_line))
                     j += 1
                 formatted_results.extend(block_lines)
-                formatted_results.append("")
+                formatted_results.append("")  
                 i = j
             else:
                 if line.strip():
-                    formatted_results.append(self._colorize_command(line))
-                    formatted_results.append("")
+                    modified_line = self._replace_variables(line)
+                    formatted_results.append(self._colorize_command(modified_line))
+                    formatted_results.append("")  
                 i += 1
         return formatted_results
 
@@ -469,7 +511,17 @@ class SearchCommand:
             print(f"{Colors.RED}{Colors.BOLD}⚠️ {Colors.WHITE}{Colors.BOLD}No se encontraron resultados.{Colors.RESET}")
         else:
             formatted_results = self._format_results(results)
+            cleaned_results = []
+            last_was_empty = False
             for line in formatted_results:
+                if line.strip() == "":
+                    if not last_was_empty and cleaned_results:
+                        cleaned_results.append(line)
+                    last_was_empty = True
+                else:
+                    cleaned_results.append(line)
+                    last_was_empty = False
+            for line in cleaned_results:
                 print(line)
         print()
 
@@ -527,32 +579,98 @@ class SearchCommand:
         self._display_in_columns(list(self.categories.keys()), "CATEGORÍAS DISPONIBLES", Colors.GREEN)
 
     def _handle_internal_command(self, query: str) -> bool:
-        query_lower = query.lower()
+        query_lower = query.lower().strip()
         aliases = {
             'h': 'help',
             'lt': 'list tools',
             'lc': 'list categories',
             'c': 'clear',
-            'q': 'exit'
+            'q': 'exit',
+            'si': 'setip',
+            'su': 'seturl'
         }
-        query_lower = aliases.get(query_lower, query_lower)
         
-        if query_lower == 'help':
+        query_parts = query_lower.split(maxsplit=1)
+        command = query_parts[0]
+        args = query_parts[1] if len(query_parts) > 1 else ''
+        
+        command = aliases.get(command, command)
+        
+        if command == 'help':
             self.show_help()
             return True
-        elif query_lower == 'clear':
+        elif command == 'clear':
             self._clear_screen()
             self.print_header()
             return True
-        elif query_lower == 'list tools':
+        elif command == 'list tools':
             self._list_tools()
             return True
-        elif query_lower == 'list categories':
+        elif command == 'list categories':
             self._list_categories()
             return True
-        elif query_lower == 'exit':
+        elif command == 'exit':
             print(f"\n\t\t\t{Colors.RED}H4PPY H4CK1NG{Colors.RESET}")
             sys.exit(0)
+        elif command == 'setip':
+            if not args:
+                if self.ip_value:
+                    print(f"{Colors.BLUE}[ℹ] {Colors.RESET}Valor actual de $IP: {self.ip_value}")
+                else:
+                    print(f"{Colors.BLUE}[ℹ] {Colors.RESET}No se ha configurado un valor para $IP")
+                print(f"{Colors.GREEN}[+] {Colors.RESET}Uso: {Colors.GRAY}setip <IP> (ejemplo: setip 192.168.1.1){Colors.RESET}")
+                print(f"{Colors.GREEN}[+] {Colors.RESET}Para limpiar: {Colors.GRAY}setip clear{Colors.RESET}\n")
+            elif args == 'clear':
+                self.ip_value = None
+                print(f"{Colors.GREEN}✔ {Colors.RESET}$IP ha sido limpiado. Los comandos usarán '$IP' por defecto.")
+            else:
+                try:
+                    import ipaddress
+                    ipaddress.ip_address(args)
+                    self.ip_value = args
+                    if args not in self.recent_ips:
+                        self.recent_ips.append(args)
+                        if len(self.recent_ips) > 5:
+                            self.recent_ips.pop(0)
+                    print(f"{Colors.GREEN}✔ {Colors.RESET}$IP configurado como: {args}")
+                except ValueError:
+                    domain_pattern = r'^[a-zA-Z0-9][a-zA-Z0-9\-\.]*[a-zA-Z0-9]$'
+                    if re.match(domain_pattern, args) and 1 < len(args) <= 255:
+                        self.ip_value = args
+                        if args not in self.recent_ips:
+                            self.recent_ips.append(args)
+                            if len(self.recent_ips) > 5:
+                                self.recent_ips.pop(0)
+                        print(f"{Colors.GREEN}[✔] {Colors.RESET}$IP configurado como: {args}")
+                    else:
+                        print(f"{Colors.RED}⚠️ {Colors.RESET}Entrada inválida. Debe ser una IP válida o un dominio.")
+                        print(f"{Colors.BLUE}Uso:{Colors.RESET} setip <IP> (ejemplo: setip 192.168.1.1)")
+            return True
+        elif command == 'seturl':
+            if not args:
+                if self.url_value:
+                    print(f"{Colors.BLUE}[ℹ] {Colors.RESET}Valor actual de $URL: {self.url_value}")
+                else:
+                    print(f"{Colors.BLUE}[ℹ] {Colors.RESET}No se ha configurado un valor para $URL")
+                print(f"{Colors.GREEN}[+]{Colors.RESET} Uso: {Colors.GRAY}seturl <URL> (ejemplo: seturl http://ejemplo.com ){Colors.RESET}")
+                print(f"{Colors.GREEN}[+]{Colors.RESET} Para limpiar: {Colors.GRAY}seturl clear{Colors.RESET}\n")
+            elif args == 'clear':
+                self.url_value = None
+                print(f"{Colors.GREEN}✔ {Colors.RESET}$URL ha sido limpiado. Los comandos usarán '$URL' por defecto.")
+            else:
+                url_pattern = r'^(https?://)?[a-zA-Z0-9][a-zA-Z0-9\-\.]*\.[a-zA-Z]{2,}(/.*)?$'
+                if re.match(url_pattern, args):
+                    normalized_url = self._normalize_url(args)
+                    self.url_value = normalized_url
+                    if normalized_url not in self.recent_urls:
+                        self.recent_urls.append(normalized_url)
+                        if len(self.recent_urls) > 5:
+                            self.recent_urls.pop(0)
+                    print(f"{Colors.GREEN}✔ {Colors.RESET}$URL configurado como: {normalized_url}")
+                else:
+                    print(f"{Colors.RED}⚠️ {Colors.RESET}Entrada inválida. Debe ser una URL válida (ejemplo: http://example.com).")
+                    print(f"{Colors.BLUE}Uso:{Colors.RESET} seturl <URL> (ejemplo: seturl http://example.com)")
+            return True
         return False
 
     def interactive_menu(self):
@@ -723,12 +841,14 @@ class SearchCommand:
         print()
 
 class EnhancedCompleter(Completer):
-    def __init__(self, categories: List[str], tools: List[str], tools_by_category: Dict[str, List[str]]):
+    def __init__(self, categories: List[str], tools: List[str], tools_by_category: Dict[str, List[str]], recent_ips: List[str] = None, recent_urls: List[str] = None):
         self.original_categories = categories
         self.original_tools = tools
         self.categories_normalized = [normalize_text(cat) for cat in categories]
         self.tools_normalized = [normalize_text(tool) for tool in tools]
         self.tools_by_category = tools_by_category
+        self.recent_ips = recent_ips or []
+        self.recent_urls = recent_urls or []
         self.tool_to_category = {}
         try:
             for category, tools in tools_by_category.items():
@@ -741,6 +861,8 @@ class EnhancedCompleter(Completer):
             ('clear', 'Limpiar pantalla'),
             ('list tools', 'Listar herramientas'),
             ('list categories', 'Listar categorías'),
+            ('setip', 'Configurar $IP para comandos'),
+            ('seturl', 'Configurar $URL para comandos'),
             ('exit', 'Salir del programa')
         ]
         self.command_to_alias = {
@@ -748,48 +870,82 @@ class EnhancedCompleter(Completer):
             'clear': 'c',
             'list tools': 'lt',
             'list categories': 'lc',
+            'setip': 'si',
+            'seturl': 'su',
             'exit': 'q'
         }
 
     def get_completions(self, document, complete_event):
+        text = document.text_before_cursor
         word = document.get_word_before_cursor()
         word_normalized = normalize_text(word)
         completions = []
-        
-        for cmd, meta in self.internal_commands:
-            if word_normalized in normalize_text(cmd):
-                alias = self.command_to_alias.get(cmd, cmd[:2])
-                display_text = f'[{alias}]'.ljust(5) + f' {cmd}'
-                completions.append((0, Completion(
-                    cmd,
-                    start_position=-len(word),
-                    display=HTML(display_text),
-                    display_meta=meta,
-                    style='class:completion-menu.completion'
-                )))
-        
-        for orig_cat, norm_cat in zip(self.original_categories, self.categories_normalized):
-            if word_normalized in norm_cat:
-                match_priority = 0 if norm_cat == word_normalized else 1
-                completions.append((match_priority, Completion(
-                    orig_cat,
-                    start_position=-len(word),
-                    display=HTML(f'📁 {orig_cat}'),
-                    display_meta=f'{len(self.tools_by_category.get(orig_cat, []))} herramientas',
-                    style='class:completion-menu.category-completion'
-                )))
-        
-        for orig_tool, norm_tool in zip(self.original_tools, self.tools_normalized):
-            if word_normalized in norm_tool:
-                match_priority = 0 if norm_tool == word_normalized else 1
-                category = self.tool_to_category.get(norm_tool, "")
-                completions.append((match_priority, Completion(
-                    orig_tool,
-                    start_position=-len(word),
-                    display=HTML(f'🔧 {orig_tool}'),
-                    display_meta=f'Categoría: {category}' if category else '',
-                    style='class:completion-menu.tool-completion'
-                )))
+
+        parts = text.strip().split()
+        is_setip_arg = len(parts) >= 2 and normalize_text(parts[0]) in ['setip', 'si']
+        is_seturl_arg = len(parts) >= 2 and normalize_text(parts[0]) in ['seturl', 'su']
+
+        if not (is_setip_arg or is_seturl_arg):
+            for cmd, meta in self.internal_commands:
+                if word_normalized in normalize_text(cmd):
+                    alias = self.command_to_alias.get(cmd, cmd[:2])
+                    display_text = f'[{alias}]'.ljust(5) + f' {cmd}'
+                    completions.append((0, Completion(
+                        cmd,
+                        start_position=-len(word),
+                        display=HTML(display_text),
+                        display_meta=meta,
+                        style='class:completion-menu.completion'
+                    )))
+
+        if not (is_setip_arg or is_seturl_arg):
+            for orig_cat, norm_cat in zip(self.original_categories, self.categories_normalized):
+                if word_normalized in norm_cat:
+                    match_priority = 0 if norm_cat == word_normalized else 1
+                    completions.append((match_priority, Completion(
+                        orig_cat,
+                        start_position=-len(word),
+                        display=HTML(f'📁 {orig_cat}'),
+                        display_meta=f'{len(self.tools_by_category.get(orig_cat, []))} herramientas',
+                        style='class:completion-menu.category-completion'
+                    )))
+
+        if not (is_setip_arg or is_seturl_arg):
+            for orig_tool, norm_tool in zip(self.original_tools, self.tools_normalized):
+                if word_normalized in norm_tool:
+                    match_priority = 0 if norm_tool == word_normalized else 1
+                    category = self.tool_to_category.get(norm_tool, "")
+                    completions.append((match_priority, Completion(
+                        orig_tool,
+                        start_position=-len(word),
+                        display=HTML(f'🔧 {orig_tool}'),
+                        display_meta=f'Categoría: {category}' if category else '',
+                        style='class:completion-menu.tool-completion'
+                    )))
+
+        if is_setip_arg:
+            for ip in self.recent_ips:
+                if word_normalized in normalize_text(ip):
+                    match_priority = 0 if normalize_text(ip) == word_normalized else 1
+                    completions.append((match_priority, Completion(
+                        ip,
+                        start_position=-len(word),
+                        display=HTML(f'🌐 {ip}'),
+                        display_meta='IP o dominio reciente',
+                        style='class:completion-menu.tool-completion'
+                    )))
+
+        if is_seturl_arg:
+            for url in self.recent_urls:
+                if word_normalized in normalize_text(url):
+                    match_priority = 0 if normalize_text(url) == word_normalized else 1
+                    completions.append((match_priority, Completion(
+                        url,
+                        start_position=-len(word),
+                        display=HTML(f'🌐 {url}'),
+                        display_meta='URL reciente',
+                        style='class:completion-menu.tool-completion'
+                    )))
 
         seen = set()
         for priority, completion in sorted(completions, key=lambda x: x[0]):
