@@ -16,9 +16,6 @@ avanzados que buscan una forma rápida y ordenada de acceder a comandos
 ═══════════════════════════════════════════════════════════════════
 """
 
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-
 import os
 import re
 import sys
@@ -242,13 +239,9 @@ class SearchCommand:
 
     def _normalize_url(self, url: str) -> str:
         """Normaliza una URL eliminando dobles barras y asegurando un formato correcto."""
-        # Parsear la URL
         parsed = urllib.parse.urlparse(url)
-        # Reconstruir la URL, eliminando dobles barras en el path
         path = re.sub(r'/+', '/', parsed.path.lstrip('/'))
-        # Asegurar que la URL tenga un esquema (http por defecto si no se especifica)
         scheme = parsed.scheme if parsed.scheme else 'http'
-        # Reconstruir la URL
         normalized = urllib.parse.urlunparse((
             scheme,
             parsed.netloc,
@@ -264,11 +257,8 @@ class SearchCommand:
         if '$IP' in command and self.ip_value:
             command = command.replace('$IP', self.ip_value)
         if '$URL' in command and self.url_value:
-            # Normalizar la URL antes de reemplazar
             normalized_url = self._normalize_url(self.url_value)
-            # Reemplazar $URL y limpiar dobles barras
             command = command.replace('$URL', normalized_url)
-            # Limpiar cualquier doble barra resultante
             command = re.sub(r'(https?://[^/]+)//+', r'\1/', command)
         return command
 
@@ -283,15 +273,19 @@ class SearchCommand:
                     if cat_normalized == query_normalized:
                         self.current_category = category
                         self.last_query = category
-                        self.last_results_count = len(self.categories[category][1:] if len(self.categories[category]) > 1 else self.categories[category])
-                        return self.categories[category][1:] if len(self.categories[category]) > 1 else self.categories[category]
+                        # Aplicar sustituciones a todas las líneas
+                        results = [self._replace_variables(line) for line in self.categories[category][1:] if len(self.categories[category]) > 1]
+                        self.last_results_count = len(results)
+                        return results
                     elif query_normalized in cat_normalized and not best_match:
                         best_match = category
                 if best_match:
                     self.current_category = best_match
                     self.last_query = best_match
-                    self.last_results_count = len(self.categories[best_match][1:] if len(self.categories[best_match]) > 1 else self.categories[best_match])
-                    return self.categories[best_match][1:] if len(self.categories[best_match]) > 1 else self.categories[best_match]
+                    # Aplicar sustituciones a todas las líneas
+                    results = [self._replace_variables(line) for line in self.categories[best_match][1:] if len(self.categories[best_match]) > 1]
+                    self.last_results_count = len(results)
+                    return results
                 self.current_category = ""
                 self.last_query = ""
                 self.last_results_count = 0
@@ -304,24 +298,24 @@ class SearchCommand:
                             line_normalized = normalize_text(line)
                             if '[*]' in line and query_normalized in line_normalized:
                                 tool_found = True
-                                results.append(line)
+                                results.append(self._replace_variables(line))
                                 self.last_query = line.split('[*]')[1].strip()
                             elif tool_found and '▶' in line:
-                                block = [content[i]]
+                                block = [self._replace_variables(content[i])]
                                 for j in range(i + 1, len(content)):
                                     if '[*]' in content[j] or '[+]' in content[j]:
                                         break
                                     if content[j].strip():
-                                        block.append(content[j])
+                                        block.append(self._replace_variables(content[j]))
                                 results.extend(block)
                                 break
                             elif '▶' in line and query_normalized in line_normalized:
-                                block = [content[i]]
+                                block = [self._replace_variables(content[i])]
                                 for j in range(i + 1, len(content)):
                                     if '[*]' in content[j] or '[+]' in content[j] or '▶' in content[j]:
                                         break
                                     if content[j].strip():
-                                        block.append(content[j])
+                                        block.append(self._replace_variables(content[j]))
                                 results.extend(block)
                                 break
                         except IndexError as e:
@@ -480,8 +474,7 @@ class SearchCommand:
                 formatted_results.append(f"{Colors.INTENSE_RED}{Colors.BOLD}[+] ══════════[ {subtitle} ]══════════ [+]{Colors.RESET}")
                 i += 1
             elif '▶' in line:
-                modified_line = self._replace_variables(line)
-                formatted_results.append(self._colorize_command(modified_line))
+                formatted_results.append(self._colorize_command(line))
                 block_lines = []
                 j = i + 1
                 while j < len(results):
@@ -489,16 +482,14 @@ class SearchCommand:
                     if next_line.startswith('[*]') or next_line.startswith('[+]') or next_line.strip().startswith('*') or '▶' in next_line:
                         break
                     if next_line.strip():
-                        modified_next_line = self._replace_variables(next_line)
-                        block_lines.append(self._colorize_command(modified_next_line))
+                        block_lines.append(self._colorize_command(next_line))
                     j += 1
                 formatted_results.extend(block_lines)
                 formatted_results.append("")  
                 i = j
             else:
                 if line.strip():
-                    modified_line = self._replace_variables(line)
-                    formatted_results.append(self._colorize_command(modified_line))
+                    formatted_results.append(self._colorize_command(line))
                     formatted_results.append("")  
                 i += 1
         return formatted_results
