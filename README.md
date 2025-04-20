@@ -65,7 +65,8 @@ searchCommand
 ## Ejemplo de comandos internos
 * `list tools` (o `lt`): Muestra todas las herramientas.
 * `list categories` (o `lc`): Muestra todas las categorías.
-* `clear` (o `c`): Limpia la pantalla.
+* `setip <IP> `: Configurar $IP para comandos
+* `seturl <URL>`: Configurar $URL para comandos.
 * `exit` (o `q`): Sale del programa.
 ## Búsqueda directa
 Busca un comando específico y sal:
