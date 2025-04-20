@@ -623,7 +623,7 @@ class SearchCommand:
                         self.recent_ips.append(args)
                         if len(self.recent_ips) > 5:
                             self.recent_ips.pop(0)
-                    print(f"{Colors.GREEN}✔ {Colors.RESET}$IP configurado como: {args}")
+                    print(f"{Colors.GREEN}✔ {Colors.RESET}$IP configurado como: {Colors.GRAY}{args}{Colors.RESET}\n")
                 except ValueError:
                     domain_pattern = r'^[a-zA-Z0-9][a-zA-Z0-9\-\.]*[a-zA-Z0-9]$'
                     if re.match(domain_pattern, args) and 1 < len(args) <= 255:
@@ -632,7 +632,7 @@ class SearchCommand:
                             self.recent_ips.append(args)
                             if len(self.recent_ips) > 5:
                                 self.recent_ips.pop(0)
-                        print(f"{Colors.GREEN}[✔] {Colors.RESET}$IP configurado como: {args}")
+                        print(f"{Colors.GREEN}[✔] {Colors.RESET}$IP configurado como: {Colors.GRAY}{args}{Colors.RESET}\n")
                     else:
                         print(f"{Colors.RED}⚠️ {Colors.RESET}Entrada inválida. Debe ser una IP válida o un dominio.")
                         print(f"{Colors.BLUE}Uso:{Colors.RESET} setip <IP> (ejemplo: setip 192.168.1.1)")
@@ -642,7 +642,7 @@ class SearchCommand:
                 if self.url_value:
                     print(f"{Colors.BLUE}[ℹ] {Colors.RESET}Valor actual de $URL: {self.url_value}")
                 else:
-                    print(f"{Colors.BLUE}[ℹ] {Colors.RESET}No se ha configurado un valor para $URL")
+                    print(f"{Colors.BLUE}[ℹ] {Colors.RESET}No se ha configurado un valor para $URL\n")
                 print(f"{Colors.GREEN}[+]{Colors.RESET} Uso: {Colors.GRAY}seturl <URL> (ejemplo: seturl http://ejemplo.com ){Colors.RESET}")
                 print(f"{Colors.GREEN}[+]{Colors.RESET} Para limpiar: {Colors.GRAY}seturl clear{Colors.RESET}\n")
             elif args == 'clear':
@@ -657,7 +657,7 @@ class SearchCommand:
                         self.recent_urls.append(normalized_url)
                         if len(self.recent_urls) > 5:
                             self.recent_urls.pop(0)
-                    print(f"{Colors.GREEN}✔ {Colors.RESET}$URL configurado como: {normalized_url}")
+                    print(f"{Colors.GREEN}✔ {Colors.RESET}$URL configurado como: {Colors.GRAY}{normalized_url}{Colors.RESET}\n")
                 else:
                     print(f"{Colors.RED}⚠️ {Colors.RESET}Entrada inválida. Debe ser una URL válida (ejemplo: http://example.com).")
                     print(f"{Colors.BLUE}Uso:{Colors.RESET} seturl <URL> (ejemplo: seturl http://example.com)")
@@ -978,3 +978,4 @@ if __name__ == "__main__":
         print(f"{Colors.RESET}", end="")
         print(f"\n\t\t\t{Colors.RED}H4PPY H4CK1NG{Colors.RESET}")
         sys.exit(0)
+
