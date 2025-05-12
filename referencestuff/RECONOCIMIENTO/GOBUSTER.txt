@@ -23,7 +23,7 @@
   gobuster dir -u $URL -w /usr/share/wordlists/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt -U usuario -P contraseña
 
 ▶ Escaneo DNS (Bruteforce de subdominios):
-  gobuster dns -d <dominio.com> -w /usr/share/wordlists/seclists/Discovery/DNS/subdomains-top1million-5000.txt
+  gobuster dns -d $URL -w /usr/share/wordlists/seclists/Discovery/DNS/subdomains-top1million-5000.txt
 
 ▶ Escaneo con Retraso (Evitar bloqueos):
   gobuster dir -u $URL -w /usr/share/wordlists/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt -t 50 --delay 500ms
