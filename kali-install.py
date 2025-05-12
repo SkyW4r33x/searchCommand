@@ -2,12 +2,12 @@
 
 import os
 import sys
-import shutil
 import subprocess
+import shutil
 from time import sleep
+import pwd
 import tty
 import termios
-import pwd
 
 def ensure_colorama():
     try:
@@ -160,9 +160,6 @@ def install_search_command():
 
     if not os.path.exists("referencestuff"):
         log_error(f"'referencestuff' no encontrado en el directorio actual. Es necesario para searchCommand.")
-    utilscommon_path = os.path.join("referencestuff", "utilscommon")
-    if not os.path.exists(utilscommon_path):
-        log_error(f"'utilscommon' no encontrado dentro de 'referencestuff'. Asegúrate de que esté presente.")
 
     target_script = os.path.join(BIN_DIR, "searchCommand.py")
     if os.path.exists(target_script):
@@ -176,28 +173,33 @@ def install_search_command():
 
     try:
         shutil.copy("searchCommand.py", target_script)
-        log_info("Copiando el script principal...", secondary=True, delay=0.2)
 
         destino = os.path.expanduser(f"~{SUDO_USER}/referencestuff")
         pw = pwd.getpwnam(SUDO_USER)
-        if os.path.isdir("referencestuff"):
-            shutil.copytree("referencestuff", destino, dirs_exist_ok=True)
-            for root, dirs, files in os.walk(destino):
-                for d in dirs:
-                    dir_path = os.path.join(root, d)
-                    os.chmod(dir_path, 0o755)  
-                    os.chown(dir_path, pw.pw_uid, pw.pw_gid)
-                for f in files:
-                    file_path = os.path.join(root, f)
-                    os.chmod(file_path, 0o644)  
-                    os.chown(file_path, pw.pw_uid, pw.pw_gid)
-            os.chmod(destino, 0o755) 
-            os.chown(destino, pw.pw_uid, pw.pw_gid)
-        else:
-            shutil.copy("referencestuff", destino)
-            os.chmod(destino, 0o644) 
-            os.chown(destino, pw.pw_uid, pw.pw_gid)
-        log_info(f"Copiado {BOLD}{BLUE}referencestuff{RESET} a {BOLD}{YELLOW}{destino}{RESET}", secondary=True, delay=0.2)
+        if os.path.exists(destino):
+            shutil.rmtree(destino)  
+        shutil.copytree("referencestuff", destino, dirs_exist_ok=False)
+        
+       
+        for root, dirs, files in os.walk(destino):
+            for d in dirs:
+                dir_path = os.path.join(root, d)
+                os.chmod(dir_path, 0o755) 
+                os.chown(dir_path, pw.pw_uid, pw.pw_gid)
+            for f in files:
+                file_path = os.path.join(root, f)
+                os.chmod(file_path, 0o644) 
+                os.chown(file_path, pw.pw_uid, pw.pw_gid)
+        os.chmod(destino, 0o755)  
+        os.chown(destino, pw.pw_uid, pw.pw_gid)
+        
+        
+        stat_info = os.stat(destino)
+        if stat_info.st_uid != pw.pw_uid or stat_info.st_gid != pw.pw_gid:
+            log_error(f"El directorio {destino} no tiene el propietario correcto (esperado: {SUDO_USER})")
+        if not os.access(destino, os.R_OK | os.X_OK):
+            log_error(f"El directorio {destino} no tiene permisos de lectura/entrada para el usuario {SUDO_USER}.")
+        log_info(f"Dando permisos correspondientes a {BOLD}{YELLOW}{destino}{RESET}.", secondary=True, delay=0.2)
 
         if os.path.exists(VENV_DIR):
             log_warn(f"El entorno virtual en {VENV_DIR} ya existe. ¿Regenerar? (S/n)", delay=0.2)
@@ -212,24 +214,48 @@ def install_search_command():
             subprocess.run(["python3", "-m", "venv", VENV_DIR], check=True, capture_output=True, text=True)
 
         pip_path = os.path.join(VENV_DIR, "bin", "pip")
+        
+        required_packages = [
+            "fuzzywuzzy>=0.18.0",
+            "prompt_toolkit>=3.0.0",
+            "colorama>=0.4.6"
+        ]
         with open("requirements.txt", "r") as f:
-            packages = [line.strip().split("#")[0].strip() for line in f if line.strip() and not line.startswith("#")]
-        if not packages:
-            log_error("requirements.txt está vacío o no contiene dependencias válidas.")
-        for i, package in enumerate(packages, 1):
-            print(f"{GREEN}> instalando {package} ({i}/{len(packages)}){RESET} ", end="")
+            req_packages = [line.strip().split("#")[0].strip() for line in f if line.strip() and not line.startswith("#")]
+        all_packages = required_packages + req_packages
+        if not all_packages:
+            log_error("No se encontraron dependencias válidas para instalar.")
+        
+        
+        for i, package in enumerate(all_packages, 1):
+            print(f"{GREEN}> instalando {package} ({i}/{len(all_packages)}){RESET} ", end="")
             sys.stdout.flush()
             for frame in ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧"]:
-                print(f"\r{GREEN}>{RESET} instalando {GREEN}{package} ({i}/{len(packages)}) [{frame}]{RESET}", end="")
+                print(f"\r{GREEN}>{RESET} instalando {GREEN}{package} ({i}/{len(all_packages)}) [{frame}]{RESET}", end="")
                 sleep(0.1)
             subprocess.run([pip_path, "install", package], check=True, capture_output=True, text=True)
-            print(f"\r{GREEN}>{RESET} instalando {GREEN}{package} ({i}/{len(packages)}) [✓]{RESET}")
+            print(f"\r{GREEN}>{RESET} instalando {GREEN}{package} ({i}/{len(all_packages)}) [✓]{RESET}")
 
         script_content = f"#!/bin/sh\nexec {VENV_DIR}/bin/python3 {target_script} \"$@\""
         script_path = os.path.join(SCRIPT_DIR, "searchCommand")
-        with open("searchCommand", "w") as f:
+        temp_script = "searchCommand_temp"
+        
+       
+        if os.path.exists(temp_script):
+            if os.path.isdir(temp_script):
+                shutil.rmtree(temp_script)
+            else:
+                os.remove(temp_script)
+        if os.path.exists(script_path):
+            if os.path.isdir(script_path):
+                shutil.rmtree(script_path)
+            else:
+                os.remove(script_path)
+        
+       
+        with open(temp_script, "w") as f:
             f.write(script_content)
-        shutil.move("searchCommand", script_path)
+        shutil.move(temp_script, script_path)
         os.chmod(target_script, 0o755)  
         os.chmod(script_path, 0o755)    
         log_info("Script ejecutable creado y permisos asignados.", secondary=True, delay=0.2)
