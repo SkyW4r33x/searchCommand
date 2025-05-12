@@ -1,0 +1,23 @@
+▶ Ataque de Diccionario (Crackeo con wordlist):
+  hashcat -m 1000 -a 0 hash.txt /usr/share/wordlists/rockyou.txt
+
+▶ Ataque de Fuerza Bruta (Probar todas las combinaciones):
+  hashcat -m 1000 -a 3 hash.txt ?a?a?a?a?a?a
+
+▶ Ataque de Máscara (Patrón personalizado):
+  hashcat -m 1000 -a 3 hash.txt ?u?l?l?l?l?l?d?d
+
+▶ Ataque Híbrido (Wordlist + máscara):
+  hashcat -m 1000 -a 6 hash.txt /usr/share/wordlists/rockyou.txt ?d?d?d?d
+
+▶ Ataque de Reglas (Mutaciones de wordlist):
+  hashcat -m 1000 -a 0 hash.txt /usr/share/wordlists/rockyou.txt -r /usr/share/hashcat/rules/best64.rule
+
+▶ Ataque de Combinación (Combinar dos wordlists):
+  hashcat -m 1000 -a 1 hash.txt wordlist1.txt wordlist2.txt
+
+▶ Crackeo de MD5 (Ejemplo básico):
+  hashcat -m 0 hash.txt /usr/share/wordlists/rockyou.txt
+
+▶ Mostrar Resultados (Ver contraseñas crackeadas):
+  hashcat -m 1000 hash.txt --show

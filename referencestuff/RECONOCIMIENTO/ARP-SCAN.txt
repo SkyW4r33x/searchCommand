@@ -1,0 +1,8 @@
+▶ Reconocimiento de Host (Escaneo ARP local):
+  arp-scan -I eth0 --ignoredups --localnet # se simplifica -lg
+
+▶ Salida Detallada (Información extendida):
+  arp-scan -l -v
+
+▶ Escaneo Específico (Rango personalizado):
+  arp-scan 192.168.1.1-192.168.1.254

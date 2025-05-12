@@ -1,0 +1,14 @@
+▶ Escaneo Simple Test (Prueba rápida sin diccionario externo):
+  dirb $URL
+
+▶ Escaneo Básico (Búsqueda de directorios):
+  dirb $URL /usr/share/wordlists/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt
+
+▶ Escaneo con Extensiones (Probar extensiones):
+  dirb $URL /usr/share/wordlists/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt -X .php,.html,.txt
+
+▶ Escaneo Silencioso (Sin salida innecesaria):
+  dirb $URL /usr/share/wordlists/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt -S
+
+▶ Escaneo con Diccionario Propio (Usar wordlist integrada):
+  dirb $URL /usr/share/dirb/wordlists/common.txt

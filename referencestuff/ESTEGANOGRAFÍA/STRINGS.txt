@@ -1,0 +1,2 @@
+▶ Analizar Imagen con Strings (Buscar texto dentro de imagen):
+  strings imagen.jpg | grep "palabra_clave"

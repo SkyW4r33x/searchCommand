@@ -1,0 +1,8 @@
+▶ Reconocimiento de Host (Descubrir dispositivos en red):
+  netdiscover -r 192.168.1.0/24
+
+▶ Modo Pasivo (Escuchar sin enviar paquetes):
+  netdiscover -P -i eth0
+
+▶ Escaneo Rápido (Acelerado):
+  netdiscover -f -r 192.168.1.0/24

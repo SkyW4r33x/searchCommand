@@ -1,0 +1,2 @@
+▶ Ejecutar como Otro Usuario (Ejecutar comando como otro usuario):
+  runas /user:<domain>\<user> cmd.exe

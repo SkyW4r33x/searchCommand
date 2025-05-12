@@ -1,0 +1,23 @@
+▶ Escaneo SSH (Fuerza bruta en SSH):
+  medusa -h $IP -u <usuario> -p <contraseña> -M ssh
+
+▶ Ataque HTTP (Autenticación en directorio):
+  medusa -h $IP -u admin -P /path/to/wordlist.txt -M http -m DIR:/admin
+
+▶ Ataque FTP (Fuerza bruta en FTP):
+  medusa -h $IP -U users.txt -P passwords.txt -M ftp
+
+▶ Ataque SMB (Windows file sharing):
+  medusa -h $IP -U users.txt -P passwords.txt -M smbnt
+
+▶ Ataque POP3 (Correo entrante):
+  medusa -h $IP -U users.txt -P passwords.txt -M pop3
+
+▶ Ataque MySQL (Base de datos):
+  medusa -h $IP -U users.txt -P passwords.txt -M mysql
+
+▶ Ataque Telnet (Acceso remoto):
+  medusa -h $IP -U users.txt -P passwords.txt -M telnet
+
+▶ Ataque RDP (Escritorio remoto):
+  medusa -h $IP -U users.txt -P passwords.txt -M rdp

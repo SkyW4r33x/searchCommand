@@ -1,0 +1,4 @@
+▶ Listar Procesos (Ver procesos en ejecución con detalles):
+  tasklist /V
+▶ Listar Procesos y Servicios Asociados (Ver servicios vinculados a procesos):
+  tasklist /SVC

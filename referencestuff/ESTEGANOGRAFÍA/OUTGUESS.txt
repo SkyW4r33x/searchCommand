@@ -1,0 +1,5 @@
+▶ Ocultar en Imagen con Outguess (Insertar datos con clave):
+  outguess -k "clave" -d archivo_secreto.txt imagen.jpg imagen_con_secreto.jpg
+
+▶ Extraer con Outguess (Recuperar datos de imagen):
+  outguess -k "clave" -r imagen_con_secreto.jpg output.txt

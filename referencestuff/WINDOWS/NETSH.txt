@@ -1,0 +1,12 @@
+▶ Ver Estado del Firewall (Mostrar estado del firewall):
+  netsh firewall show state
+▶ Ver Configuración del Firewall (Mostrar configuración del firewall):
+  netsh firewall show config
+▶ Desactivar Firewall (Apagar el firewall):
+  netsh Advfirewall set allprofiles state off
+▶ Desactivar Firewall Alternativo (Método alternativo para apagar firewall):
+  netsh firewall set opmode disable
+▶ Activar Firewall (Encender el firewall):
+  netsh Advfirewall set allprofiles state on
+▶ Abrir Puerto RDP en Firewall (Permitir acceso RDP):
+  netsh firewall add portopening TCP 3389 "Remote Desktop"

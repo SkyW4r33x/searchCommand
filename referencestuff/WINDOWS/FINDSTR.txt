@@ -1,0 +1,4 @@
+▶ Buscar Contraseñas en Archivos (Buscar la palabra 'password' en archivos):
+  findstr /si 'password' *.txt *.xml *.docx
+▶ Buscar Contraseñas en Políticas de Grupo (Explotar MS14-025 para encontrar cpassword):
+  findstr /S /I cpassword \\<FQDN>\sysvol\<FQDN>\policies\*.xml

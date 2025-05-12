@@ -1,0 +1,5 @@
+▶ Buscar Cadenas (Extraer texto legible):
+  strings <binario> | grep "palabra_clave"
+
+▶ Filtro Avanzado (Mínimo 8 caracteres):
+  strings -n 8 <binario> | grep -i "clave"

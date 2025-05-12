@@ -1,0 +1,10 @@
+▶ Listar Archivos Ocultos (Mostrar archivos ocultos en una ruta):
+  dir /a:h <path>
+▶ Listar Archivos Recursivamente (Listar archivos en formato completo):
+  dir /s /b
+▶ Listar Contenido del Recycle Bin (Mostrar archivos en la papelera de reciclaje):
+  dir C:\$Recycle.Bin /s /b
+▶ Listar Software Instalado en Program Files (Ver programas instalados):
+  dir /a "C:\Program Files"
+▶ Listar Software Instalado en Program Files x86 (Ver programas instalados en x86):
+  dir /a "C:\Program Files (x86)"

@@ -1,0 +1,11 @@
+▶ Ocultar Archivo en Imagen (Insertar archivo en imagen):
+  steghide embed -cf imagen.jpg -ef archivo_secreto.txt
+
+▶ Extraer Datos sin Passphrase (Obtener archivo oculto sin contraseña):
+  steghide extract -sf imagen.jpg -xf output.txt -p ""
+
+▶ Ocultar Mensaje en Audio (Insertar texto en archivo WAV):
+  steghide embed -cf audio.wav -ef mensaje.txt
+
+▶ Extraer Mensaje de Audio (Obtener texto oculto en WAV):
+  steghide extract -sf audio.wav

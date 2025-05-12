@@ -1,0 +1,5 @@
+▶ Analizar con Binwalk (Detectar contenido incrustado):
+  binwalk imagen.jpg
+
+▶ Extraer Archivos con Binwalk (Extraer datos detectados):
+  binwalk -e imagen.jpg

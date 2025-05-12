@@ -1,0 +1,17 @@
+▶ Desensamblar Binario (Sintaxis Intel):
+  objdump -d -M intel <binario>
+
+▶ Mostrar Secciones:
+  objdump -h <binario>
+
+▶ Mostrar Símbolos:
+  objdump -t <binario>
+
+▶ Mostrar Información de Cabecera:
+  objdump -f <binario>
+
+▶ Desensamblar con Código Fuente (Si está disponible):
+  objdump -d -M intel -S <binario>
+
+▶ Extraer Sección Específica:
+  objdump -s --section=.text <binario>
