@@ -55,6 +55,7 @@ class Colors:
     BOLD = "\033[1m"
     INTENSE_RED = "\033[38;2;255;0;0m"
     GRAY = "\033[38;2;128;128;128m"
+    YELLOW = "\033[38;2;255;255;0m"  
 
 def normalize_text(text: str) -> str:
     return ''.join(
