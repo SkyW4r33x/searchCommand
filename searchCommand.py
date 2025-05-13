@@ -807,7 +807,7 @@ class SearchCommand:
                         if response.status_code < 400:
                             print(f"{Colors.GREEN}[✔] {Colors.RESET}$URL accesible: {Colors.BLUE}{normalized_url}{Colors.RESET} (Código: {response.status_code})")
                         else:
-                            print(f"{Colors.YELLOW}[-] {Colors.RESET} $URL responde con código: {response.status_code}, pero se acepta")
+                            print(f"{Colors.ORANGE}[-] {Colors.RESET} $URL responde con código: {response.status_code}, pero se acepta")
                     except (ImportError, requests.RequestException):
                         print(f"{Colors.YELLOW}[-] {Colors.RESET} No se pudo verificar la accesibilidad de la URL, pero se acepta")
                     if normalized_url not in self.recent_urls:
