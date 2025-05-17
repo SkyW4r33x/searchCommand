@@ -38,7 +38,7 @@ from prompt_toolkit.application import get_app
 from prompt_toolkit.history import FileHistory
 from fuzzywuzzy import process
 
-__version__ = "1.2"
+__version__ = "1.3"
 
 if os.name == 'nt':
     print(f"{Colors.RED}{Colors.BOLD}[-]{Colors.RESET} Este programa está diseñado para Linux/macOS. En Windows, usa WSL para mejor compatibilidad.")
@@ -55,7 +55,7 @@ class Colors:
     BOLD = "\033[1m"
     INTENSE_RED = "\033[38;2;255;0;0m"
     GRAY = "\033[38;2;128;128;128m"
-    YELLOW = "\033[38;2;255;255;0m"  
+    YELLOW = "\033[38;2;255;255;0m"
 
 def normalize_text(text: str) -> str:
     return ''.join(
@@ -185,7 +185,7 @@ class SearchCommand:
                     return
                 try:
                     subprocess.run([editor, file_path], check=True)
-                    print(f"{Colors.GREEN}[✔] {Colors.RESET}Abriendo {self.last_query} en {editor}. Usa 'refresh' para recargar cambios.")
+                    print(f"{Colors.GREEN}[✔] {Colors.RESET}Abriendo {Colors.GREEN}{self.last_query}{Colors.RESET} en {editor}. Usa {Colors.BLUE}refresh{Colors.RESET} para recargar cambios.\n")
                 except (subprocess.CalledProcessError, FileNotFoundError) as e:
                     print(f"{Colors.RED}{Colors.BOLD}[-]{Colors.RESET} Error al abrir el editor: {e}")
             else:
@@ -591,7 +591,7 @@ class SearchCommand:
         print(f"\n{Colors.BLUE}🔍 {title}{Colors.RESET}\n")
         
         if not results:
-            print(f"{Colors.RED}{Colors.BOLD}[-]{Colors.RESET} No se encontraron resultados.{Colors.RESET}")
+            print(f"{Colors.RED}{Color.BOLD}[-]{Colors.RESET} No se encontraron resultados.{Colors.RESET}")
         else:
             formatted_results = self._format_results(results)
             cleaned_results = []
@@ -668,12 +668,6 @@ class SearchCommand:
             print(f"  {item_color}{icon}{Colors.RESET} {item}")
         print("")
         print(f"{Colors.BLUE}{Colors.BOLD}╚══════════════════════════════════════════════════════════════════╝{Colors.RESET}")
-
-    def _list_tools(self):
-        self._display_in_columns([tool for tools in self.tools_by_category.values() for tool in tools], "HERRAMIENTAS DISPONIBLES", Colors.ORANGE)
-
-    def _list_categories(self):
-        self._display_in_columns(list(self.categories.keys()), "CATEGORÍAS DISPONIBLES", Colors.GREEN)
 
     def _display_edit_help(self):
         self._clear_screen()
@@ -788,7 +782,7 @@ class SearchCommand:
                     print(f"{Colors.BLUE}[ℹ] {Colors.RESET}Valor actual de $URL: {Colors.GRAY}{self.url_value}{Colors.RESET}")
                 else:
                     print(f"{Colors.BLUE}[ℹ] {Colors.RESET}No se ha configurado un valor para $URL")
-                print(f"{Colors.GREEN}[+] {Colors.RESET}Uso: {Colors.GRAY}seturl <URL> (ejemplo: seturl https://example.com){Colors.RESET}")
+                print(f"{Colors.GREEN}[+] {Colors.RESET}Uso: {Colors.GRAY}seturl <URL> (ejemplo: seturl http://example.com, https://example.com, http://10.10.10.20){Colors.RESET}")
                 print(f"{Colors.GREEN}[+] {Colors.RESET}Para limpiar: {Colors.GRAY}seturl clear{Colors.RESET}")
                 print(f"{Colors.BLUE}[ℹ] {Colors.RESET}La URL se usará en comandos con $URL.\n")
                 return True
@@ -797,27 +791,27 @@ class SearchCommand:
                 print(f"{Colors.GREEN}[✔] {Colors.RESET}Correctamente restablecido. Los comandos usarán {Colors.GREEN}$URL{Colors.RESET} por defecto.\n")
                 return True
             else:
-                url_pattern = r'^(https?://)?([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}(/.*)?$'
+                url_pattern = r'^(https?://)(([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}|(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}))(/.*)?$'
                 if re.match(url_pattern, args):
                     normalized_url = self._normalize_url(args)
                     self.url_value = normalized_url
                     try:
                         import requests
-                        response = requests.head(normalized_url, timeout=3, allow_redirects=True)
+                        response = requests.head(normalized_url, timeout=3, allow_redirects=True, verify=False)
                         if response.status_code < 400:
                             print(f"{Colors.GREEN}[✔] {Colors.RESET}$URL accesible: {Colors.BLUE}{normalized_url}{Colors.RESET} (Código: {response.status_code})")
                         else:
                             print(f"{Colors.ORANGE}[-] {Colors.RESET} $URL responde con código: {response.status_code}, pero se acepta")
-                    except (ImportError, requests.RequestException):
-                        print(f"{Colors.YELLOW}[-] {Colors.RESET} No se pudo verificar la accesibilidad de la URL, pero se acepta")
+                    except (ImportError, requests.RequestException) as e:
+                        print(f"{Colors.YELLOW}[-] {Colors.RESET} No se pudo verificar la accesibilidad de la URL ({e}), pero se acepta")
                     if normalized_url not in self.recent_urls:
                         self.recent_urls.append(normalized_url)
                         if len(self.recent_urls) > 5:
                             self.recent_urls.pop(0)
                     print(f"{Colors.GREEN}[✔] {Colors.RESET}$URL configurado como: {Colors.GRAY}{normalized_url}{Colors.RESET}\n")
                 else:
-                    print(f"{Colors.RED}[-] {Colors.RESET} Entrada inválida. Debe ser una URL válida (ej: https://example.com).")
-                    print(f"{Colors.BLUE}[ℹ] {Colors.RESET}Uso: seturl <URL> (ejemplo: seturl https://example.com)\n")
+                    print(f"{Colors.RED}[-] {Colors.RESET} Entrada inválida. Debe ser una URL válida (ej: http://example.com, https://example.com, http://10.10.10.20).")
+                    print(f"{Colors.BLUE}[ℹ] {Colors.RESET}Uso: seturl <URL> (ejemplo: seturl http://10.10.10.20)\n")
                 return True
         elif command == 'refresh':
             if args.lower() == 'config':
