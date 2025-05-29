@@ -74,21 +74,51 @@ Busca un comando específico y sal:
 searchCommand -q nmap
 ```
 ## ⚙️ Formato de `utilscommon`
-La herramienta lee comandos desde `~/referencestuff/utilscommon`. Este archivo debe tener un formato específico:
-```bash
-[+]------------------------------[ RECONOCIMIENTO ]------------------------------[+]
-[*] NMAP
-▶ Escaneo completo:
-   nmap -p- -sS -sV -A $IP -oN targeted  
-```
-* `[+]---[ ]---[+]`: Define una categoría.
-* `[*]`: Define una herramienta dentro de la categoría.
-* `▶`: Descripción del comando y abajo de ello el comando entero.
 
-**NOTA**: Si falta este archivo o está mal formateado, la herramienta fallará con un error, se trata de corregir este problema en las nuevas versiones:
-```bash
-⚠️ Error al leer el archivo: Archivo no encontrado en /home/usuario/referencestuff/utilscommon
+La herramienta `utilscommon` ahora organiza los comandos en una estructura de carpetas dentro del directorio `~/referencestuff`. Cada categoría es una carpeta, y dentro de cada carpeta se encuentran archivos que representan las herramientas con sus respectivos comandos.
+
+## Estructura de Archivos
+
+- **Categorías**: Las categorías se definen como carpetas dentro de `~/referencestuff`. Por ejemplo, una categoría como "RECONOCIMIENTO" sería una carpeta llamada `RECONOCIMIENTO`.
+
+- **Herramientas**: Dentro de cada carpeta de categoría, las herramientas se definen como archivos de texto. Cada archivo lleva el nombre de la herramienta (por ejemplo, `NMAP.txt`) y contiene una descripción del comando seguida del comando en sí.
+
+### Formato de un archivo de herramienta
+
+Cada archivo de herramienta debe seguir este formato:
+
 ```
+Descripción:▶ [Descripción del comando]
+Comando: [Comando completo]
+```
+
+**Ejemplo** (`~/referencestuff/RECONOCIMIENTO/NMAP.txt`):
+```
+Descripción:▶ Escaneo completo con NMAP
+Comando: nmap -p- -sS -sV -A $IP -oN targeted
+```
+## Notas Importantes
+
+- **Ubicación**: Los archivos de herramientas deben estar dentro de sus respectivas carpetas de categorías en `~/referencestuff`.
+- **Formato estricto**: Cada archivo de herramienta debe contener las líneas `Descripción:` y `Comando:` exactamente como se indica, con el texto correspondiente después de cada una.
+- **Errores**: Si una carpeta de categoría o un archivo de herramienta no se encuentra, o si el formato no es correcto, la herramienta generará un error similar a:
+  ```
+  ⚠️ Error al leer el archivo: Archivo no encontrado en /home/usuario/referencestuff/[CATEGORÍA]/[HERRAMIENTA]
+  ```
+  Se está trabajando en mejorar la gestión de errores en futuras versiones.
+
+## Ejemplo de Estructura
+
+```
+~/referencestuff/
+├── RECONOCIMIENTO/
+│   ├── NMAP.txt
+│   └── OTRA_HERRAMIENTA.txt
+├── EXPLOTACIÓN/
+│   ├── METASPLOIT.txt
+│   └── OTRA_HERRAMIENTA.txt
+```
+
 ## 🖥️ Prompt de `searchCommand`
 
 El prompt interactivo de **`searchCommand`** te guía con un sistema de **autocompletado** intuitivo y muestra en tiempo real la **categoría** o **herramienta** en la que estás navegando. A continuación, se detallan los diferentes escenarios de uso con ejemplos visuales:
