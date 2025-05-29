@@ -8,7 +8,7 @@
   gobuster dir -u $URL -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt -t 30
 
 ▶ Enumeración de Subdominios (Descubrir subdominios):
-  gobuster vhost -u http://<dominio> -w /usr/share/wordlists/seclists/Discovery/DNS/subdomains-top1million-5000.txt -t 200 --append-domain -q
+  gobuster vhost -u $URL -w /usr/share/wordlists/seclists/Discovery/DNS/subdomains-top1million-5000.txt -t 200 --append-domain -q
 
 ▶ Solo Estado 200 (Filtrar respuestas válidas):
   gobuster dir -u $URL -w /usr/share/wordlists/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt -t 50 -x html -s 200
