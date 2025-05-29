@@ -94,8 +94,8 @@ Comando: [Comando completo]
 
 **Ejemplo** (`~/referencestuff/RECONOCIMIENTO/NMAP.txt`):
 ```
-Descripción:▶ Escaneo completo con NMAP
-Comando: nmap -p- -sS -sV -A $IP -oN targeted
+Descripción:▶ Escaneo Rápido (Puertos abiertos rápidamente):
+Comando: nmap -p- --open -sS --min-rate 5000 -vvv -n -Pn $IP -oG allPorts
 ```
 ## Notas Importantes
 
