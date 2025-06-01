@@ -27,6 +27,7 @@ import time
 import unicodedata
 import urllib.parse
 import socket
+import warnings
 from typing import List, Dict, Optional
 from prompt_toolkit import PromptSession
 from prompt_toolkit.styles import Style
@@ -38,7 +39,10 @@ from prompt_toolkit.application import get_app
 from prompt_toolkit.history import FileHistory
 from fuzzywuzzy import process
 
-__version__ = "1.2"
+# Suprimir advertencias de urllib3 sobre conexiones HTTPS no verificadas
+warnings.filterwarnings("ignore", category=Warning, module="urllib3")
+
+__version__ = "1.3"
 
 if os.name == 'nt':
     print(f"{Colors.RED}{Colors.BOLD}[-]{Colors.RESET} Este programa está diseñado para Linux/macOS. En Windows, usa WSL para mejor compatibilidad.")
@@ -328,7 +332,7 @@ class SearchCommand:
 
     def _normalize_url(self, url: str) -> str:
         parsed = urllib.parse.urlparse(url)
-        scheme = parsed.scheme if parsed.scheme else 'http'
+        scheme = parsed.scheme if parsed.scheme in ['http', 'https'] else 'http'
         path = re.sub(r'/+', '/', parsed.path.lstrip('/'))
         normalized = urllib.parse.urlunparse((
             scheme,
@@ -344,8 +348,7 @@ class SearchCommand:
         if '$IP' in command and self.ip_value:
             command = command.replace('$IP', self.ip_value)
         if '$URL' in command and self.url_value:
-            normalized_url = self._normalize_url(self.url_value)
-            command = command.replace('$URL', normalized_url)
+            command = command.replace('$URL', self.url_value)
             command = re.sub(r'(https?://[^/]+)//+', r'\1/', command)
         return command
 
@@ -591,7 +594,7 @@ class SearchCommand:
         print(f"\n{Colors.BLUE}🔍 {title}{Colors.RESET}\n")
         
         if not results:
-            print(f"{Colors.RED}{Color.BOLD}[-]{Colors.RESET} No se encontraron resultados.{Colors.RESET}")
+            print(f"{Colors.RED}{Colors.BOLD}[-]{Colors.RESET} No se encontraron resultados.{Colors.RESET}")
         else:
             formatted_results = self._format_results(results)
             cleaned_results = []
@@ -630,7 +633,7 @@ class SearchCommand:
             return
         
         try:
-            col_width = 28 if "HERRAMIENTAS" in title else 45
+            col_width = 32 if "HERRAMIENTAS" in title else 45
             
             num_columns = 3 if "HERRAMIENTAS" in title else 2
             rows = (len(items) + num_columns - 1) // num_columns
@@ -667,7 +670,15 @@ class SearchCommand:
         for item in items:
             print(f"  {item_color}{icon}{Colors.RESET} {item}")
         print("")
-        print(f"{Colors.BLUE}{Colors.BOLD}╚══════════════════════════════════════════════════════════════════╝{Colors.RESET}")
+        print(f"{Colors.BLUE}{Colors.BOLD}╚═══════════════════════════════════════════════════════════════════════════════╝{Colors.RESET}")
+
+    def _list_tools(self):
+        all_tools = sorted([tool for tools in self.tools_by_category.values() for tool in tools])
+        self._display_in_columns(all_tools, "HERRAMIENTAS DISPONIBLES", Colors.ORANGE)
+
+    def _list_categories(self):
+        all_categories = sorted(self.categories.keys())
+        self._display_in_columns(all_categories, "CATEGORÍAS DISPONIBLES", Colors.BLUE)
 
     def _display_edit_help(self):
         self._clear_screen()
@@ -676,8 +687,8 @@ class SearchCommand:
         
         print(f"{Colors.BLUE}{Colors.BOLD}╔═══════════════════╣ HERRAMIENTAS DISPONIBLES ╠═══════════════════╗{Colors.RESET}")
         print(f"  {Colors.GREEN}Categorías:{Colors.RESET} {total_categories}  {Colors.ORANGE}Herramientas:{Colors.RESET} {total_tools}")
-        print(f"  {Colors.BLUE}[ℹ] {Colors.RESET}Uso: {Colors.GRAY}edit <herramienta> (ejemplo: edit nmap){Colors.RESET}")
-        print(f"{Colors.BLUE}{Colors.BOLD}╚══════════════════════════════════════════════════════════════════╝{Colors.RESET}\n")
+        print(f"  {Colors.BLUE}[ℹ] {Colors.RESET}Uso: {Colors.GRAY}edit <herramienta> (ejemplo: edit nmap) {Colors.RESET}")
+        print(f"{Colors.BLUE}{Colors.BOLD}╚═══════════════════════════════════════════════════════════════════════╝{Colors.RESET}\n")
 
     def _handle_internal_command(self, query: str) -> bool:
         query_lower = query.lower().strip()
@@ -730,21 +741,21 @@ class SearchCommand:
             self._list_categories()
             return True
         elif command == 'exit':
-            print(f"\n\t\t\t{Colors.RED}{Colors.BOLD}H4PPY H4CK1NG{Colors.RESET}")
+            print(f"\n\t\t\t\t\t{Colors.RED}{Colors.RESET}H4PPY H4CK1NG")
             sys.exit(0)
         elif command == 'setip':
             if not args:
                 if self.ip_value:
-                    print(f"{Colors.BLUE}[ℹ] {Colors.RESET}Valor actual de $IP: {Colors.GRAY}{self.ip_value}{Colors.RESET}")
+                    print(f"{Colors.BLUE}[ℹ] {Colors.RESET}Valor actual de $IP: {Colors.GREEN}{self.ip_value}{Colors.RESET}")
                 else:
                     print(f"{Colors.BLUE}[ℹ] {Colors.RESET}No se ha configurado un valor para $IP")
-                print(f"{Colors.GREEN}[+] {Colors.RESET}Uso: {Colors.GRAY}setip <IP|dominio> (ejemplo: setip 192.168.1.1 o setip example.com){Colors.RESET}")
-                print(f"{Colors.GREEN}[+] {Colors.RESET}Para limpiar: {Colors.GRAY}setip clear{Colors.RESET}")
+                print(f"{Colors.GREEN}[+] {Colors.RESET}Uso: {Colors.GREEN}setip <IP|dominio> (ejemplo: setip 192.168.1.1 o setip example.com)")
+                print(f"{Colors.GREEN}[+] {Colors.RESET}Para limpiar: {Colors.GREEN}setipclear{Colors.RESET}")
                 print(f"{Colors.BLUE}[ℹ] {Colors.RESET}La IP/dominio se usará en comandos con $IP.\n")
                 return True
             elif args.lower() == 'clear':
-                self.ip_value = None
-                print(f"{Colors.GREEN}[✔] {Colors.RESET}Correctamente restablecido. Los comandos usarán {Colors.GREEN}$IP{Colors.RESET} por defecto.\n")
+                self._ip_value = None
+                print(f"{Colors.GREEN}[✔] {Colors.RESET}Correctamente restablecido. Los comandos usarán colores_verdes {Colors.GREEN}$IP{Colors.RESET} por defecto.\n")
                 return True
             else:
                 try:
@@ -753,64 +764,64 @@ class SearchCommand:
                     self.ip_value = args
                     try:
                         socket.gethostbyname(args)
-                        print(f"{Colors.GREEN}[✔] {Colors.RESET}$IP resuelve correctamente: {args}")
+                        print(f"{Colors.GREEN}[✔] {Colors.RESET} $IP resuelve correctamente: {args}")
                     except socket.gaierror:
-                        print(f"{Colors.YELLOW}[-] {Colors.RESET} $IP no resuelve en DNS, pero se acepta: {args}")
+                        print(f"{Colors.ORANGE}[-] {Colors.RESET} $IP no resuelve en DNS, pero se acepta: {args}")
                 except ValueError:
-                    domain_pattern = r'^([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$'
+                    domain_pattern = r'^([a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$'
                     if re.match(domain_pattern, args) and 1 < len(args) <= 255:
                         try:
                             socket.gethostbyname(args)
                             self.ip_value = args
                             print(f"{Colors.GREEN}[✔] {Colors.RESET}Dominio resuelve correctamente: {args}")
                         except socket.gaierror:
-                            print(f"{Colors.YELLOW}[-] {Colors.RESET} Dominio no resuelve en DNS, pero se acepta: {args}")
+                            print(f"{Colors.ORANGE}[-] {Colors.RESET} Dominio no resuelve en DNS, pero se acepta: {args}")
                             self.ip_value = args
                     else:
-                        print(f"{Colors.RED}[-] {Colors.RESET} Entrada inválida. Debe ser una IP válida (ej: 192.168.1.1) o dominio (ej: example.com).")
-                        print(f"{Colors.BLUE}[ℹ] {Colors.RESET}Uso: setip <IP|dominio> (ejemplo: setip 8.8.8.8)")
+                        print(f"{Colors.RED}[-] {Colors.RESET} Entrada inválida. Debe ser una IP válida (ej: 192.168.1.1) o dominio (ejemplo: example.com).")
+                        print(f"{Colors.BLUE}[ℹ] {Colors.RESET}Uso: setip <IP|dominio>| (ejemplo: setip 8.8.8.8)")
                         return True
                 if self.ip_value and args not in self.recent_ips:
                     self.recent_ips.append(args)
                     if len(self.recent_ips) > 5:
                         self.recent_ips.pop(0)
-                print(f"{Colors.GREEN}[✔] {Colors.RESET}$IP configurado como: {Colors.GRAY}{args}{Colors.RESET}\n")
+                print(f"{Colors.GREEN}[✔] {Colors.RESET}$IP configurado como: {Colors.GREEN}{args}{Colors.RESET}\n")
                 return True
         elif command == 'seturl':
             if not args:
                 if self.url_value:
-                    print(f"{Colors.BLUE}[ℹ] {Colors.RESET}Valor actual de $URL: {Colors.GRAY}{self.url_value}{Colors.RESET}")
+                    print(f"{Colors.BLUE}[ℹ] {Colors.RESET}Valor actual de $URL: {Colors.GREEN}{self.url_value}{Colors.RESET}")
                 else:
                     print(f"{Colors.BLUE}[ℹ] {Colors.RESET}No se ha configurado un valor para $URL")
-                print(f"{Colors.GREEN}[+] {Colors.RESET}Uso: {Colors.GRAY}seturl <URL> (ejemplo: seturl http://example.com, https://example.com, http://10.10.10.20){Colors.RESET}")
-                print(f"{Colors.GREEN}[+] {Colors.RESET}Para limpiar: {Colors.GRAY}seturl clear{Colors.RESET}")
+                print(f"{Colors.GREEN}[+] {Colors.RESET}Uso: {Colors.GREEN}seturl <URL> (ejemplo: seturl http://example.com, https://example.com/, http://10.10.10.20)")
+                print(f"{Colors.GREEN}[+] {Colors.RESET}Para limpiar: {Colors.GREEN}seturl clear{Colors.RESET}")
                 print(f"{Colors.BLUE}[ℹ] {Colors.RESET}La URL se usará en comandos con $URL.\n")
                 return True
             elif args.lower() == 'clear':
                 self.url_value = None
-                print(f"{Colors.GREEN}[✔] {Colors.RESET}Correctamente restablecido. Los comandos usarán {Colors.GREEN}$URL{Colors.RESET} por defecto.\n")
+                print(f"{Colors.GREEN}[✔] {Colors.RESET}Correctamente restablecido. Los comandos usarán colores verdes {Colors.GREEN}$URL{Colors.RESET} por defecto.\n")
                 return True
             else:
-                url_pattern = r'^(https?://)(([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}|(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}))(/.*)?$'
+                url_pattern = r'^(https?://)?(([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}|(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}))(/.*)?$'
                 if re.match(url_pattern, args):
+                    self.url_value = args
                     normalized_url = self._normalize_url(args)
-                    self.url_value = normalized_url
                     try:
                         import requests
                         response = requests.head(normalized_url, timeout=3, allow_redirects=True, verify=False)
                         if response.status_code < 400:
-                            print(f"{Colors.GREEN}[✔] {Colors.RESET}$URL accesible: {Colors.BLUE}{normalized_url}{Colors.RESET} (Código: {response.status_code})")
+                            print(f"{Colors.GREEN}[✔] {Colors.RESET}$URL accesible: {Colors.BLUE}{args}{Colors.RESET} (Código: {response.status_code})")
                         else:
-                            print(f"{Colors.ORANGE}[-] {Colors.RESET} $URL responde con código: {response.status_code}, pero se acepta")
-                    except (ImportError, requests.RequestException) as e:
-                        print(f"{Colors.YELLOW}[-] {Colors.RESET} No se pudo verificar la accesibilidad de la URL ({e}), pero se acepta")
-                    if normalized_url not in self.recent_urls:
-                        self.recent_urls.append(normalized_url)
+                            print(f"{Colors.ORANGE}[-] {Colors.RESET}URL no accesible (código: {response.status_code}), pero se agregó con éxito")
+                    except (ImportError, requests.RequestException):
+                        print(f"{Colors.ORANGE}[-] {Colors.RESET}URL no accesible, pero se agregó con éxito")
+                    if args not in self.recent_urls:
+                        self.recent_urls.append(args)
                         if len(self.recent_urls) > 5:
                             self.recent_urls.pop(0)
-                    print(f"{Colors.GREEN}[✔] {Colors.RESET}$URL configurado como: {Colors.GRAY}{normalized_url}{Colors.RESET}\n")
+                    print(f"{Colors.GREEN}[✔] {Colors.RESET}$URL configurado como: {Colors.GREEN}{args}{Colors.RESET}\n")
                 else:
-                    print(f"{Colors.RED}[-] {Colors.RESET} Entrada inválida. Debe ser una URL válida (ej: http://example.com, https://example.com, http://10.10.10.20).")
+                    print(f"{Colors.RED}[-] {Colors.RESET}Entrada inválida. Debe ser una URL válida (ej: http://example.com, https://example.com/, http://10.10.10.20).")
                     print(f"{Colors.BLUE}[ℹ] {Colors.RESET}Uso: seturl <URL> (ejemplo: seturl http://10.10.10.20)\n")
                 return True
         elif command == 'refresh':
@@ -929,7 +940,7 @@ class SearchCommand:
 
                     tool_results = self.search_by_tool(query)
                     if tool_results:
-                        self._display_results(tool_results, f"{Colors.ORANGE}{Colors.BOLD}Resultados para Herramienta: {Colors.RESET}{query.upper()}\n")
+                        self._display_results(tool_results, f"{Colors.ORANGE}Resultados para Herramienta: {Colors.RESET}{query.upper()}\n")
                         self.last_command_success = True
                         continue
 
@@ -1023,7 +1034,7 @@ class EnhancedCompleter(Completer):
     def _normalize_url(self, url: str) -> str:
         parsed = urllib.parse.urlparse(url)
         path = re.sub(r'/+', '/', parsed.path.lstrip('/'))
-        scheme = parsed.scheme if parsed.scheme else 'http'
+        scheme = parsed.scheme if parsed.scheme in ['http', 'https'] else 'http'
         normalized = urllib.parse.urlunparse((
             scheme,
             parsed.netloc.lower(),
