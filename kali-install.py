@@ -262,7 +262,7 @@ def install_search_command():
 
         print(SEPARATOR + "\n")
         log_info("Instalación completada con éxito!", delay=0.2)
-        print(f"[{GREEN}+{RESET}] Usa {BLUE}{BOLD}searchCommand{RESET} desde la terminal.")
+        print(f"[{GREEN}+{RESET}] Usa {BLUE}{BOLD}searchCommand{RESET} desde la terminal 😎.")
         print(f"\n\t\t{BOLD}{RED}H4PPY H4CK1NG{RESET}")
 
     except subprocess.CalledProcessError as e:
@@ -277,7 +277,7 @@ def uninstall_search_command():
     log_info("Iniciando desinstalación...", delay=0.2)
     cleanup()
     print(SEPARATOR + "\n")
-    log_info("Desinstalación completada.", delay=0.2)
+    log_info("Desinstalación completada crack 😎.", delay=0.2)
 
 choice = get_user_choice()
 if choice == "1":
