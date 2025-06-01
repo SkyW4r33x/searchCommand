@@ -1,0 +1,6 @@
+▶ Listar Conexiones Activas (Ver conexiones de red):
+  netstat -tuln
+▶ Mostrar Procesos Asociados (Ver procesos con conexiones):
+  netstat -tulnp
+▶ Filtrar por Puerto Específico (Buscar puerto específico):
+  netstat -tulnp | grep :80

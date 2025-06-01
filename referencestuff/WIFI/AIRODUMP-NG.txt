@@ -1,0 +1,4 @@
+▶ Escuchar Todo el Tráfico WiFi (Capturar todo el tráfico de la red):
+  airodump-ng wlan0mon
+▶ Escuchar SSID Específico (Capturar tráfico de un SSID específico):
+  airodump-ng --bssid <mac_address> -c <channel> -w <output_file> wlan0mon

@@ -1,0 +1,32 @@
+▶ Escaneo por Defecto (Fuzzing básico sin wordlist):
+  feroxbuster --url $URL
+
+▶ Enumeración de Directorios (Búsqueda de directorios y archivos):
+  feroxbuster -u $URL -w /usr/share/wordlists/seclists/Discovery/Web-Content/directory-list-lowercase-2.3-medium.txt -d 10 -t 200 -x php,txt,html,php.bak,bak,tar --status-codes 200,301,302
+
+▶ Escaneo Recursivo (Búsqueda en profundidad):
+  feroxbuster -u $URL -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt -d 5 -x php,html,txt -r
+
+▶ Escaneo IPv6 No Recursivo (Con logging INFO activado):
+  feroxbuster -u <proto|https>://[<ipv6>] --no-recursion -vv
+
+▶ Manejo de Cookies (Autenticación con cookies):
+  feroxbuster -u $URL -w /usr/share/wordlists/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt -t 100 --cookies "PHPSESSID=abc123; usuario=admin" --status-codes 200,403
+
+▶ Escaneo con Cabeceras (Personalizar headers):
+  feroxbuster -u $URL -w /usr/share/wordlists/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt -H "Authorization: Bearer token123" -H "User-Agent: MiNavegador/1.0"
+
+▶ Abortar o Reducir Velocidad por Errores (Parar si hay demasiados errores):
+  feroxbuster -u $URL --auto-bail
+
+▶ Filtrado por Tamaño (Excluir respuestas por bytes):
+  feroxbuster -u $URL -w /usr/share/wordlists/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt --filter-size 1024
+
+▶ Escaneo con Proxy (Usar proxy local):
+  feroxbuster -u $URL -w /usr/share/wordlists/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt --proxy http://127.0.0.1:8080
+
+▶ Escaneo de API (Búsqueda en endpoints API):
+  feroxbuster -u $URL/api -w /usr/share/wordlists/seclists/Discovery/Web-Content/api-words.txt -x json,xml -H "Content-Type: application/json"
+
+▶ Escaneo con Rate Limit (Controlar velocidad):
+  feroxbuster -u $URL -w /usr/share/wordlists/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt --rate-limit 50

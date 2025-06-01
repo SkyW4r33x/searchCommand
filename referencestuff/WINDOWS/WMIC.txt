@@ -1,0 +1,12 @@
+▶ Listar Parches Instalados (Ver actualizaciones y hotfixes):
+  wmic qfe get Caption,Description,HotFixID,InstalledOn
+▶ Listar Discos Montados (Mostrar discos y sus descripciones):
+  wmic logicaldisk get caption,description,providername
+▶ Listar Servicios (Mostrar servicios en ejecución):
+  wmic service list brief
+▶ Crear Copia de Sombra (Crear shadow copy del volumen C):
+  wmic shadowcopy call create Volume='C:\'
+▶ Obtener Arquitectura del Sistema (Ver arquitectura del SO):
+  wmic os get osarchitecture
+▶ Obtener Información de Administrador (Recuperar SID del usuario Administrator):
+  [wmi] "Win32_userAccount.Domain='<computer_name>',Name='Administrator'"

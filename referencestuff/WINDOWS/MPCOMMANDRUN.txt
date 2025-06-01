@@ -1,0 +1,4 @@
+▶ Descargar Archivo con Windows Defender (Método 1 - Ruta completa):
+  "c:\ProgramData\Microsoft\Windows Defender\Platform\4.18.2008.9-0\mpcmdrun.exe" -DownloadFile -url <url> -path <result_file>
+▶ Descargar Archivo con Windows Defender (Método 2 - Comando directo):
+  mpcmdrun.exe -DownloadFile -url <url> -path <result_file>

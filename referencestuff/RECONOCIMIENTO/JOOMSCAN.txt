@@ -1,0 +1,29 @@
+▶ Escaneo Básico con Joomla (Inicia un escaneo general para detectar vulnerabilidades comunes): 
+  joomscan -u $URL
+
+▶ Enumerar Plugins Joomla (Lista los plugins instalados y verifica vulnerabilidades): 
+  joomscan -u $URL --enumerate-plugins
+
+▶ Enumerar Extensiones Joomla (Identifica extensiones instaladas y busca vulnerabilidades): 
+  joomscan -u $URL --enumerate-components
+
+▶ Enumerar Usuarios Joomla (Obtiene una lista de usuarios registrados): 
+  joomscan -u $URL --enum-users
+
+▶ Verificar Vulnerabilidades Joomla (Busca vulnerabilidades conocidas en el núcleo y componentes): 
+  joomscan -u $URL --ec
+
+▶ Guardar Resultados en Archivo (Almacena los resultados del escaneo en un archivo): 
+  joomscan -u $URL -o /path/to/results.txt
+
+▶ Salida Detallada del Escaneo (Proporciona información detallada durante el escaneo): 
+  joomscan -u $URL -v
+
+▶ Actualizar Base de Datos de Vulnerabilidades (Actualiza la base de datos de vulnerabilidades): 
+  joomscan --update
+
+# Notas:
+# Reemplaza $URL con la URL del sitio Joomla que deseas escanear, por ejemplo, http://example.com.
+# Asegúrate de que la URL sea válida y apunte a un sitio Joomla.
+# Usa la opción --update regularmente para mantener la base de datos de vulnerabilidades actualizada.
+# Los resultados pueden ser más detallados con -v, pero aumentan el tiempo de escaneo.

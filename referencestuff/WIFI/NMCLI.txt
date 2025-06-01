@@ -1,0 +1,2 @@
+▶ Restaurar Interfaz WiFi (Volver interfaz a modo gestionado):
+  nmcli device set wlan0 managed true

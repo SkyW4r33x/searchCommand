@@ -1,0 +1,41 @@
+▶ Ver Metadatos Básicos de un Archivo (Inspeccionar metadatos básicos):
+  exiftool archivo.jpg
+
+▶ Ver Metadatos Completos de un Archivo (Mostrar todos los detalles):
+  exiftool -a -u -g archivo.jpg
+
+▶ Eliminar Todos los Metadatos de un Archivo (Borrar información adicional):
+  exiftool -all= archivo.jpg
+
+▶ Extraer Metadatos de Múltiples Archivos (Analizar directorio completo):
+  exiftool -r .
+
+▶ Guardar Metadatos en un Archivo de Texto (Exportar a texto):
+  exiftool archivo.jpg > metadatos.txt
+
+▶ Modificar un Campo Específico (Cambiar autor de metadatos):
+  exiftool -Author="Nuevo Autor" archivo.jpg
+
+▶ Extraer Coordenadas GPS de un Archivo (Obtener ubicación si existe):
+  exiftool -gpslatitude -gpslongitude archivo.jpg
+
+▶ Cambiar Fecha y Hora de Captura (Modificar timestamp):
+  exiftool "-DateTimeOriginal=2025:01:27 10:00:00" archivo.jpg
+
+▶ Copiar Metadatos de un Archivo a Otro (Transferir metadatos):
+  exiftool -tagsfromfile fuente.jpg destino.jpg
+
+▶ Filtrar por Palabra Clave en Metadatos (Buscar texto específico):
+  exiftool archivo.jpg | grep "palabra_clave"
+
+▶ Extraer Miniaturas Incrustadas (Obtener imágenes pequeñas):
+  exiftool -b -ThumbnailImage archivo.jpg > miniatura.jpg
+
+▶ Eliminar Información GPS (Borrar datos de ubicación):
+  exiftool -gps:all= archivo.jpg
+
+▶ Renombrar Archivos por Fecha de Captura (Organizar por timestamp):
+  exiftool '-FileName<DateTimeOriginal' -d %Y%m%d_%H%M%S%%-c.%%e *.jpg
+
+▶ Exportar Metadatos a JSON (Guardar en formato estructurado):
+  exiftool -json archivo.jpg > metadatos.json

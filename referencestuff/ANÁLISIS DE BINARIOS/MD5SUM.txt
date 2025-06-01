@@ -1,0 +1,2 @@
+▶ Hash MD5 (Verificar integridad):
+  md5sum <binario>

@@ -1,0 +1,26 @@
+▶ Descargar Archivo (Obtener archivo desde URL):
+  curl -O $URL/archivo.txt
+
+▶ Enviar Datos POST (Hacer solicitud POST):
+  curl -X POST -d "param1=valor1&param2=valor2" $URL/api
+
+▶ Descargar con Autenticación (Acceso protegido):
+  curl -u usuario:contraseña $URL/archivo_protegido.txt
+
+▶ Seguir Redirecciones (Manejar redirecciones):
+  curl -L $URL/redireccion
+
+▶ Usar Proxy (Transferencia a través de proxy):
+  curl -x socks5://127.0.0.1:9150 $URL
+
+▶ Verificar Certificado SSL (Inspeccionar conexión segura):
+  curl -v https://$URL
+
+▶ Guardar Cookies (Almacenar cookies de respuesta):
+  curl -c cookies.txt $URL
+
+▶ Usar Cookies Guardadas (Enviar cookies almacenadas):
+  curl -b cookies.txt $URL
+
+▶ Mostrar Cabeceras de Respuesta (Ver headers HTTP):
+  curl -I $URL

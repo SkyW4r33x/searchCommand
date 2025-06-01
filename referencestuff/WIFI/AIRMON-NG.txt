@@ -1,0 +1,6 @@
+▶ Matar Procesos Conflictivos (Eliminar procesos que puedan interferir):
+  airmon-ng check kill
+▶ Iniciar Interfaz en Modo Monitor (Activar modo monitor en interfaz):
+  airmon-ng start wlan0
+▶ Detener Interfaz en Modo Monitor (Desactivar modo monitor):
+  airmon-ng stop wlan0mon

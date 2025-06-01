@@ -1,0 +1,23 @@
+▶ Conectarse a un Recurso SMB (Acceder a un share):
+  smbclient //$IP/RECURSO -U user
+
+▶ Listar Shares Disponibles (Enumerar recursos compartidos):
+  smbclient -L //$IP -U user
+
+▶ Descargar Archivo de un Share (Obtener archivo específico):
+  smbclient //$IP/share -U user -c "get filename"
+
+▶ Subir Archivo a un Share (Enviar archivo al servidor):
+  smbclient //$IP/share -U user -c "put localfile remotefile"
+
+▶ Ejecutar Comandos en Modo Interactivo (Usar shell SMB):
+  smbclient //$IP/share -U user
+  smb: \> ls
+  smb: \> get file
+  smb: \> put file
+
+▶ Montar Share SMB Localmente (Montar en sistema local):
+  mount -t cifs //$IP/share /mnt/share -o username=user,password=pass
+
+▶ Conexión Anónima (Acceder sin credenciales):
+  smbclient -L //$IP -N

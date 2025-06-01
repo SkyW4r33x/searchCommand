@@ -1,0 +1,4 @@
+▶ Listar Controladores de Dominio (Ver lista de DCs en el dominio):
+  nltest /dclist:<domain>
+▶ Obtener Relaciones de Confianza (Ver relaciones de confianza del dominio):
+  nltest /domain_trusts

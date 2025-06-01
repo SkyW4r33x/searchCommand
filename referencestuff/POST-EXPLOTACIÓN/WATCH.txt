@@ -1,0 +1,2 @@
+▶ Monitoreo en Tiempo Real (Observar cambios en archivo):
+  watch -n 1 "ls -l /bin/bash"

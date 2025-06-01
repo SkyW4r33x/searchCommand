@@ -1,0 +1,20 @@
+▶ Escaneo Básico con Wordlist (Enumerar subdominios con lista de palabras):
+  dnsmap $URL -w /path/to/wordlist
+
+▶ Guardar Resultados en Archivo (Guardar resultados en un archivo de texto):
+  dnsmap $URL -w /path/to/wordlist -r /path/to/results.txt
+
+▶ Guardar Resultados en CSV (Guardar resultados en formato CSV):
+  dnsmap $URL -w /path/to/wordlist -c /path/to/results.csv
+
+▶ Añadir Retardo (Añadir retardo entre peticiones en milisegundos):
+  dnsmap $URL -w /path/to/wordlist -d <delay>
+
+▶ Ignorar IPs Específicas (Ignorar IPs específicas en el escaneo):
+  dnsmap $URL -w /path/to/wordlist -i <ignore_ips>
+
+# Notas:
+# - Reemplaza $DOMAIN con el dominio que deseas escanear, por ejemplo, example.com.
+# - Para las opciones -r y -c, si no se especifica un nombre de archivo, dnsmap generará uno automáticamente con la fecha y hora actual.
+# - La opción -d acepta valores entre 1 y 300000 milisegundos.
+# - La opción -i permite ignorar hasta 5 direcciones IP, separadas por comas.

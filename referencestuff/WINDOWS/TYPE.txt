@@ -1,0 +1,2 @@
+▶ Mostrar Contenido del Archivo Hosts (Ver archivo hosts):
+  type C:\WINDOWS\System32\drivers\etc\hosts

@@ -1,0 +1,6 @@
+▶ Listar Procesos (Ver procesos en ejecución):
+  ps aux
+▶ Filtrar Procesos por Usuario (Ver procesos de un usuario específico):
+  ps -u $USER
+▶ Buscar Proceso Específico (Localizar un proceso por nombre):
+  ps aux | grep "<nombre_proceso>"

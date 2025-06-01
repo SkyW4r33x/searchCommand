@@ -1,0 +1,2 @@
+▶ Tipo de Archivo (Identificar formato):
+  file <binario>
