@@ -39,7 +39,6 @@ from prompt_toolkit.application import get_app
 from prompt_toolkit.history import FileHistory
 from fuzzywuzzy import process
 
-# Suprimir advertencias de urllib3 sobre conexiones HTTPS no verificadas
 warnings.filterwarnings("ignore", category=Warning, module="urllib3")
 
 __version__ = "1.3"
