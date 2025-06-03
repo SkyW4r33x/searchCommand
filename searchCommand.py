@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# ADFASDF SADF ASD
+
 """
 ═════════════════════════[searchCommand]════════════════════════════
 Autor       : Jordan Cueva Mendoza (aka SkyW4r33x)
@@ -39,10 +39,9 @@ from prompt_toolkit.application import get_app
 from prompt_toolkit.history import FileHistory
 from fuzzywuzzy import process
 
-# Suprimir advertencias de urllib3 sobre conexiones HTTPS no verificadas
 warnings.filterwarnings("ignore", category=Warning, module="urllib3")
 
-__version__ = "1.3"
+__version__ = "1.4"
 
 if os.name == 'nt':
     print(f"{Colors.RED}{Colors.BOLD}[-]{Colors.RESET} Este programa está diseñado para Linux/macOS. En Windows, usa WSL para mejor compatibilidad.")
