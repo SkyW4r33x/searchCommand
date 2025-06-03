@@ -1,2 +1,0 @@
-▶ Verificar Dependencias (Bibliotecas dinámicas):
-  ldd <binario>

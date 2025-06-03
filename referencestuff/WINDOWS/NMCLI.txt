@@ -1,2 +1,0 @@
-▶ Encontrar IP de Active Directory (Mostrar nombre de dominio y DNS):
-  nmcli dev show eth0

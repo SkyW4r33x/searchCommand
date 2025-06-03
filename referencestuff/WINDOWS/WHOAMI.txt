@@ -1,4 +1,0 @@
-▶ Información Completa del Usuario Actual (Ver información detallada y tokens):
-  whoami /all
-▶ Ver Privilegios del Usuario (Listar privilegios habilitados):
-  whoami /priv

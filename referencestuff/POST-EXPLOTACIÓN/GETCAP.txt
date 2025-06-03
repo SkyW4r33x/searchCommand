@@ -1,2 +1,0 @@
-▶ Buscar Capacidades (Listar binarios con capacidades):
-  getcap -r / 2>/dev/null

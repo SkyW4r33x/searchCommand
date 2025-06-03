@@ -1,4 +1,0 @@
-▶ Obtener Nombre del Equipo (Ver nombre del equipo desde PowerShell):
-  $env:computername
-▶ Listar Credenciales Almacenadas (Ver credenciales guardadas en el sistema):
-  cmdkey /list

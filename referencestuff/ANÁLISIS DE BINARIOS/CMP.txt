@@ -1,2 +1,0 @@
-▶ Comparar Binarios (Diferencias byte por byte):
-  cmp <binario1> <binario2>

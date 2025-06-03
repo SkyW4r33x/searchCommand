@@ -1,2 +1,0 @@
-▶ Mostrar Tabla de Enrutamiento (Ver rutas de red):
-  route print

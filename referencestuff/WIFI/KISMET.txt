@@ -1,2 +1,0 @@
-▶ Monitorear Redes WiFi (Capturar tráfico WiFi en modo monitor):
-  kismet -c wlan0

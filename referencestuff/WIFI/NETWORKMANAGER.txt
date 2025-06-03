@@ -1,2 +1,0 @@
-▶ Reiniciar NetworkManager (Restaurar configuración de red):
-  systemctl restart NetworkManager

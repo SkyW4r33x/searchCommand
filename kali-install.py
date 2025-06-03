@@ -4,6 +4,10 @@ import os
 import sys
 import subprocess
 import shutil
+import zipfile
+import tempfile
+import hashlib
+import requests
 from time import sleep
 import pwd
 import tty
@@ -16,22 +20,20 @@ def ensure_colorama():
         init()
         return Fore, Style
     except ImportError:
-        print("Colorama no está instalado globalmente. Creando entorno virtual temporal para el instalador...")
-        temp_venv = "/tmp/searchCommand_installer_venv"
-        
-        if not os.path.exists(temp_venv):
-            subprocess.run([sys.executable, "-m", "venv", temp_venv], check=True)
-        
-        pip_path = os.path.join(temp_venv, "bin", "pip")
+        print("Instalando dependencia colorama...")
+        temp_dir = tempfile.mkdtemp()
         try:
+            subprocess.run([sys.executable, "-m", "venv", os.path.join(temp_dir, "venv")], check=True)
+            pip_path = os.path.join(temp_dir, "venv", "bin", "pip")
             subprocess.run([pip_path, "install", "colorama>=0.4.6"], check=True)
-        except subprocess.CalledProcessError:
-            print("Error: No se pudo instalar colorama. Asegúrate de tener acceso a internet.")
+            subprocess.run([os.path.join(temp_dir, "venv", "bin", "python")] + sys.argv, check=True)
+            sys.exit(0)
+        except subprocess.CalledProcessError as e:
+            print(f"Error: No se pudo instalar colorama: {e}", file=sys.stderr)
             sys.exit(1)
-        
-        python_path = os.path.join(temp_venv, "bin", "python3")
-        subprocess.run([python_path] + sys.argv, check=True)
-        sys.exit(0) 
+        finally:
+            if os.path.exists(temp_dir):
+                shutil.rmtree(temp_dir)
 
 Fore, Style = ensure_colorama()
 os.system("clear")
@@ -39,11 +41,13 @@ os.system("clear")
 GREEN, YELLOW, RED, CYAN, BLUE, MAGENTA = Fore.GREEN, Fore.YELLOW, Fore.RED, Fore.CYAN, Fore.BLUE, Fore.MAGENTA
 RESET, BOLD = Style.RESET_ALL, Style.BRIGHT
 
-__version__ = "0.1"
+__version__ = "0.6"
 
 VENV_DIR = "/opt/searchCommand_venv"
 BIN_DIR = "/usr/local/bin"
 SCRIPT_DIR = "/usr/bin"
+SEARCHCOMMAND_URL = "https://raw.githubusercontent.com/SkyW4r33x/searchCommand/main/searchCommand.py"
+REFERENCESTUFF_URL = "https://raw.githubusercontent.com/SkyW4r33x/searchCommand/main/referencestuff.zip"
 
 def create_gradient_banner():
     banner_lines = [
@@ -53,16 +57,14 @@ def create_gradient_banner():
     ]
     signature = f"╚═[ SkyW4r33x | v.{__version__} ]═╝"
     gradient_colors = ["\033[38;5;75m", "\033[38;5;79m", "\033[38;5;85m"]
-    
     banner_width = len(banner_lines[0])
     gradient_banner = "\n".join(f"{gradient_colors[i]}{line}{RESET}" for i, line in enumerate(banner_lines))
     signature_color = "\033[38;5;85m"
     centered_signature = " " * ((banner_width - len(signature)) // 2) + f"{signature_color}{signature}{RESET}"
-    
-    return f"{gradient_banner}\n{centered_signature}".rstrip()
+    return f"{gradient_banner}\n{centered_signature}\n"
 
 BANNER = create_gradient_banner()
-SEPARATOR = f"{BLUE}════════════════════════════════════════════{RESET}"
+SEPARATOR = f"\n{BLUE}══════[ 🔍 Instalador searchCommand ]══════{RESET}\n"
 
 def log_info(msg, secondary=False, delay=0):
     prefix = f"{CYAN}[INFO]{RESET}" if secondary else f"{GREEN}[INFO]{RESET}"
@@ -71,31 +73,48 @@ def log_info(msg, secondary=False, delay=0):
         sleep(delay)
 
 def log_warn(msg, delay=0):
-    print(f"{YELLOW}[WARN]{RESET} {msg}", file=sys.stderr)
+    print(f"\n{YELLOW}[WARN]{RESET} {BOLD}{msg}{RESET}", flush=True)
     if delay:
         sleep(delay)
 
 def log_error(msg, exit_code=1):
-    print(f"{RED}[ERROR]{RESET} {msg}", file=sys.stderr)
+    print(f"\n{RED}[ERROR]{RESET} {BOLD}{msg}{RESET}", file=sys.stderr)
     sys.exit(exit_code)
 
-if not shutil.which("python3"):
-    log_error("Python3 no está instalado. Instálalo con 'sudo apt install python3'.")
-if os.geteuid() != 0:
-    log_error("Este script requiere privilegios de root. Usa sudo.")
+def check_requirements():
+    if not shutil.which("python3"):
+        log_error("Python3 no está instalado. Instálalo con 'sudo apt install python3'.")
+    if os.geteuid() != 0:
+        log_error("Este script requiere privilegios de root. Usa sudo.")
+    if not shutil.which("wget"):
+        log_error("wget no está instalado. Instálalo con 'sudo apt install wget'.")
+    global SUDO_USER
+    SUDO_USER = os.environ.get("SUDO_USER")
+    if not SUDO_USER:
+        log_error("No se pudo determinar el usuario que ejecutó sudo.")
 
-SUDO_USER = os.environ.get("SUDO_USER")
-if not SUDO_USER:
-    log_error("No se pudo determinar el usuario que ejecutó sudo.")
+check_requirements()
 
-def cleanup():
-    log_warn("Limpiando archivos temporales...", delay=0.5)
+def compute_md5(file_path):
+    hash_md5 = hashlib.md5()
+    try:
+        with open(file_path, "rb") as f:
+            for chunk in iter(lambda: f.read(4096), b""):
+                hash_md5.update(chunk)
+        return hash_md5.hexdigest()
+    except OSError:
+        return None
+
+def cleanup(full_cleanup=True):
+    log_info("Limpiando archivos existentes...", delay=0.5)
     paths = [
         os.path.join(BIN_DIR, "searchCommand.py"),
         os.path.join(SCRIPT_DIR, "searchCommand"),
         VENV_DIR,
-        os.path.expanduser(f"~{SUDO_USER}/referencestuff")
     ]
+    if full_cleanup:
+        paths.append(os.path.expanduser(f"~{SUDO_USER}/referencestuff"))
+    
     for path in paths:
         if os.path.exists(path):
             try:
@@ -103,12 +122,12 @@ def cleanup():
                     shutil.rmtree(path)
                 else:
                     os.remove(path)
-                log_info(f"{path} {BOLD}{RED}eliminado...{RESET}", secondary=True, delay=0.2)
+                log_info(f"Eliminado {path}", secondary=True, delay=0.2)
             except OSError as e:
-                log_warn(f"No se pudo limpiar {path}: {e}", delay=0.2)
+                log_error(f"No se pudo limpiar {path}: {e}")
 
-def get_input(prompt, default=None):
-    print(prompt, end="", flush=True)
+def get_input(prompt, default=""):
+    print(f"\n{BLUE}>>{RESET} {prompt} [{BOLD}{default}{RESET}]: ", end="", flush=True)
     fd = sys.stdin.fileno()
     old_settings = termios.tcgetattr(fd)
     try:
@@ -118,7 +137,7 @@ def get_input(prompt, default=None):
             char = sys.stdin.read(1)
             if char in ("\n", "\r"):
                 print()
-                break
+                return user_input or default
             elif char == "\x03":
                 raise KeyboardInterrupt
             elif char == "\x7f":
@@ -133,156 +152,294 @@ def get_input(prompt, default=None):
                 print(char, end="", flush=True)
     finally:
         termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
-    return user_input.strip() or default
+        print()
 
 def get_user_choice():
     while True:
         try:
+            os.system("clear")
             print(BANNER)
-            print(f"\n{GREEN}[1]{RESET} Instalar searchCommand")
-            print(f"{GREEN}[2]{RESET} Desinstalar searchCommand")
-            print(f"{GREEN}[3]{RESET} Salir")
-            choice = get_input(f"{BLUE}>> {RESET}", default="3")
-            if choice in ["1", "2", "3"]:
+            print(f"\n{BOLD}{GREEN}[1]{RESET} Instalar searchCommand (completo con referencestuff)")
+            print(f"{BOLD}{GREEN}[2]{RESET} Actualizar solo searchCommand")
+            print(f"{BOLD}{GREEN}[3]{RESET} Actualizar solo referencestuff")
+            print(f"{BOLD}{GREEN}[4]{RESET} Desinstalar searchCommand")
+            print(f"{BOLD}{GREEN}[5]{RESET} Salir (predeterminado)")
+            choice = get_input("Selecciona una opción", default="5")
+            if choice in ["1", "2", "3", "4", "5"]:
                 return choice
             os.system("clear")
-            log_warn("Opción inválida. Usa 1, 2 o 3.")
+            log_warn("Opción inválida. Usa 1, 2, 3, 4 o 5.", delay=0.1)
         except KeyboardInterrupt:
             print()
             log_info("Interrupción detectada. Saliendo...", delay=0.5)
             sys.exit(0)
 
-def install_search_command():
-    required_files = ["searchCommand.py", "requirements.txt"]
-    for file in required_files:
-        if not os.path.exists(file):
-            log_error(f"No se encuentra {BOLD}{RED}{file}{RESET} en el directorio actual.")
+def update_referencestuff(pw):
+    destino = os.path.expanduser(f"~{SUDO_USER}/referencestuff")
+    log_info("Descargando referencestuff.zip desde el repositorio...", delay=0.2)
+    with tempfile.TemporaryDirectory() as temp_dir:
+        zip_path = os.path.join(temp_dir, "referencestuff.zip")
+        try:
+            subprocess.run(["wget", "--quiet", REFERENCESTUFF_URL, "-O", zip_path], check=True)
+            log_info("referencestuff.zip descargado correctamente.", secondary=True, delay=0.2)
+        except subprocess.CalledProcessError:
+            log_error("No se pudo descargar referencestuff.zip. Verifica tu conexión.")
+        
+        try:
+            with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+                if zip_ref.testzip() is not None:
+                    log_error("El archivo referencestuff.zip está corrupto.")
+                log_info("Archivo ZIP verificado.", secondary=True, delay=0.2)
+                temp_extract = os.path.join(temp_dir, "extracted")
+                zip_ref.extractall(temp_extract)
+        except zipfile.BadZipFile:
+            log_error("El archivo referencestuff.zip no es un ZIP válido.")
+        
+        extracted_ref = os.path.join(temp_extract, "referencestuff")
+        if not os.path.exists(extracted_ref):
+            log_error("El ZIP no contiene directorio 'referencestuff'.")
+        
+        if os.path.exists(destino):
+            log_warn(f"El directorio {destino} ya existe. ¿Sobreescribir? (S/n)", delay=0.5)
+            if get_input("S/n", default="S").lower() != "s":
+                log_info("Actualización de referencestuff cancelada.", secondary=True, delay=0.2)
+                return
+        
+        if os.path.exists(destino):
+            try:
+                shutil.rmtree(destino)
+                log_info(f"Directorio existente {destino} eliminado.", secondary=True, delay=0.2)
+            except OSError as e:
+                log_error(f"No se pudo eliminar {destino}: {e}")
+        
+        try:
+            shutil.move(extracted_ref, destino)
+            for root, dirs, files in os.walk(destino):
+                for d in dirs:
+                    dir_path = os.path.join(root, d)
+                    os.chmod(dir_path, 0o755)
+                    os.chown(dir_path, pw.pw_uid, pw.pw_gid)
+                for f in files:
+                    file_path = os.path.join(root, f)
+                    os.chmod(file_path, 0o644)
+                    os.chown(file_path, pw.pw_uid, pw.pw_gid)
+            os.chmod(destino, 0o755)
+            os.chown(destino, pw.pw_uid, pw.pw_gid)
+            stat_info = os.stat(destino)
+            if stat_info.st_uid != pw.pw_uid or stat_info.st_gid != pw.pw_gid:
+                log_error(f"El directorio {destino} no tiene el propietario correcto (esperado: {SUDO_USER}).")
+            log_info(f"referencestuff actualizado en {BOLD}{YELLOW}{destino}{RESET}.", secondary=True, delay=0.2)
+        except OSError as e:
+            log_error(f"Error al actualizar referencestuff: {e}")
 
-    if not os.path.exists("referencestuff"):
-        log_error(f"'referencestuff' no encontrado en el directorio actual. Es necesario para searchCommand.")
+def download_temp_file(url, temp_file_path):
+    response = requests.get(url, stream=True)
+    if response.status_code == 200:
+        with open(temp_file_path, 'wb') as f:
+            for chunk in response.iter_content(chunk_size=8192):
+                f.write(chunk)
+        return True
+    return False
+
+def install_search_command(full_install=True):
+    required_files = ["searchCommand.py", "requirements.txt"]
+    pw = pwd.getpwnam(SUDO_USER)
+    
+    if full_install:
+        for file in required_files:
+            if not os.path.exists(file):
+                log_error(f"Archivo {BOLD}{RED}{file}{RESET} no encontrado en el directorio actual.")
+        if not os.path.exists("referencestuff"):
+            log_error(f"El directorio 'referencestuff' no existe en el directorio actual.")
+    else:
+        log_info("Buscando actualizaciones de searchCommand.py...", delay=0.2)
+        temp_file = tempfile.mktemp(suffix=".py")
+        target_script = os.path.join(BIN_DIR, "searchCommand.py")
+
+        if not download_temp_file(SEARCHCOMMAND_URL, temp_file):
+            log_error("No se pudo descargar searchCommand.py desde GitHub.")
+            os.remove(temp_file)
+            return
+
+        if not os.path.exists(target_script):
+            log_error(f"No se encuentra el archivo local en {target_script}.")
+            os.remove(temp_file)
+            return
+
+        downloaded_md5 = compute_md5(temp_file)
+        existing_md5 = compute_md5(target_script)
+
+        if downloaded_md5 == existing_md5:
+            log_info("No se encontraron actualizaciones disponibles para searchCommand.py.", secondary=True, delay=0.2)
+            os.remove(temp_file)
+            return
+        else:
+            log_info("¡Se encontraron actualizaciones para searchCommand.py!", secondary=True, delay=0.2)
+            log_warn("¿Deseas proceder con la actualización? (S/n)", delay=0.5)
+            if get_input("S/n", default="S").lower() == "s":
+                try:
+                    log_info("Actualizando searchCommand.py...", secondary=True, delay=0.2)
+                    shutil.copy2(temp_file, target_script)
+                    os.chmod(target_script, 0o755)
+                    os.chown(target_script, pw.pw_uid, pw.pw_gid)
+                    stat_info = os.stat(target_script)
+                    if stat_info.st_uid != pw.pw_uid or stat_info.st_gid != pw.pw_gid:
+                        log_error(f"Archivo {target_script} tiene propietario incorrecto (esperado: {SUDO_USER}).")
+                    log_info(f"searchCommand.py actualizado en {BOLD}{YELLOW}{target_script}{RESET}.", secondary=True, delay=0.2)
+                except OSError as e:
+                    log_error(f"Error al actualizar searchCommand.py: {e}")
+                finally:
+                    os.remove(temp_file)
+            else:
+                log_info("Actualización de searchCommand.py cancelada.", secondary=True, delay=0.2)
+                os.remove(temp_file)
+                return
 
     target_script = os.path.join(BIN_DIR, "searchCommand.py")
-    if os.path.exists(target_script):
-        log_warn(f"searchCommand.py ya existe en {BOLD}{YELLOW}{BIN_DIR}{RESET}. ¿Sobrescribir? (S/n)", delay=0.2)
-        if get_input("").lower() != "s":
+    if full_install and os.path.exists(target_script):
+        log_warn(f"searchCommand.py ya existe en {BOLD}{YELLOW}{BIN_DIR}{RESET}. ¿Sobreescribir? (S/n)", delay=0.5)
+        if get_input("S/n", default="S").lower() != "s":
             log_info("Instalación cancelada.", delay=0.5)
             sys.exit(0)
+    elif not full_install:
+        print(f"\n{CYAN}[INFO]{RESET} Actualizando searchCommand en {BOLD}{YELLOW}{BIN_DIR}{RESET}\n")
 
-    print("\n" + SEPARATOR)
-    log_info("Iniciando instalación...", delay=0.2)
+    print(SEPARATOR)
+    log_info(f"Iniciando {'instalación completa' if full_install else 'actualización de searchCommand'}...", delay=0.2)
 
     try:
-        shutil.copy("searchCommand.py", target_script)
+        if full_install:
+            cleanup(full_cleanup=False)
+            shutil.copy("searchCommand.py", target_script)
+            os.chmod(target_script, 0o755)
+            os.chown(target_script, pw.pw_uid, pw.pw_gid)
+            stat_info = os.stat(target_script)
+            if stat_info.st_uid != pw.pw_uid or stat_info.st_gid != pw.pw_gid:
+                log_error(f"Archivo {target_script} tiene propietario incorrecto (esperado: {SUDO_USER}).")
+            log_info(f"searchCommand.py instalado en {BOLD}{YELLOW}{target_script}{RESET}.", secondary=True, delay=0.2)
 
-        destino = os.path.expanduser(f"~{SUDO_USER}/referencestuff")
-        pw = pwd.getpwnam(SUDO_USER)
-        if os.path.exists(destino):
-            shutil.rmtree(destino)  
-        shutil.copytree("referencestuff", destino, dirs_exist_ok=False)
-        
-       
-        for root, dirs, files in os.walk(destino):
-            for d in dirs:
-                dir_path = os.path.join(root, d)
-                os.chmod(dir_path, 0o755) 
-                os.chown(dir_path, pw.pw_uid, pw.pw_gid)
-            for f in files:
-                file_path = os.path.join(root, f)
-                os.chmod(file_path, 0o644) 
-                os.chown(file_path, pw.pw_uid, pw.pw_gid)
-        os.chmod(destino, 0o755)  
-        os.chown(destino, pw.pw_uid, pw.pw_gid)
-        
-        
-        stat_info = os.stat(destino)
-        if stat_info.st_uid != pw.pw_uid or stat_info.st_gid != pw.pw_gid:
-            log_error(f"El directorio {destino} no tiene el propietario correcto (esperado: {SUDO_USER})")
-        if not os.access(destino, os.R_OK | os.X_OK):
-            log_error(f"El directorio {destino} no tiene permisos de lectura/entrada para el usuario {SUDO_USER}.")
-        log_info(f"Dando permisos correspondientes a {BOLD}{YELLOW}{destino}{RESET}.", secondary=True, delay=0.2)
+            destino = os.path.expanduser(f"~{SUDO_USER}/referencestuff")
+            if os.path.exists(destino):
+                log_warn(f"El directorio {destino} ya existe. ¿Sobreescribir? (S/n)", delay=0.5)
+                if get_input("S/n", default="S").lower() == "s":
+                    try:
+                        shutil.rmtree(destino)
+                        log_info(f"Directorio existente {destino} eliminado.", secondary=True, delay=0.2)
+                    except OSError as e:
+                        log_error(f"No se pudo eliminar {destino}: {e}")
+                else:
+                    log_info("Manteniendo directorio de referencestuff existente.", secondary=True, delay=0.2)
+                    destino = None
+            if destino:
+                try:
+                    shutil.copytree("referencestuff", destino, dirs_exist_ok=False)
+                    for root, dirs, files in os.walk(destino):
+                        for d in dirs:
+                            dir_path = os.path.join(root, d)
+                            os.chmod(dir_path, 0o755)
+                            os.chown(dir_path, pw.pw_uid, pw.pw_gid)
+                        for f in files:
+                            file_path = os.path.join(root, f)
+                            os.chmod(file_path, 0o644)
+                            os.chown(file_path, pw.pw_uid, pw.pw_gid)
+                    os.chmod(destino, 0o755)
+                    os.chown(destino, pw.pw_uid, pw.pw_gid)
+                    stat_info = os.stat(destino)
+                    if stat_info.st_uid != pw.pw_uid or stat_info.st_gid != pw.pw_gid:
+                        log_error(f"El directorio {destino} tiene propietario incorrecto (esperado: {SUDO_USER}).")
+                    log_info(f"referencestuff instalado en {BOLD}{YELLOW}{destino}{RESET}.", secondary=True, delay=0.2)
+                except OSError as e:
+                    log_error(f"Error al instalar referencestuff en {destino}: {e}")
 
-        if os.path.exists(VENV_DIR):
-            log_warn(f"El entorno virtual en {VENV_DIR} ya existe. ¿Regenerar? (S/n)", delay=0.2)
-            if get_input("").lower() == "s":
-                shutil.rmtree(VENV_DIR)
+        if full_install:
+            if os.path.exists(VENV_DIR):
+                log_warn(f"El entorno virtual en {VENV_DIR} ya existe. ¿Regenerar? (S/n)", delay=0.5)
+                if get_input("S/n", default="S").lower() != "s":
+                    log_info("Reutilizando entorno virtual existente.", secondary=True, delay=0.2)
+                else:
+                    shutil.rmtree(VENV_DIR)
+                    subprocess.run(["python3", "-m", "venv", VENV_DIR], check=True, capture_output=True, text=True)
+                    log_info("Entorno virtual regenerado.", secondary=True, delay=0.2)
+            else:
+                log_info(f"Creando entorno virtual en {BOLD}{YELLOW}{VENV_DIR}{RESET}...", delay=0.2)
                 subprocess.run(["python3", "-m", "venv", VENV_DIR], check=True, capture_output=True, text=True)
-                log_info("Entorno virtual regenerado.", secondary=True, delay=0.2)
-            else:
-                log_info("Reutilizando entorno existente.", secondary=True, delay=0.2)
-        else:
-            log_info(f"Creando entorno virtual en {BOLD}{YELLOW}{VENV_DIR}...{RESET}", delay=0.2)
-            subprocess.run(["python3", "-m", "venv", VENV_DIR], check=True, capture_output=True, text=True)
 
-        pip_path = os.path.join(VENV_DIR, "bin", "pip")
-        
-        required_packages = [
-            "fuzzywuzzy>=0.18.0",
-            "prompt_toolkit>=3.0.0",
-            "colorama>=0.4.6"
-        ]
-        with open("requirements.txt", "r") as f:
-            req_packages = [line.strip().split("#")[0].strip() for line in f if line.strip() and not line.startswith("#")]
-        all_packages = required_packages + req_packages
-        if not all_packages:
-            log_error("No se encontraron dependencias válidas para instalar.")
-        
-        
-        for i, package in enumerate(all_packages, 1):
-            print(f"{GREEN}> instalando {package} ({i}/{len(all_packages)}){RESET} ", end="")
-            sys.stdout.flush()
-            for frame in ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧"]:
-                print(f"\r{GREEN}>{RESET} instalando {GREEN}{package} ({i}/{len(all_packages)}) [{frame}]{RESET}", end="")
-                sleep(0.1)
-            subprocess.run([pip_path, "install", package], check=True, capture_output=True, text=True)
-            print(f"\r{GREEN}>{RESET} instalando {GREEN}{package} ({i}/{len(all_packages)}) [✓]{RESET}")
+            pip_path = os.path.join(VENV_DIR, "bin", "pip")
+            
+            required_packages = [
+                "fuzzywuzzy>=0.18.0",
+                "prompt_toolkit>=3.0.0",
+                "requests>=2.28.0",
+                "packaging>=23.0"
+            ]
+            with open("requirements.txt", "r") as f:
+                req_packages = [line.strip().split("#")[0].strip() for line in f if line.strip() and not line.strip().startswith("#")]
+            all_packages = list(set(required_packages + req_packages))
+            if not all_packages:
+                log_error("No se encontraron dependencias válidas para instalar.")
+            
+            for i, package in enumerate(all_packages, 1):
+                max_len = max(len(p) for p in all_packages) + 20
+                msg = f"Instalando {package} ({i}/{len(all_packages)})"
+                print(f"{GREEN}[INFO]{RESET} {msg:<{max_len}}", end="", flush=True)
+                subprocess.run([pip_path, "install", package], check=True, capture_output=True, text=True)
+                print(f"\r{GREEN}[INFO]{RESET} {msg:<{max_len}} {GREEN}✓{RESET}")
 
-        script_content = f"#!/bin/sh\nexec {VENV_DIR}/bin/python3 {target_script} \"$@\""
-        script_path = os.path.join(SCRIPT_DIR, "searchCommand")
-        temp_script = "searchCommand_temp"
-        
-       
-        if os.path.exists(temp_script):
-            if os.path.isdir(temp_script):
-                shutil.rmtree(temp_script)
-            else:
-                os.remove(temp_script)
-        if os.path.exists(script_path):
-            if os.path.isdir(script_path):
-                shutil.rmtree(script_path)
-            else:
-                os.remove(script_path)
-        
-       
-        with open(temp_script, "w") as f:
-            f.write(script_content)
-        shutil.move(temp_script, script_path)
-        os.chmod(target_script, 0o755)  
-        os.chmod(script_path, 0o755)    
-        log_info("Script ejecutable creado y permisos asignados.", secondary=True, delay=0.2)
+            script_content = f"#!/bin/sh\nexec {VENV_DIR}/bin/python3 {target_script} \"$@\""
+            script_path = os.path.join(SCRIPT_DIR, "searchCommand")
+            temp_script = "searchCommand_temp"
+            
+            if os.path.exists(temp_script):
+                if os.path.isdir(temp_script):
+                    shutil.rmtree(temp_script)
+                else:
+                    os.remove(temp_script)
+            if os.path.exists(script_path):
+                if os.path.isdir(script_path):
+                    shutil.rmtree(script_path)
+                else:
+                    os.remove(script_path)
+            
+            with open(temp_script, "w") as f:
+                f.write(script_content)
+            shutil.move(temp_script, script_path)
+            os.chmod(script_path, 0o755)
+            log_info("Script ejecutable creado.", secondary=True, delay=0.2)
 
-        print(SEPARATOR + "\n")
-        log_info("Instalación completada con éxito!", delay=0.2)
-        print(f"[{GREEN}+{RESET}] Usa {BLUE}{BOLD}searchCommand{RESET} desde la terminal 😎.")
-        print(f"\n\t\t{BOLD}{RED}H4PPY H4CK1NG{RESET}")
+        print(SEPARATOR)
+        log_info(f"¡{'Instalación' if full_install else 'Actualización'} completada con éxito, crack!", delay=0.2)
+        print(f"[{GREEN}✓{RESET}] Usa {BLUE}{BOLD}searchCommand{RESET} desde la terminal 😎")
+        print(f"\n\t\t{BOLD}{RED}H4PPY H4CK1NG ! ! !{RESET}\n")
 
-    except subprocess.CalledProcessError as e:
-        log_error(f"Error en subproceso: {e.stderr}")
-        cleanup()
-    except (PermissionError, OSError) as e:
-        log_error(f"Error de permisos o sistema: {e}")
-        cleanup()
+    except (subprocess.CalledProcessError, OSError) as e:
+        log_error(f"Falló la instalación: {str(e)}")
+        cleanup(full_cleanup=False)
 
 def uninstall_search_command():
-    print("\n" + SEPARATOR)
+    print(SEPARATOR)
     log_info("Iniciando desinstalación...", delay=0.2)
-    cleanup()
-    print(SEPARATOR + "\n")
-    log_info("Desinstalación completada crack 😎.", delay=0.2)
+    log_warn("¿Eliminar también el directorio referencestuff? (S/n)", delay=0.5)
+    full_cleanup = get_input("S/n", default="S").lower() == "s"
+    cleanup(full_cleanup=full_cleanup)
+    print(SEPARATOR)
+    log_info("Desinstalación completada, crack 😎.", delay=0.2)
 
-choice = get_user_choice()
-if choice == "1":
-    install_search_command()
-elif choice == "2":
-    uninstall_search_command()
-else:
-    log_info("Saliendo...", delay=0.5)
+def main():
+    choice = get_user_choice()
+    if choice == "1":
+        install_search_command(full_install=True)
+    elif choice == "2":
+        install_search_command(full_install=False)
+    elif choice == "3":
+        print(SEPARATOR)
+        log_info("Iniciando actualización de referencestuff...", delay=0.2)
+        update_referencestuff(pwd.getpwnam(SUDO_USER))
+        print(SEPARATOR)
+        log_info("Actualización de referencestuff completada, crack 😎.", delay=0.2)
+    elif choice == "4":
+        uninstall_search_command()
+    else:
+        log_info("Saliendo...", delay=0.5)
+
+if __name__ == "__main__":
+    main()

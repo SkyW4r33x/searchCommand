@@ -1,2 +1,0 @@
-▶ Mostrar Variables de Entorno (Listar todas las variables de entorno):
-  set

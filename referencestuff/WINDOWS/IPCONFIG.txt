@@ -1,2 +1,0 @@
-▶ Listar Interfaces de Red (Ver configuración de todas las interfaces):
-  ipconfig /all

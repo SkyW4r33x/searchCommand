@@ -1,2 +1,0 @@
-▶ Comparar Archivos (Diferencias textuales):
-  diff archivo1 archivo2

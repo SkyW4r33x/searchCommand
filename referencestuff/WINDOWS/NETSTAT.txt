@@ -1,2 +1,0 @@
-▶ Listar Puertos Abiertos (Ver conexiones y puertos activos):
-  netstat -ano

@@ -1,2 +1,0 @@
-▶ Volcar NTDS.DIT (Método 2 - Windows >= 2008 Server):
-  esentutl.exe /y /vss c:\windows\ntds\ntds.dit /d c:\folder\ntds.dit
