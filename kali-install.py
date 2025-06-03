@@ -174,13 +174,63 @@ def get_user_choice():
             log_info("Interrupción detectada. Saliendo...", delay=0.5)
             sys.exit(0)
 
+def install_referencestuff_from_zip(zip_path, destino, pw):
+    with tempfile.TemporaryDirectory() as temp_dir:
+        try:
+            with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+                if zip_ref.testzip() is not None:
+                    log_error("El archivo referencestuff.zip está corrupto.")
+                temp_extract = os.path.join(temp_dir, "extracted")
+                zip_ref.extractall(temp_extract)
+        except zipfile.BadZipFile:
+            log_error("El archivo referencestuff.zip no es un ZIP válido.")
+        
+        extracted_ref = os.path.join(temp_extract, "referencestuff")
+        if not os.path.exists(extracted_ref):
+            log_error("El ZIP no contiene directorio 'referencestuff'.")
+        
+        if os.path.exists(destino):
+            log_warn(f"El directorio {destino} ya existe. ¿Sobreescribir? (S/n)", delay=0.5)
+            if get_input("S/n", default="S").lower() != "s":
+                log_info("Instalación de referencestuff cancelada.", secondary=True, delay=0.2)
+                return False
+        
+        if os.path.exists(destino):
+            try:
+                shutil.rmtree(destino)
+                log_info(f"Directorio existente {destino} eliminado.", secondary=True, delay=0.2)
+            except OSError as e:
+                log_error(f"No se pudo eliminar {destino}: {e}")
+        
+        try:
+            shutil.move(extracted_ref, destino)
+            for root, dirs, files in os.walk(destino):
+                for d in dirs:
+                    dir_path = os.path.join(root, d)
+                    os.chmod(dir_path, 0o755)
+                    os.chown(dir_path, pw.pw_uid, pw.pw_gid)
+                for f in files:
+                    file_path = os.path.join(root, f)
+                    os.chmod(file_path, 0o644)
+                    os.chown(file_path, pw.pw_uid, pw.pw_gid)
+            os.chmod(destino, 0o755)
+            os.chown(destino, pw.pw_uid, pw.pw_gid)
+            stat_info = os.stat(destino)
+            if stat_info.st_uid != pw.pw_uid or stat_info.st_gid != pw.pw_gid:
+                log_error(f"El directorio {destino} no tiene el propietario correcto (esperado: {SUDO_USER}).")
+            log_info(f"referencestuff instalado en {BOLD}{YELLOW}{destino}{RESET}.", secondary=True, delay=0.2)
+            return True
+        except OSError as e:
+            log_error(f"Error al instalar referencestuff: {e}")
+            return False
+
 def update_referencestuff(pw):
     destino = os.path.expanduser(f"~{SUDO_USER}/referencestuff")
     log_info("Descargando referencestuff.zip desde el repositorio...", delay=0.2)
     with tempfile.TemporaryDirectory() as temp_dir:
         zip_path = os.path.join(temp_dir, "referencestuff.zip")
         try:
-            subprocess.run(["wget", "--quiet", REFERENCESTUFF_URL, "-O", zip_path], check=True)
+            subprocess.run(["wget", "--quiet", "-O", zip_path, REFERENCESTUFF_URL], check=True)
             log_info("referencestuff.zip descargado correctamente.", secondary=True, delay=0.2)
         except subprocess.CalledProcessError:
             log_error("No se pudo descargar referencestuff.zip. Verifica tu conexión.")
@@ -192,7 +242,7 @@ def update_referencestuff(pw):
                 log_info("Archivo ZIP verificado.", secondary=True, delay=0.2)
                 temp_extract = os.path.join(temp_dir, "extracted")
                 zip_ref.extractall(temp_extract)
-        except zipfile.BadZipFile:
+        except IOError:
             log_error("El archivo referencestuff.zip no es un ZIP válido.")
         
         extracted_ref = os.path.join(temp_extract, "referencestuff")
@@ -233,45 +283,55 @@ def update_referencestuff(pw):
             log_error(f"Error al actualizar referencestuff: {e}")
 
 def download_temp_file(url, temp_file_path):
-    response = requests.get(url, stream=True)
-    if response.status_code == 200:
+    try:
+        response = requests.get(url, stream=True, timeout=30)
+        response.raise_for_status()
         with open(temp_file_path, 'wb') as f:
             for chunk in response.iter_content(chunk_size=8192):
                 f.write(chunk)
         return True
-    return False
+    except requests.exceptions.RequestException as e:
+        log_error(f"Error downloading file from {url}: {e}")
+        return False
 
 def install_search_command(full_install=True):
     required_files = ["searchCommand.py", "requirements.txt"]
+    if full_install:
+        required_files.append("referencestuff.zip")
     pw = pwd.getpwnam(SUDO_USER)
     
-    if full_install:
-        for file in required_files:
-            if not os.path.exists(file):
-                log_error(f"Archivo {BOLD}{RED}{file}{RESET} no encontrado en el directorio actual.")
-        if not os.path.exists("referencestuff"):
-            log_error(f"El directorio 'referencestuff' no existe en el directorio actual.")
-    else:
+    for file in required_files:
+        if not os.path.exists(file):
+            log_error(f"Archivo {BOLD}{RED}{file}{RESET} no encontrado en el directorio actual.")
+    
+    target_script = os.path.join(BIN_DIR, "searchCommand.py")
+    if full_install and os.path.exists(target_script):
+        log_warn(f"searchCommand.py ya existe en {BOLD}{YELLOW}{BIN_DIR}{RESET}. ¿Sobreescribir? (S/n)", delay=0.5)
+        if get_input("S/n", default="S").lower() != "s":
+            log_info("Instalación cancelada.", delay=0.5)
+            sys.exit(0)
+    elif not full_install:
         log_info("Buscando actualizaciones de searchCommand.py...", delay=0.2)
         temp_file = tempfile.mktemp(suffix=".py")
-        target_script = os.path.join(BIN_DIR, "searchCommand.py")
-
         if not download_temp_file(SEARCHCOMMAND_URL, temp_file):
-            log_error("No se pudo descargar searchCommand.py desde GitHub.")
-            os.remove(temp_file)
+            log_error("No se pudo descargar searchCommand.py desde el repositorio.")
+            if os.path.exists(temp_file):
+                os.remove(temp_file)
             return
-
+        
         if not os.path.exists(target_script):
             log_error(f"No se encuentra el archivo local en {target_script}.")
-            os.remove(temp_file)
+            if os.path.exists(temp_file):
+                os.remove(temp_file)
             return
-
+        
         downloaded_md5 = compute_md5(temp_file)
         existing_md5 = compute_md5(target_script)
-
+        
         if downloaded_md5 == existing_md5:
             log_info("No se encontraron actualizaciones disponibles para searchCommand.py.", secondary=True, delay=0.2)
-            os.remove(temp_file)
+            if os.path.exists(temp_file):
+                os.remove(temp_file)
             return
         else:
             log_info("¡Se encontraron actualizaciones para searchCommand.py!", secondary=True, delay=0.2)
@@ -289,21 +349,14 @@ def install_search_command(full_install=True):
                 except OSError as e:
                     log_error(f"Error al actualizar searchCommand.py: {e}")
                 finally:
-                    os.remove(temp_file)
+                    if os.path.exists(temp_file):
+                        os.remove(temp_file)
             else:
                 log_info("Actualización de searchCommand.py cancelada.", secondary=True, delay=0.2)
-                os.remove(temp_file)
+                if os.path.exists(temp_file):
+                    os.remove(temp_file)
                 return
-
-    target_script = os.path.join(BIN_DIR, "searchCommand.py")
-    if full_install and os.path.exists(target_script):
-        log_warn(f"searchCommand.py ya existe en {BOLD}{YELLOW}{BIN_DIR}{RESET}. ¿Sobreescribir? (S/n)", delay=0.5)
-        if get_input("S/n", default="S").lower() != "s":
-            log_info("Instalación cancelada.", delay=0.5)
-            sys.exit(0)
-    elif not full_install:
-        print(f"\n{CYAN}[INFO]{RESET} Actualizando searchCommand en {BOLD}{YELLOW}{BIN_DIR}{RESET}\n")
-
+    
     print(SEPARATOR)
     log_info(f"Iniciando {'instalación completa' if full_install else 'actualización de searchCommand'}...", delay=0.2)
 
@@ -319,37 +372,10 @@ def install_search_command(full_install=True):
             log_info(f"searchCommand.py instalado en {BOLD}{YELLOW}{target_script}{RESET}.", secondary=True, delay=0.2)
 
             destino = os.path.expanduser(f"~{SUDO_USER}/referencestuff")
-            if os.path.exists(destino):
-                log_warn(f"El directorio {destino} ya existe. ¿Sobreescribir? (S/n)", delay=0.5)
-                if get_input("S/n", default="S").lower() == "s":
-                    try:
-                        shutil.rmtree(destino)
-                        log_info(f"Directorio existente {destino} eliminado.", secondary=True, delay=0.2)
-                    except OSError as e:
-                        log_error(f"No se pudo eliminar {destino}: {e}")
-                else:
-                    log_info("Manteniendo directorio de referencestuff existente.", secondary=True, delay=0.2)
-                    destino = None
-            if destino:
-                try:
-                    shutil.copytree("referencestuff", destino, dirs_exist_ok=False)
-                    for root, dirs, files in os.walk(destino):
-                        for d in dirs:
-                            dir_path = os.path.join(root, d)
-                            os.chmod(dir_path, 0o755)
-                            os.chown(dir_path, pw.pw_uid, pw.pw_gid)
-                        for f in files:
-                            file_path = os.path.join(root, f)
-                            os.chmod(file_path, 0o644)
-                            os.chown(file_path, pw.pw_uid, pw.pw_gid)
-                    os.chmod(destino, 0o755)
-                    os.chown(destino, pw.pw_uid, pw.pw_gid)
-                    stat_info = os.stat(destino)
-                    if stat_info.st_uid != pw.pw_uid or stat_info.st_gid != pw.pw_gid:
-                        log_error(f"El directorio {destino} tiene propietario incorrecto (esperado: {SUDO_USER}).")
-                    log_info(f"referencestuff instalado en {BOLD}{YELLOW}{destino}{RESET}.", secondary=True, delay=0.2)
-                except OSError as e:
-                    log_error(f"Error al instalar referencestuff en {destino}: {e}")
+            if install_referencestuff_from_zip("referencestuff.zip", destino, pw):
+                log_info("referencestuff instalado correctamente.", secondary=True, delay=0.2)
+            else:
+                log_info("referencestuff no instalado debido a cancelación o error.", secondary=True, delay=0.2)
 
         if full_install:
             if os.path.exists(VENV_DIR):
