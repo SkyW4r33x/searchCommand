@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
+# ADFASDF SADF ASD
 """
 ═════════════════════════[searchCommand]════════════════════════════
 Autor       : Jordan Cueva Mendoza (aka SkyW4r33x)
