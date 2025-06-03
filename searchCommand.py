@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# test
+
 """
 ═════════════════════════[searchCommand]════════════════════════════
 Autor       : Jordan Cueva Mendoza (aka SkyW4r33x)
@@ -41,7 +41,7 @@ from fuzzywuzzy import process
 
 warnings.filterwarnings("ignore", category=Warning, module="urllib3")
 
-__version__ = "1.3"
+__version__ = "1.5"
 
 if os.name == 'nt':
     print(f"{Colors.RED}{Colors.BOLD}[-]{Colors.RESET} Este programa está diseñado para Linux/macOS. En Windows, usa WSL para mejor compatibilidad.")
