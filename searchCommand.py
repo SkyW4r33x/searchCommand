@@ -41,7 +41,7 @@ from fuzzywuzzy import process
 
 warnings.filterwarnings("ignore", category=Warning, module="urllib3")
 
-__version__ = "1.4"
+__version__ = "1.3"
 
 if os.name == 'nt':
     print(f"{Colors.RED}{Colors.BOLD}[-]{Colors.RESET} Este programa está diseñado para Linux/macOS. En Windows, usa WSL para mejor compatibilidad.")
