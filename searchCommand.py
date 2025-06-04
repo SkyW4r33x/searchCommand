@@ -331,7 +331,7 @@ class SearchCommand:
                     return
 
                 if current_hash == new_hash:
-                    print(f"{Colors.GREEN}[✔] {Colors.RESET}Ya tienes la versión más reciente.")
+                    print(f"{Colors.GREEN}[✔] {Colors.RESET}Ya tienes la versión más reciente.\n")
                     os.remove(temp_path)
                     return
 
