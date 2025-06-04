@@ -270,7 +270,7 @@ class SearchCommand:
 
         
         if os.geteuid() != 0:
-            print(f"{Colors.RED}{Colors.BOLD}[-]{Colors.RESET} Para actualizar {Colors.BLUE}searchCommand{Colors.RESET} necesitas ser {Colors.RED}ROOT{Colors.RESET}.")
+            print(f"{Colors.RED}{Colors.BOLD}[-]{Colors.RESET} Para actualizar {Colors.BLUE}searchCommand{Colors.RESET} necesitas ser {Colors.RED}ROOT{Colors.RESET}.\n")
             return
 
     
@@ -364,7 +364,7 @@ class SearchCommand:
                 
                 shutil.move(temp_path, script_path)
                 print(f"{Colors.GREEN}[✔] {Colors.RESET}Actualización completada correctamente.")
-                print(f"{Colors.BLUE}[ℹ] {Colors.RESET}Reinicia tu shell para aplicar los cambios {Colors.GREEN}exec bash{Colors.RESET}).")
+                print(f"{Colors.BLUE}[ℹ] {Colors.RESET}Reinicia tu shell para aplicar los cambios {Colors.GREEN}exec bash{Colors.RESET}).\n")
 
                
                 os.chmod(script_path, 0o755)
