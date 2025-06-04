@@ -293,7 +293,7 @@ class SearchCommand:
                 print(f"{Colors.BLUE}[ℹ] {Colors.RESET}Restaurando versión anterior...")
                 shutil.move(backup_path, script_path)
                 print(f"{Colors.GREEN}[✔] {Colors.RESET}Restauración completada correctamente.")
-                print(f"{Colors.BLUE}[ℹ] {Colors.RESET}Reinicia tu shell para aplicar los cambios.")
+                print(f"{Colors.BLUE}[ℹ] {Colors.RESET}Reinicia tu shell para aplicar los cambios.\n")
 
                
                 os.chmod(script_path, 0o755)
