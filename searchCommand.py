@@ -28,6 +28,9 @@ import unicodedata
 import urllib.parse
 import socket
 import warnings
+import hashlib
+import requests
+import shutil
 from typing import List, Dict, Optional
 from prompt_toolkit import PromptSession
 from prompt_toolkit.styles import Style
@@ -41,7 +44,7 @@ from fuzzywuzzy import process
 
 warnings.filterwarnings("ignore", category=Warning, module="urllib3")
 
-__version__ = "1.5"
+__version__ = "2.1"
 
 if os.name == 'nt':
     print(f"{Colors.RED}{Colors.BOLD}[-]{Colors.RESET} Este programa está diseñado para Linux/macOS. En Windows, usa WSL para mejor compatibilidad.")
@@ -246,6 +249,135 @@ class SearchCommand:
             history=FileHistory(history_file)
         )
 
+    def _calculate_md5(self, file_path: str) -> str:
+        """Calculate the MD5 hash of a file."""
+        try:
+            hash_md5 = hashlib.md5()
+            with open(file_path, "rb") as f:
+                for chunk in iter(lambda: f.read(4096), b""):
+                    hash_md5.update(chunk)
+            return hash_md5.hexdigest()
+        except (FileNotFoundError, PermissionError) as e:
+            self._handle_exception(f"{Colors.RED}{Colors.BOLD}[-]{Colors.RESET} Error al calcular hash MD5", e)
+            return ""
+
+    def update_script(self, restore: bool = False):
+        """Handle script update or restoration based on the restore flag."""
+        script_path = "/usr/local/bin/searchCommand.py"
+        backup_path = "/usr/local/bin/searchCommand.py.back"
+        temp_path = "/tmp/searchCommand.py.temp"
+        url = "https://raw.githubusercontent.com/SkyW4r33x/searchCommand/refs/heads/main/searchCommand.py"
+
+        
+        if os.geteuid() != 0:
+            print(f"{Colors.RED}{Colors.BOLD}[-]{Colors.RESET} Para actualizar {Colors.BLUE}searchCommand{Colors.RESET} necesitas ser {Colors.RED}ROOT{Colors.RESET}.")
+            return
+
+    
+        if not os.access(os.path.dirname(script_path), os.W_OK):
+            print(f"{Colors.RED}{Colors.BOLD}[-]{Colors.RESET} Permisos insuficientes para escribir en {os.path.dirname(script_path)}. Intenta con sudo.")
+            return
+
+        if restore:
+            
+            if not os.path.exists(backup_path):
+                print(f"{Colors.RED}{Colors.BOLD}[-]{Colors.RESET} No hay una versión anterior disponible para restaurar.")
+                return
+
+            try:
+               
+                if not os.access(script_path, os.W_OK):
+                    print(f"{Colors.RED}{Colors.BOLD}[-]{Colors.RESET} Permisos insuficientes para escribir en {script_path}. Intenta con sudo.")
+                    return
+
+                print(f"{Colors.BLUE}[ℹ] {Colors.RESET}Restaurando versión anterior...")
+                shutil.move(backup_path, script_path)
+                print(f"{Colors.GREEN}[✔] {Colors.RESET}Restauración completada correctamente.")
+                print(f"{Colors.BLUE}[ℹ] {Colors.RESET}Reinicia tu shell para aplicar los cambios.")
+
+               
+                os.chmod(script_path, 0o755)
+
+            except (PermissionError, OSError) as e:
+                print(f"{Colors.RED}{Colors.BOLD}[-]{Colors.RESET} Error al restaurar el script: {e}")
+        else:
+            
+            try:
+                
+                socket.gethostbyname("github.com")
+            except socket.gaierror:
+                print(f"{Colors.RED}{Colors.BOLD}[-]{Colors.RESET} No hay conexión a Internet. No se puede verificar actualizaciones.")
+                return
+
+            try:
+                
+                print(f"{Colors.BLUE}[ℹ] {Colors.RESET}Descargando la versión más reciente...")
+                response = requests.get(url, timeout=10)
+                response.raise_for_status()
+
+                
+                with open(temp_path, "wb") as f:
+                    f.write(response.content)
+                
+                time.sleep(1)
+
+                current_hash = self._calculate_md5(script_path)
+                new_hash = self._calculate_md5(temp_path)
+
+                if not current_hash or not new_hash:
+                    print(f"{Colors.RED}{Colors.BOLD}[-]{Colors.RESET} Error al comparar versiones. Actualización cancelada.")
+                    if os.path.exists(temp_path):
+                        os.remove(temp_path)
+                    return
+
+                if current_hash == new_hash:
+                    print(f"{Colors.GREEN}[✔] {Colors.RESET}Ya tienes la versión más reciente.")
+                    os.remove(temp_path)
+                    return
+
+                print(f"{Colors.GREEN}[+] {Colors.RESET}Actualización disponible.")
+
+                
+                if not os.access(script_path, os.W_OK):
+                    print(f"{Colors.RED}{Colors.BOLD}[-]{Colors.RESET} Permisos insuficientes para escribir en {script_path}. Intenta con sudo.")
+                    os.remove(temp_path)
+                    return
+
+               
+                if os.path.exists(script_path):
+                    print(f"{Colors.BLUE}[ℹ] {Colors.RESET}Respaldando versión actual...")
+                    try:
+                        
+                        if os.path.exists(backup_path):
+                            try:
+                                os.remove(backup_path)
+                            except PermissionError:
+                                print(f"{Colors.RED}{Colors.BOLD}[-]{Colors.RESET} No se pudo eliminar el respaldo existente en {backup_path}. Intenta con sudo o elimina manualmente.")
+                                os.remove(temp_path)
+                                return
+                        shutil.copy2(script_path, backup_path)
+                    except PermissionError as e:
+                        print(f"{Colors.RED}{Colors.BOLD}[-]{Colors.RESET} Error al crear respaldo en {backup_path}: {e}. Intenta con sudo o elimina manualmente el respaldo existente.")
+                        os.remove(temp_path)
+                        return
+
+                
+                shutil.move(temp_path, script_path)
+                print(f"{Colors.GREEN}[✔] {Colors.RESET}Actualización completada correctamente.")
+                print(f"{Colors.BLUE}[ℹ] {Colors.RESET}Reinicia tu shell para aplicar los cambios {Colors.GREEN}exec bash{Colors.RESET}).")
+
+               
+                os.chmod(script_path, 0o755)
+
+            except requests.RequestException as e:
+                print(f"{Colors.RED}{Colors.BOLD}[-]{Colors.RESET} Error al descargar la actualización: {e}")
+                if os.path.exists(temp_path):
+                    os.remove(temp_path)
+            except (PermissionError, OSError) as e:
+                print(f"{Colors.RED}{Colors.BOLD}[-]{Colors.RESET} Error al actualizar el script: {e}")
+                if os.path.exists(temp_path):
+                    os.remove(temp_path)
+
     def _handle_exception(self, error_msg: str, e: Exception, exit_on_error: bool = False):
         print(f"{Colors.RED}{Colors.BOLD}[-]{Colors.RESET}{Colors.BOLD}{error_msg}: {e}{Colors.RESET}")
         if exit_on_error:
@@ -425,6 +557,7 @@ class SearchCommand:
             ("➜", "seturl <URL>", "su", "Configurar $URL"),
             ("➜", "edit <herramienta>", "e", "Editar herramienta"),
             ("➜", "refresh [config]", "r", "Recargar herramientas o limpiar config"),
+            ("➜", "update [-r]", "u", "Actualizar o restaurar versión anterior"),
             ("➜", "clear", "c", "Limpiar la pantalla"),
             ("➜", "exit", "q", "Salir del programa"),
         ]
@@ -671,14 +804,6 @@ class SearchCommand:
         print("")
         print(f"{Colors.BLUE}{Colors.BOLD}╚═══════════════════════════════════════════════════════════════════════════════╝{Colors.RESET}")
 
-    def _list_tools(self):
-        all_tools = sorted([tool for tools in self.tools_by_category.values() for tool in tools])
-        self._display_in_columns(all_tools, "HERRAMIENTAS DISPONIBLES", Colors.ORANGE)
-
-    def _list_categories(self):
-        all_categories = sorted(self.categories.keys())
-        self._display_in_columns(all_categories, "CATEGORÍAS DISPONIBLES", Colors.BLUE)
-
     def _display_edit_help(self):
         self._clear_screen()
         total_tools = sum(len(tools) for tools in self.tools_by_category.values())
@@ -701,7 +826,8 @@ class SearchCommand:
             'si': 'setip',
             'su': 'seturl',
             'r': 'refresh',
-            'e': 'edit'
+            'e': 'edit',
+            'u': 'update'
         }
         commands = {
             'help': 'help',
@@ -712,7 +838,8 @@ class SearchCommand:
             'setip': 'setip',
             'seturl': 'seturl',
             'refresh': 'refresh',
-            'edit': 'edit'
+            'edit': 'edit',
+            'update': 'update'
         }
         
         query_parts = query.strip().split(maxsplit=1)
@@ -889,6 +1016,10 @@ class SearchCommand:
                     print(f"{Colors.RED}[-] {Colors.RESET} Herramienta '{tool}' no encontrada.")
                     self._display_edit_help()
             return True
+        elif command == 'update':
+            restore_flag = args.strip().lower() == '-r'
+            self.update_script(restore=restore_flag)
+            return True
         return False
 
     def interactive_menu(self):
@@ -1016,6 +1147,7 @@ class EnhancedCompleter(Completer):
             ('seturl', 'Configurar $URL para comandos'),
             ('refresh', 'Recargar herramientas o configuración'),
             ('edit', 'Editar archivo de herramienta'),
+            ('update', 'Actualizar script o restaurar con -r'),
             ('exit', 'Salir del programa')
         ]
         self.command_to_alias = {
@@ -1027,6 +1159,7 @@ class EnhancedCompleter(Completer):
             'seturl': 'su',
             'refresh': 'r',
             'edit': 'e',
+            'update': 'u',
             'exit': 'q'
         }
 
@@ -1055,8 +1188,9 @@ class EnhancedCompleter(Completer):
         is_seturl_arg = len(parts) >= 2 and normalize_text(parts[0]) in ['seturl', 'su']
         is_refresh_arg = len(parts) >= 2 and normalize_text(parts[0]) in ['refresh', 'r']
         is_edit_arg = len(parts) >= 2 and normalize_text(parts[0]) in ['edit', 'e']
+        is_update_arg = len(parts) >= 2 and normalize_text(parts[0]) in ['update', 'u']
 
-        if not (is_setip_arg or is_seturl_arg or is_refresh_arg or is_edit_arg):
+        if not (is_setip_arg or is_seturl_arg or is_refresh_arg or is_edit_arg or is_update_arg):
             for cmd, meta in self.internal_commands:
                 alias = self.command_to_alias.get(cmd, cmd[:2])
                 display_text = f'[{alias}] {cmd}'
@@ -1087,6 +1221,16 @@ class EnhancedCompleter(Completer):
                     style='class:completion-menu.completion'
                 )))
 
+        if is_update_arg:
+            if word_normalized in normalize_text('-r'):
+                completions.append((0, Completion(
+                    '-r',
+                    start_position=-len(word),
+                    display=HTML('-r'),
+                    display_meta='Restaurar versión anterior del script',
+                    style='class:completion-menu.completion'
+                )))
+
         if is_edit_arg:
             for tool in self.original_tools:
                 if word_normalized in normalize_text(tool):
@@ -1100,7 +1244,7 @@ class EnhancedCompleter(Completer):
                         style='class:completion-menu.tool-completion'
                     )))
 
-        if not (is_setip_arg or is_seturl_arg or is_refresh_arg or is_edit_arg):
+        if not (is_setip_arg or is_seturl_arg or is_refresh_arg or is_edit_arg or is_update_arg):
             for orig_cat, norm_cat in zip(self.original_categories, self.categories_normalized):
                 if word_normalized in norm_cat:
                     match_priority = 0 if norm_cat == word_normalized else 1
@@ -1112,7 +1256,7 @@ class EnhancedCompleter(Completer):
                         style='class:completion-menu.category-completion'
                     )))
 
-        if not (is_setip_arg or is_seturl_arg or is_refresh_arg or is_edit_arg):
+        if not (is_setip_arg or is_seturl_arg or is_refresh_arg or is_edit_arg or is_update_arg):
             for orig_tool, norm_tool in zip(self.original_tools, self.tools_normalized):
                 if word_normalized in norm_tool:
                     match_priority = 0 if norm_tool == word_normalized else 1
