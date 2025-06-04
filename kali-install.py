@@ -213,7 +213,7 @@ def install_referencestuff_from_zip(zip_path, destino, pw):
                     file_path = os.path.join(root, f)
                     os.chmod(file_path, 0o644)
                     os.chown(file_path, pw.pw_uid, pw.pw_gid)
-            os.chmod(destino, 0o755)
+            os.chmod(destino, 0o750)
             os.chown(destino, pw.pw_uid, pw.pw_gid)
             stat_info = os.stat(destino)
             if stat_info.st_uid != pw.pw_uid or stat_info.st_gid != pw.pw_gid:
@@ -273,7 +273,7 @@ def update_referencestuff(pw):
                     file_path = os.path.join(root, f)
                     os.chmod(file_path, 0o644)
                     os.chown(file_path, pw.pw_uid, pw.pw_gid)
-            os.chmod(destino, 0o755)
+            os.chmod(destino, 0o750)
             os.chown(destino, pw.pw_uid, pw.pw_gid)
             stat_info = os.stat(destino)
             if stat_info.st_uid != pw.pw_uid or stat_info.st_gid != pw.pw_gid:
