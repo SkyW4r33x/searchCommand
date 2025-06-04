@@ -44,7 +44,7 @@ from fuzzywuzzy import process
 
 warnings.filterwarnings("ignore", category=Warning, module="urllib3")
 
-__version__ = "2.2"
+__version__ = "2.3"
 
 if os.name == 'nt':
     print(f"{Colors.RED}{Colors.BOLD}[-]{Colors.RESET} Este programa está diseñado para Linux/macOS. En Windows, usa WSL para mejor compatibilidad.")
@@ -364,7 +364,7 @@ class SearchCommand:
                 
                 shutil.move(temp_path, script_path)
                 print(f"{Colors.GREEN}[✔] {Colors.RESET}Actualización completada correctamente.")
-                print(f"{Colors.BLUE}[ℹ] {Colors.RESET}Reinicia tu shell para aplicar los cambios {Colors.GREEN}exec bash{Colors.RESET}).\n")
+                print(f"{Colors.BLUE}[ℹ] {Colors.RESET}Reinicia tu shell para aplicar los cambios {Colors.GREEN}exec zsh o bash{Colors.RESET}.\n")
 
                
                 os.chmod(script_path, 0o755)
