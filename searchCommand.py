@@ -847,6 +847,14 @@ class SearchCommand:
         print(f"  {Colors.BLUE}[ℹ] {Colors.RESET}Uso: {Colors.GRAY}edit <herramienta> (ejemplo: edit nmap) {Colors.RESET}")
         print(f"{Colors.BLUE}{Colors.BOLD}╚═══════════════════════════════════════════════════════════════════════╝{Colors.RESET}\n")
 
+    def _list_categories(self):
+        categories = sorted(self.categories.keys())
+        self._display_in_columns(categories, "CATEGORÍAS DISPONIBLES", Colors.ORANGE)
+
+    def _list_tools(self):
+        tools = sorted([tool for tools in self.tools_by_category.values() for tool in tools])
+        self._display_in_columns(tools, "HERRAMIENTAS DISPONIBLES", Colors.AQUA)
+
     def _handle_internal_command(self, query: str) -> bool:
         query_lower = query.lower().strip()
         
@@ -949,7 +957,7 @@ class SearchCommand:
                 return True
         elif command == 'seturl':
             if len(args) > 2048:
-                print(f"{Colors.RED}[-]{Colors.RESET}Entrada demasiado larga. Máximo 2048 caracteres.")
+                print(f"{Colors.RED}[-] {Colors.RESET}Entrada demasiado larga. Máximo 2048 caracteres.")
                 return True
             if not args:
                 if self.url_value:
@@ -971,13 +979,13 @@ class SearchCommand:
                         print(f"{Colors.RED}[-] {Colors.RESET}Solo se permiten URLs con protocolo http o https.")
                         return True
                     if not parsed.netloc:
-                        print(f"{Colors.RED}[-] {Colors.RESET}Entrada inválida. Debe ser una URL válida (ej: http://example.com).\n")
+                        print(f"{Colors.RED}[-] {Colors.RESET}Entrada inválida. Debe ser una URL válida (ej: http://example.com).")
                         return True
                     # Verificar si el dominio es resoluble
                     try:
                         socket.gethostbyname(parsed.netloc)
                     except socket.gaierror:
-                        print(f"{Colors.RED}[-] {Colors.RESET}El dominio {parsed.netloc} no es válido o no se resuelve. Verifica la URL.\n")
+                        print(f"{Colors.RED}[-] {Colors.RESET}El dominio {parsed.netloc} no es válido o no se resuelve. Verifica la URL.")
                         return True
                     self.url_value = args
                     normalized_url = self._normalize_url(args)
@@ -991,7 +999,7 @@ class SearchCommand:
                         else:
                             print(f"{Colors.ORANGE}[-] {Colors.RESET}URL no accesible (código: {response.status_code}), pero se agregó con éxito")
                     except requests.exceptions.SSLError:
-                        print(f"{Colors.RED}[-] {Colors.RESET}URL inválida o certificado SSL no verificable. Verifica el dominio.\n")
+                        print(f"{Colors.RED}[-] {Colors.RESET}URL inválida o certificado SSL no verificable. Verifica el dominio.")
                         return True
                     except requests.RequestException:
                         print(f"{Colors.ORANGE}[-] {Colors.RESET}URL no accesible, pero se agregó con éxito")
@@ -1001,7 +1009,7 @@ class SearchCommand:
                             self.recent_urls.pop(0)
                     print(f"{Colors.GREEN}[✔] {Colors.RESET}$URL configurado como: {Colors.GREEN}{args}{Colors.RESET}\n")
                 except ValueError:
-                    print(f"{Colors.RED}[-] {Colors.RESET}Entrada inválida. Debe ser una URL válida (ej: http://example.com).\n")
+                    print(f"{Colors.RED}[-] {Colors.RESET}Entrada inválida. Debe ser una URL válida (ej: http://example.com).")
                 return True
         elif command == 'refresh':
             if args.lower() == 'config':
@@ -1092,7 +1100,7 @@ class SearchCommand:
                     
                     query_normalized = normalize_text(query)
                     if query_normalized is None:
-                        print(f"{Colors.RED}[-]{Colors.RESET} Consulta inválida.\n")
+                        print(f"{Colors.RED}[-]{Colors.RESET} Consulta inválida: usa caracteres alfanuméricos.\n")
                         self.last_command_success = False
                         self.last_query = ""
                         continue
