@@ -31,6 +31,11 @@ import warnings
 import hashlib
 import requests
 import shutil
+import ipaddress
+from urllib.parse import urlparse
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
+from urllib3.exceptions import InsecureRequestWarning
 from typing import List, Dict, Optional
 from prompt_toolkit import PromptSession
 from prompt_toolkit.styles import Style
@@ -42,12 +47,19 @@ from prompt_toolkit.application import get_app
 from prompt_toolkit.history import FileHistory
 from fuzzywuzzy import process
 
-warnings.filterwarnings("ignore", category=Warning, module="urllib3")
+# Suprimir solo advertencias específicas de urllib3
+warnings.filterwarnings("ignore", category=InsecureRequestWarning, module="urllib3")
 
 __version__ = "2.3"
 
 if os.name == 'nt':
     print(f"{Colors.RED}{Colors.BOLD}[-]{Colors.RESET} Este programa está diseñado para Linux/macOS. En Windows, usa WSL para mejor compatibilidad.")
+
+class Config:
+    ROOT_DIR_NAME = 'referencestuff'
+    UPDATE_URL = 'https://raw.githubusercontent.com/SkyW4r33x/searchCommand/refs/heads/main/searchCommand.py'
+    DEFAULT_PERMS = 0o750
+    MAX_FILE_SIZE = 10 * 1024 * 1024  # 10 MB
 
 class Colors:
     RESET = "\033[0m"
@@ -64,19 +76,25 @@ class Colors:
     YELLOW = "\033[38;2;255;255;0m"
 
 def normalize_text(text: str) -> str:
-    return ''.join(
+    normalized = ''.join(
         c for c in unicodedata.normalize('NFD', text.lower())
-        if unicodedata.category(c) != 'Mn'
-    )
+        if unicodedata.category(c) != 'Mn' and (c.isalnum() or c.isspace())
+    ).strip()
+    return normalized if normalized else None
 
 class SearchCommand:
     def __init__(self):
+        import pwd
+        user_home = os.path.expanduser('~')
         if os.geteuid() == 0 and 'SUDO_USER' in os.environ:
-            user_home = os.path.expanduser(f"~{os.environ['SUDO_USER']}")
-        else:
-            user_home = os.path.expanduser('~')
-        
-        self.root_dir = os.path.join(user_home, 'referencestuff')
+            sudo_user = os.environ.get('SUDO_USER')
+            try:
+                pwd.getpwnam(sudo_user)
+                user_home = os.path.expanduser(f"~{sudo_user}")
+            except KeyError:
+                print(f"{Colors.RED}[-]{Colors.RESET} SUDO_USER inválido. Usando directorio del usuario actual.")
+
+        self.root_dir = os.path.join(user_home, Config.ROOT_DIR_NAME)
         self.ip_value = None
         self.url_value = None
         self.recent_ips = []
@@ -94,12 +112,24 @@ class SearchCommand:
         self.prompt_session = None
 
         try:
+            self._create_directory(self.root_dir)
             self._check_directory_permissions(self.root_dir)
         except PermissionError as e:
-            self._handle_exception(f"{Colors.RED}{Colors.BOLD}[-]{Colors.RESET} Error de permisos en el directorio", e, True)
+            self._handle_exception(f"Error de permisos en el directorio", e, True)
 
         self._load_tools()
         self._init_prompt_session()
+
+    def _create_directory(self, directory: str):
+        try:
+            if not os.path.exists(directory):
+                os.makedirs(directory, mode=Config.DEFAULT_PERMS)
+                if os.access(directory, os.W_OK):
+                    os.chown(directory, os.getuid(), os.getgid())
+                else:
+                    raise PermissionError(f"No se tienen permisos para modificar {directory}")
+        except PermissionError as e:
+            self._handle_exception(f"Error de permisos en el directorio", e, True)
 
     def _init_prompt_session(self):
         try:
@@ -124,7 +154,7 @@ class SearchCommand:
                 'completion-menu.multi-column-meta': 'bg:#131419 #f79b3e',
             })
         except ValueError as e:
-            self._handle_exception(f"{Colors.RED}{Colors.BOLD}[-]{Colors.RESET} Error al configurar estilos", e, True)
+            self._handle_exception(f"Error al configurar estilos", e, True)
 
         try:
             self.completer = EnhancedCompleter(
@@ -137,7 +167,7 @@ class SearchCommand:
                 tool_to_file=self.tool_to_file
             )
         except TypeError as e:
-            self._handle_exception(f"{Colors.RED}{Colors.BOLD}[-]{Colors.RESET} Error al inicializar autocompletado", e, True)
+            self._handle_exception(f"Error al inicializar autocompletado", e, True)
 
         kb = KeyBindings()
         
@@ -168,34 +198,26 @@ class SearchCommand:
                 self._clear_screen()
                 self.print_header()
                 print(f"{Colors.GREEN}⏳ {Colors.RESET}Herramientas recargadas exitosamente.\n")
-            except Exception as e:
-                self._handle_exception(f"{Colors.RED}{Colors.BOLD}[-]{Colors.RESET} Error al recargar herramientas", e)
+            except (FileNotFoundError, PermissionError, ValueError) as e:
+                self._handle_exception(f"Error al recargar herramientas", e)
             event.app.renderer.reset()
             event.app.invalidate()
 
         @kb.add(Keys.ControlE)
         def edit_last_tool(event):
             if self.last_query and self.last_query in self.tool_to_file:
-                editor = os.environ.get('EDITOR')
+                editor = self._get_safe_editor()
                 if not editor:
-                    for default_editor in ['nano', 'vim', 'vi']:
-                        if subprocess.run(['which', default_editor], capture_output=True, text=True).returncode == 0:
-                            editor = default_editor
-                            break
-                    else:
-                        print(f"{Colors.RED}{Colors.BOLD}[-]{Colors.RESET} No se encontró un editor compatible (nano, vim, vi). Configura $EDITOR.")
-                        return
-                file_path = self.tool_to_file[self.last_query]
-                if not os.path.exists(file_path):
-                    print(f"{Colors.RED}{Colors.BOLD}[-]{Colors.RESET} El archivo para '{self.last_query}' no existe en {file_path}.")
+                    print(f"{Colors.RED}[-]{Colors.RESET} No se encontró un editor compatible (nano, vim, vi).")
                     return
                 try:
+                    file_path = self._sanitize_file_path(self.tool_to_file[self.last_query])
                     subprocess.run([editor, file_path], check=True)
                     print(f"{Colors.GREEN}[✔] {Colors.RESET}Abriendo {Colors.GREEN}{self.last_query}{Colors.RESET} en {editor}. Usa {Colors.BLUE}refresh{Colors.RESET} para recargar cambios.\n")
-                except (subprocess.CalledProcessError, FileNotFoundError) as e:
-                    print(f"{Colors.RED}{Colors.BOLD}[-]{Colors.RESET} Error al abrir el editor: {e}")
+                except (subprocess.CalledProcessError, FileNotFoundError, ValueError) as e:
+                    print(f"{Colors.RED}[-]{Colors.RESET} Error al abrir el editor: {e}")
             else:
-                print(f"{Colors.RED}{Colors.BOLD}[-]{Colors.RESET} No hay herramienta reciente para editar. Usa 'edit <herramienta>'.")
+                print(f"{Colors.RED}[-]{Colors.RESET} No hay herramienta reciente para editar. Usa 'edit <herramienta>'.")
             event.app.renderer.reset()
             event.app.invalidate()
 
@@ -249,137 +271,144 @@ class SearchCommand:
             history=FileHistory(history_file)
         )
 
-    def _calculate_md5(self, file_path: str) -> str:
-        """Calculate the MD5 hash of a file."""
+    def _get_safe_editor(self):
+        allowed_editors = {
+            'nano': '/bin/nano',
+            'vim': '/usr/bin/vim',
+            'vi': '/usr/bin/vi'
+        }
+        editor = os.environ.get('EDITOR', 'nano')
+        editor_name = os.path.basename(editor).split()[0]  # Evita comandos encadenados
+        return allowed_editors.get(editor_name) if os.path.exists(allowed_editors.get(editor_name, '')) else None
+
+    def _sanitize_file_path(self, file_path: str) -> str:
+        abs_path = os.path.abspath(file_path)
+        root_abs = os.path.abspath(self.root_dir)
+        if not abs_path.startswith(root_abs + os.sep):
+            raise ValueError(f"Ruta inválida: {file_path}")
+        if os.path.islink(file_path):
+            raise ValueError(f"Enlaces simbólicos no permitidos: {file_path}")
+        return abs_path
+
+    def _calculate_sha256(self, file_path: str) -> str:
         try:
-            hash_md5 = hashlib.md5()
+            hash_sha256 = hashlib.sha256()
             with open(file_path, "rb") as f:
                 for chunk in iter(lambda: f.read(4096), b""):
-                    hash_md5.update(chunk)
-            return hash_md5.hexdigest()
+                    hash_sha256.update(chunk)
+            return hash_sha256.hexdigest()
         except (FileNotFoundError, PermissionError) as e:
-            self._handle_exception(f"{Colors.RED}{Colors.BOLD}[-]{Colors.RESET} Error al calcular hash MD5", e)
+            self._handle_exception(f"Error al calcular hash SHA-256", e)
             return ""
 
     def update_script(self, restore: bool = False):
-        """Handle script update or restoration based on the restore flag."""
         script_path = "/usr/local/bin/searchCommand.py"
         backup_path = "/usr/local/bin/searchCommand.py.back"
         temp_path = "/tmp/searchCommand.py.temp"
-        url = "https://raw.githubusercontent.com/SkyW4r33x/searchCommand/refs/heads/main/searchCommand.py"
+        url = Config.UPDATE_URL
 
-        
         if os.geteuid() != 0:
-            print(f"{Colors.RED}{Colors.BOLD}[-]{Colors.RESET} Para actualizar {Colors.BLUE}searchCommand{Colors.RESET} necesitas ser {Colors.RED}ROOT{Colors.RESET}.\n")
+            print(f"{Colors.RED}[-]{Colors.RESET} Se requieren permisos de root para actualizar.")
             return
 
-    
         if not os.access(os.path.dirname(script_path), os.W_OK):
-            print(f"{Colors.RED}{Colors.BOLD}[-]{Colors.RESET} Permisos insuficientes para escribir en {os.path.dirname(script_path)}. Intenta con sudo.")
+            print(f"{Colors.RED}[-]{Colors.RESET} Permisos insuficientes para escribir en {os.path.dirname(script_path)}.")
             return
 
         if restore:
-            
             if not os.path.exists(backup_path):
-                print(f"{Colors.RED}{Colors.BOLD}[-]{Colors.RESET} No hay una versión anterior disponible para restaurar.")
+                print(f"{Colors.RED}[-]{Colors.RESET} No hay una versión anterior disponible para restaurar.")
                 return
-
             try:
-               
                 if not os.access(script_path, os.W_OK):
-                    print(f"{Colors.RED}{Colors.BOLD}[-]{Colors.RESET} Permisos insuficientes para escribir en {script_path}. Intenta con sudo.")
+                    print(f"{Colors.RED}[-]{Colors.RESET} Permisos insuficientes para escribir en {script_path}.")
                     return
-
                 print(f"{Colors.BLUE}[ℹ] {Colors.RESET}Restaurando versión anterior...")
                 shutil.move(backup_path, script_path)
+                os.chmod(script_path, Config.DEFAULT_PERMS)
+                os.chown(script_path, 0, os.stat(script_path).st_gid)
                 print(f"{Colors.GREEN}[✔] {Colors.RESET}Restauración completada correctamente.")
                 print(f"{Colors.BLUE}[ℹ] {Colors.RESET}Reinicia tu shell para aplicar los cambios.\n")
-
-               
-                os.chmod(script_path, 0o755)
-
             except (PermissionError, OSError) as e:
-                print(f"{Colors.RED}{Colors.BOLD}[-]{Colors.RESET} Error al restaurar el script: {e}")
-        else:
-            
-            try:
-                
-                socket.gethostbyname("github.com")
-            except socket.gaierror:
-                print(f"{Colors.RED}{Colors.BOLD}[-]{Colors.RESET} No hay conexión a Internet. No se puede verificar actualizaciones.")
+                print(f"{Colors.RED}[-]{Colors.RESET} Error al restaurar el script: {e}")
+            return
+
+        try:
+            socket.gethostbyname("github.com")
+        except socket.gaierror:
+            print(f"{Colors.RED}[-]{Colors.RESET} No hay conexión a Internet.")
+            return
+
+        try:
+            session = requests.Session()
+            retries = Retry(total=3, backoff_factor=0.5, status_forcelist=[429, 500, 502, 503, 504])
+            session.mount('https://', HTTPAdapter(max_retries=retries))
+            print(f"{Colors.BLUE}[ℹ] {Colors.RESET}Descargando la versión más reciente...")
+            response = session.get(url, timeout=10, verify=True)
+            response.raise_for_status()
+            with open(temp_path, "wb") as f:
+                f.write(response.content)
+            time.sleep(1)
+
+            current_hash = self._calculate_sha256(script_path)
+            new_hash = self._calculate_sha256(temp_path)
+
+            if not current_hash or not new_hash:
+                print(f"{Colors.RED}[-]{Colors.RESET} Error al comparar versiones. Actualización cancelada.")
+                if os.path.exists(temp_path):
+                    os.remove(temp_path)
                 return
 
-            try:
-                
-                print(f"{Colors.BLUE}[ℹ] {Colors.RESET}Descargando la versión más reciente...")
-                response = requests.get(url, timeout=10)
-                response.raise_for_status()
+            if current_hash == new_hash:
+                print(f"{Colors.GREEN}[✔] {Colors.RESET}Ya tienes la versión más reciente.\n")
+                os.remove(temp_path)
+                return
 
-                
-                with open(temp_path, "wb") as f:
-                    f.write(response.content)
-                
-                time.sleep(1)
+            print(f"{Colors.GREEN}[+] {Colors.RESET}Actualización disponible.")
 
-                current_hash = self._calculate_md5(script_path)
-                new_hash = self._calculate_md5(temp_path)
+            if not os.access(script_path, os.W_OK):
+                print(f"{Colors.RED}[-]{Colors.RESET} Permisos insuficientes para escribir en {script_path}.")
+                os.remove(temp_path)
+                return
 
-                if not current_hash or not new_hash:
-                    print(f"{Colors.RED}{Colors.BOLD}[-]{Colors.RESET} Error al comparar versiones. Actualización cancelada.")
-                    if os.path.exists(temp_path):
-                        os.remove(temp_path)
-                    return
-
-                if current_hash == new_hash:
-                    print(f"{Colors.GREEN}[✔] {Colors.RESET}Ya tienes la versión más reciente.\n")
+            if os.path.exists(script_path):
+                print(f"{Colors.BLUE}[ℹ] {Colors.RESET}Respaldando versión actual...")
+                try:
+                    if os.path.exists(backup_path):
+                        try:
+                            os.remove(backup_path)
+                        except PermissionError:
+                            print(f"{Colors.RED}[-]{Colors.RESET} No se pudo eliminar el respaldo existente en {backup_path}.")
+                            os.remove(temp_path)
+                            return
+                    shutil.copy2(script_path, backup_path)
+                    os.chmod(backup_path, Config.DEFAULT_PERMS)
+                    os.chown(backup_path, 0, os.stat(backup_path).st_gid)
+                except PermissionError as e:
+                    print(f"{Colors.RED}[-]{Colors.RESET} Error al crear respaldo en {backup_path}: {e}.")
                     os.remove(temp_path)
                     return
 
-                print(f"{Colors.GREEN}[+] {Colors.RESET}Actualización disponible.")
-
-                
-                if not os.access(script_path, os.W_OK):
-                    print(f"{Colors.RED}{Colors.BOLD}[-]{Colors.RESET} Permisos insuficientes para escribir en {script_path}. Intenta con sudo.")
-                    os.remove(temp_path)
-                    return
-
-               
-                if os.path.exists(script_path):
-                    print(f"{Colors.BLUE}[ℹ] {Colors.RESET}Respaldando versión actual...")
-                    try:
-                        
-                        if os.path.exists(backup_path):
-                            try:
-                                os.remove(backup_path)
-                            except PermissionError:
-                                print(f"{Colors.RED}{Colors.BOLD}[-]{Colors.RESET} No se pudo eliminar el respaldo existente en {backup_path}. Intenta con sudo o elimina manualmente.")
-                                os.remove(temp_path)
-                                return
-                        shutil.copy2(script_path, backup_path)
-                    except PermissionError as e:
-                        print(f"{Colors.RED}{Colors.BOLD}[-]{Colors.RESET} Error al crear respaldo en {backup_path}: {e}. Intenta con sudo o elimina manualmente el respaldo existente.")
-                        os.remove(temp_path)
-                        return
-
-                
-                shutil.move(temp_path, script_path)
-                print(f"{Colors.GREEN}[✔] {Colors.RESET}Actualización completada correctamente.")
-                print(f"{Colors.BLUE}[ℹ] {Colors.RESET}Reinicia tu shell para aplicar los cambios {Colors.GREEN}exec zsh o bash{Colors.RESET}.\n")
-
-               
-                os.chmod(script_path, 0o755)
-
-            except requests.RequestException as e:
-                print(f"{Colors.RED}{Colors.BOLD}[-]{Colors.RESET} Error al descargar la actualización: {e}")
-                if os.path.exists(temp_path):
-                    os.remove(temp_path)
-            except (PermissionError, OSError) as e:
-                print(f"{Colors.RED}{Colors.BOLD}[-]{Colors.RESET} Error al actualizar el script: {e}")
-                if os.path.exists(temp_path):
-                    os.remove(temp_path)
+            shutil.move(temp_path, script_path)
+            os.chmod(script_path, Config.DEFAULT_PERMS)
+            os.chown(script_path, 0, os.stat(script_path).st_gid)
+            print(f"{Colors.GREEN}[✔] {Colors.RESET}Actualización completada correctamente.")
+            print(f"{Colors.BLUE}[ℹ] {Colors.RESET}Reinicia tu shell para aplicar los cambios.\n")
+        except requests.exceptions.SSLError as e:
+            print(f"{Colors.RED}[-]{Colors.RESET} Error de verificación SSL: {e}.")
+            if os.path.exists(temp_path):
+                os.remove(temp_path)
+        except requests.RequestException as e:
+            print(f"{Colors.RED}[-]{Colors.RESET} Error al descargar la actualización: {e}")
+            if os.path.exists(temp_path):
+                os.remove(temp_path)
+        except (PermissionError, OSError) as e:
+            print(f"{Colors.RED}[-]{Colors.RESET} Error al actualizar el script: {e}")
+            if os.path.exists(temp_path):
+                os.remove(temp_path)
 
     def _handle_exception(self, error_msg: str, e: Exception, exit_on_error: bool = False):
-        print(f"{Colors.RED}{Colors.BOLD}[-]{Colors.RESET}{Colors.BOLD}{error_msg}: {e}{Colors.RESET}")
+        print(f"{Colors.RED}[-]{Colors.RESET} {error_msg}: {e}")
         if exit_on_error:
             sys.exit(1)
 
@@ -388,18 +417,23 @@ class SearchCommand:
             if os.name in ('posix', 'nt'):
                 os.system('clear' if os.name == 'posix' else 'cls')
             else:
-                print(f"{Colors.RED}{Colors.BOLD}[-]{Colors.RESET} Limpieza de pantalla no soportada en este sistema.{Colors.RESET}")
+                print(f"{Colors.RED}[-]{Colors.RESET} Limpieza de pantalla no soportada en este sistema.")
         except OSError as e:
-            print(f"{Colors.RED}{Colors.BOLD}[-]{Colors.RESET} Error al limpiar pantalla: {e}{Colors.RESET}")
+            print(f"{Colors.RED}[-]{Colors.RESET} Error al limpiar pantalla: {e}")
 
     def _read_tool_file(self, file_path: str) -> List[str]:
-        if not os.path.exists(file_path):
-            return []
         try:
-            with open(file_path, 'r', encoding='utf-8') as file:
+            if os.path.getsize(file_path) > Config.MAX_FILE_SIZE:
+                print(f"{Colors.RED}[-]{Colors.RESET} Archivo {file_path} excede el tamaño máximo permitido.")
+                return []
+            abs_path = self._sanitize_file_path(file_path)
+            if not os.path.exists(abs_path):
+                return []
+            with open(abs_path, 'r', encoding='utf-8') as file:
                 lines = [line.rstrip('\n') for line in file]
             return lines if lines else []
-        except (PermissionError, UnicodeDecodeError) as e:
+        except (PermissionError, UnicodeDecodeError, ValueError) as e:
+            print(f"{Colors.RED}[-]{Colors.RESET} Error al leer el archivo {file_path}: {e}")
             return []
 
     def _check_directory_permissions(self, directory: str):
@@ -434,7 +468,7 @@ class SearchCommand:
                 if tool_file.endswith('.txt'):
                     tool_name = tool_file[:-4]
                     if tool_name in seen_tools:
-                        print(f"{Colors.RED}{Colors.BOLD}[-]{Colors.RESET} Herramienta duplicada: '{tool_name}' en {category}. Ignorada.{Colors.RESET}")
+                        print(f"{Colors.RED}[-]{Colors.RESET} Herramienta duplicada: '{tool_name}' en {category}. Ignorada.")
                         duplicate_count += 1
                         continue
                     seen_tools.add(tool_name)
@@ -456,10 +490,8 @@ class SearchCommand:
     def _load_tools(self):
         try:
             self._parse_directory_structure()
-        except (FileNotFoundError, PermissionError) as e:
-            self._handle_exception(f"{Colors.RED}{Colors.BOLD}[-]{Colors.RESET} Error al leer el directorio", e, True)
-        except ValueError as e:
-            self._handle_exception(f"{Colors.RED}{Colors.BOLD}[-]{Colors.RESET} Error al parsear el contenido", e, True)
+        except (FileNotFoundError, PermissionError, ValueError) as e:
+            self._handle_exception(f"Error al cargar herramientas", e, True)
 
     def _normalize_url(self, url: str) -> str:
         parsed = urllib.parse.urlparse(url)
@@ -486,10 +518,12 @@ class SearchCommand:
     def _search_generic(self, query: str, search_type: str) -> List[str]:
         try:
             query_normalized = normalize_text(query)
+            if query_normalized is None:
+                return []
             results = []
             self.search_mode = search_type
             items = self.categories if search_type == "category" else self.tool_to_file
-            item_normalized = {normalize_text(k): k for k in items.keys()}
+            item_normalized = {normalize_text(k): k for k in items.keys() if normalize_text(k)}
             
             if query_normalized in item_normalized:
                 key = item_normalized[query_normalized]
@@ -533,7 +567,7 @@ class SearchCommand:
             self.last_results_count = 0
             return []
         except AttributeError as e:
-            self._handle_exception(f"{Colors.RED}{Colors.BOLD}[-]{Colors.RESET} Error al buscar por {search_type}", e)
+            self._handle_exception(f"Error al buscar por {search_type}", e)
             return []
 
     def search_by_category(self, query: str) -> List[str]:
@@ -668,7 +702,7 @@ class SearchCommand:
 
             return ''.join(colored_parts) + comment_part
         except ValueError as e:
-            self._handle_exception(f"{Colors.RED}{Colors.BOLD}[-]{Colors.RESET} Error al colorear comando", e)
+            self._handle_exception(f"Error al colorear comando", e)
             return line
 
     def _format_results(self, results: List[str]) -> List[str]:
@@ -726,7 +760,7 @@ class SearchCommand:
         print(f"\n{Colors.BLUE}🔍 {title}{Colors.RESET}\n")
         
         if not results:
-            print(f"{Colors.RED}{Colors.BOLD}[-]{Colors.RESET} No se encontraron resultados.{Colors.RESET}")
+            print(f"{Colors.RED}[-]{Colors.RESET} No se encontraron resultados.")
         else:
             formatted_results = self._format_results(results)
             cleaned_results = []
@@ -759,14 +793,13 @@ class SearchCommand:
         print("")
         
         if not items:
-            print(f"  {Colors.RED}{Colors.BOLD}[-]{Colors.RESET} No hay ítems disponibles.{Colors.RESET}")
+            print(f"  {Colors.RED}[-]{Colors.RESET} No hay ítems disponibles.")
             print("")
             print(f"{Colors.BLUE}{Colors.BOLD}╚═══════════════════════════════════════════════════════════════════════════════╝{Colors.RESET}\n")
             return
         
         try:
             col_width = 32 if "HERRAMIENTAS" in title else 45
-            
             num_columns = 3 if "HERRAMIENTAS" in title else 2
             rows = (len(items) + num_columns - 1) // num_columns
             
@@ -787,7 +820,7 @@ class SearchCommand:
             print("")
             print(f"{Colors.BLUE}{Colors.BOLD}╚═══════════════════════════════════════════════════════════════════════════════╝{Colors.RESET}\n")
         except ValueError as e:
-            self._handle_exception(f"{Colors.RED}{Colors.BOLD}[-]{Colors.RESET} Error al calcular ancho de columna", e)
+            self._handle_exception(f"Error al calcular ancho de columna", e)
             self._display_in_columns_fallback(items, title, item_color)
 
     def _display_in_columns_fallback(self, items: List[str], title: str, item_color: str):
@@ -870,22 +903,24 @@ class SearchCommand:
             print(f"\n\t\t\t\t\t{Colors.RED}{Colors.RESET}H4PPY H4CK1NG")
             sys.exit(0)
         elif command == 'setip':
+            if len(args) > 255:
+                print(f"{Colors.RED}[-]{Colors.RESET} Entrada demasiado larga. Máximo 255 caracteres.")
+                return True
             if not args:
                 if self.ip_value:
                     print(f"{Colors.BLUE}[ℹ] {Colors.RESET}Valor actual de $IP: {Colors.GREEN}{self.ip_value}{Colors.RESET}")
                 else:
                     print(f"{Colors.BLUE}[ℹ] {Colors.RESET}No se ha configurado un valor para $IP")
                 print(f"{Colors.GREEN}[+] {Colors.RESET}Uso: {Colors.GREEN}setip <IP|dominio> (ejemplo: setip 192.168.1.1 o setip example.com)")
-                print(f"{Colors.GREEN}[+] {Colors.RESET}Para limpiar: {Colors.GREEN}setipclear{Colors.RESET}")
+                print(f"{Colors.GREEN}[+] {Colors.RESET}Para limpiar: {Colors.GREEN}setip clear{Colors.RESET}")
                 print(f"{Colors.BLUE}[ℹ] {Colors.RESET}La IP/dominio se usará en comandos con $IP.\n")
                 return True
             elif args.lower() == 'clear':
-                self._ip_value = None
-                print(f"{Colors.GREEN}[✔] {Colors.RESET}Correctamente restablecido. Los comandos usarán colores_verdes {Colors.GREEN}$IP{Colors.RESET} por defecto.\n")
+                self.ip_value = None
+                print(f"{Colors.GREEN}[✔] {Colors.RESET}Correctamente restablecido. Los comandos usarán {Colors.GREEN}$IP{Colors.RESET} por defecto.\n")
                 return True
             else:
                 try:
-                    import ipaddress
                     ipaddress.ip_address(args)
                     self.ip_value = args
                     try:
@@ -905,7 +940,6 @@ class SearchCommand:
                             self.ip_value = args
                     else:
                         print(f"{Colors.RED}[-] {Colors.RESET} Entrada inválida. Debe ser una IP válida (ej: 192.168.1.1) o dominio (ejemplo: example.com).")
-                        print(f"{Colors.BLUE}[ℹ] {Colors.RESET}Uso: setip <IP|dominio>| (ejemplo: setip 8.8.8.8)")
                         return True
                 if self.ip_value and args not in self.recent_ips:
                     self.recent_ips.append(args)
@@ -914,41 +948,54 @@ class SearchCommand:
                 print(f"{Colors.GREEN}[✔] {Colors.RESET}$IP configurado como: {Colors.GREEN}{args}{Colors.RESET}\n")
                 return True
         elif command == 'seturl':
+            if len(args) > 2048:
+                print(f"{Colors.RED}[-] {Colors.RESET} Entrada demasiado larga. Máximo 2048 caracteres.")
+                return True
             if not args:
                 if self.url_value:
                     print(f"{Colors.BLUE}[ℹ] {Colors.RESET}Valor actual de $URL: {Colors.GREEN}{self.url_value}{Colors.RESET}")
                 else:
                     print(f"{Colors.BLUE}[ℹ] {Colors.RESET}No se ha configurado un valor para $URL")
-                print(f"{Colors.GREEN}[+] {Colors.RESET}Uso: {Colors.GREEN}seturl <URL> (ejemplo: seturl http://example.com, https://example.com/, http://10.10.10.20)")
+                print(f"{Colors.GREEN}[+] {Colors.RESET}Uso: {Colors.GREEN}seturl <URL> (ejemplo: seturl http://example.com)")
                 print(f"{Colors.GREEN}[+] {Colors.RESET}Para limpiar: {Colors.GREEN}seturl clear{Colors.RESET}")
                 print(f"{Colors.BLUE}[ℹ] {Colors.RESET}La URL se usará en comandos con $URL.\n")
                 return True
             elif args.lower() == 'clear':
                 self.url_value = None
-                print(f"{Colors.GREEN}[✔] {Colors.RESET}Correctamente restablecido. Los comandos usarán colores verdes {Colors.GREEN}$URL{Colors.RESET} por defecto.\n")
+                print(f"{Colors.GREEN}[✔] {Colors.RESET}Correctamente restablecido. Los comandos usarán {Colors.GREEN}$URL{Colors.RESET} por defecto.\n")
                 return True
             else:
-                url_pattern = r'^(https?://)?(([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}|(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}))(/.*)?$'
-                if re.match(url_pattern, args):
+                try:
+                    parsed = urlparse(args)
+                    if parsed.scheme not in ['http', 'https']:
+                        print(f"{Colors.RED}[-] {Colors.RESET}Solo se permiten URLs con protocolo http o https.")
+                        return True
+                    if not parsed.netloc:
+                        print(f"{Colors.RED}[-] {Colors.RESET}Entrada inválida. Debe ser una URL válida (ej: http://example.com).")
+                        return True
                     self.url_value = args
                     normalized_url = self._normalize_url(args)
                     try:
-                        import requests
-                        response = requests.head(normalized_url, timeout=3, allow_redirects=True, verify=False)
+                        session = requests.Session()
+                        retries = Retry(total=3, backoff_factor=0.5, status_forcelist=[429, 500, 502, 503, 504])
+                        session.mount('https://', HTTPAdapter(max_retries=retries))
+                        response = session.head(normalized_url, timeout=3, allow_redirects=True, verify=True)
                         if response.status_code < 400:
                             print(f"{Colors.GREEN}[✔] {Colors.RESET}$URL accesible: {Colors.BLUE}{args}{Colors.RESET} (Código: {response.status_code})")
                         else:
                             print(f"{Colors.ORANGE}[-] {Colors.RESET}URL no accesible (código: {response.status_code}), pero se agregó con éxito")
-                    except (ImportError, requests.RequestException):
+                    except requests.exceptions.SSLError as e:
+                        print(f"{Colors.RED}[-]{Colors.RESET} Error de verificación SSL: {e}.")
+                        return True
+                    except requests.RequestException:
                         print(f"{Colors.ORANGE}[-] {Colors.RESET}URL no accesible, pero se agregó con éxito")
                     if args not in self.recent_urls:
                         self.recent_urls.append(args)
                         if len(self.recent_urls) > 5:
                             self.recent_urls.pop(0)
                     print(f"{Colors.GREEN}[✔] {Colors.RESET}$URL configurado como: {Colors.GREEN}{args}{Colors.RESET}\n")
-                else:
-                    print(f"{Colors.RED}[-] {Colors.RESET}Entrada inválida. Debe ser una URL válida (ej: http://example.com, https://example.com/, http://10.10.10.20).")
-                    print(f"{Colors.BLUE}[ℹ] {Colors.RESET}Uso: seturl <URL> (ejemplo: seturl http://10.10.10.20)\n")
+                except ValueError:
+                    print(f"{Colors.RED}[-] {Colors.RESET}Entrada inválida. Debe ser una URL válida (ej: http://example.com).")
                 return True
         elif command == 'refresh':
             if args.lower() == 'config':
@@ -964,52 +1011,36 @@ class SearchCommand:
                     self._clear_screen()
                     self.print_header()
                     print(f"{Colors.GREEN}⏳ {Colors.RESET}Herramientas recargadas exitosamente.\n")
-                except Exception as e:
-                    self._handle_exception(f"{Colors.RED}{Colors.BOLD}[-]{Colors.RESET} Error al recargar herramientas", e)
+                except (FileNotFoundError, PermissionError, ValueError) as e:
+                    self._handle_exception(f"Error al recargar herramientas", e)
             return True
         elif command == 'edit':
             if not args:
                 if self.last_query and self.last_query in self.tool_to_file:
-                    editor = os.environ.get('EDITOR')
+                    editor = self._get_safe_editor()
                     if not editor:
-                        for default_editor in ['nano', 'vim', 'vi']:
-                            if subprocess.run(['which', default_editor], capture_output=True, text=True).returncode == 0:
-                                editor = default_editor
-                                break
-                        else:
-                            print(f"{Colors.RED}[-] {Colors.RESET} No se encontró un editor compatible (nano, vim, vi). Configura $EDITOR.")
-                            return True
-                    file_path = self.tool_to_file[self.last_query]
-                    if not os.path.exists(file_path):
-                        print(f"{Colors.RED}[-]{Colors.RESET} El archivo para '{self.last_query}' no existe en {file_path}.")
+                        print(f"{Colors.RED}[-] {Colors.RESET} No se encontró un editor compatible (nano, vim, vi).")
                         return True
                     try:
+                        file_path = self._sanitize_file_path(self.tool_to_file[self.last_query])
                         subprocess.run([editor, file_path], check=True)
                         print(f"{Colors.GREEN}[✔] {Colors.RESET}Abriendo {self.last_query} en {editor}. Usa 'refresh' para recargar cambios.")
-                    except (subprocess.CalledProcessError, FileNotFoundError) as e:
+                    except (subprocess.CalledProcessError, FileNotFoundError, ValueError) as e:
                         print(f"{Colors.RED}[-] {Colors.RESET} Error al abrir el editor: {e}")
                 else:
                     self._display_edit_help()
             else:
                 tool = args.strip()
                 if tool in self.tool_to_file:
-                    editor = os.environ.get('EDITOR')
+                    editor = self._get_safe_editor()
                     if not editor:
-                        for default_editor in ['nano', 'vim', 'vi']:
-                            if subprocess.run(['which', default_editor], capture_output=True, text=True).returncode == 0:
-                                editor = default_editor
-                                break
-                        else:
-                            print(f"{Colors.RED}[-] {Colors.RESET} No se encontró un editor compatible (nano, vim, vi). Configura $EDITOR.")
-                            return True
-                    file_path = self.tool_to_file[tool]
-                    if not os.path.exists(file_path):
-                        print(f"{Colors.RED}[-]{Colors.RESET} El archivo para '{tool}' no existe en {file_path}.")
+                        print(f"{Colors.RED}[-] {Colors.RESET} No se encontró un editor compatible (nano, vim, vi).")
                         return True
                     try:
+                        file_path = self._sanitize_file_path(self.tool_to_file[tool])
                         subprocess.run([editor, file_path], check=True)
                         print(f"{Colors.GREEN}[✔] {Colors.RESET}Abriendo {tool} en {editor}. Usa 'refresh' para recargar cambios.")
-                    except (subprocess.CalledProcessError, FileNotFoundError) as e:
+                    except (subprocess.CalledProcessError, FileNotFoundError, ValueError) as e:
                         print(f"{Colors.RED}[-] {Colors.RESET} Error al abrir el editor: {e}")
                 else:
                     self._clear_screen()
@@ -1022,28 +1053,19 @@ class SearchCommand:
             return True
         return False
 
+    def _handle_resize(self, signum, frame):
+        self._clear_screen()
+        self.print_header()
+        app = get_app()
+        app.renderer.reset()
+        app._redraw()
+
     def interactive_menu(self):
         self._clear_screen()
         self.print_header()
 
-        last_resize = 0
-        def handle_resize(signum, frame):
-            nonlocal last_resize
-            current_time = time.time()
-            if current_time - last_resize > 0.2:
-                self._clear_screen()
-                self.print_header()
-                app = get_app()
-                app.renderer.reset()
-                app._redraw()
-            last_resize = current_time
-
         try:
-            signal.signal(signal.SIGWINCH, handle_resize)
-        except ValueError as e:
-            print(f"{Colors.RED}{Colors.BOLD}[-]{Colors.RESET} No se pudo configurar el manejo de redimensionamiento: {e}{Colors.RESET}")
-
-        try:
+            signal.signal(signal.SIGWINCH, self._handle_resize)
             while True:
                 try:
                     query = self.prompt_session.prompt().strip()
@@ -1062,6 +1084,13 @@ class SearchCommand:
                         self.last_query = ""
                         continue
                     
+                    query_normalized = normalize_text(query)
+                    if query_normalized is None:
+                        print(f"{Colors.RED}[-]{Colors.RESET} Consulta inválida: usa caracteres alfanuméricos.\n")
+                        self.last_command_success = False
+                        self.last_query = ""
+                        continue
+
                     category_results = self.search_by_category(query)
                     if category_results:
                         self._display_results(category_results, f"{Colors.BLUE}{Colors.BOLD}Resultados para Categoría: {Colors.RESET}{query.upper()}\n")
@@ -1075,14 +1104,14 @@ class SearchCommand:
                         continue
 
                     all_options = list(self.categories.keys()) + [tool for tools in self.tools_by_category.values() for tool in tools]
-                    all_options_normalized = [normalize_text(opt) for opt in all_options]
-                    suggestions = process.extract(normalize_text(query), all_options_normalized, limit=3, scorer=process.fuzz.partial_ratio)
+                    all_options_normalized = [normalize_text(opt) for opt in all_options if normalize_text(opt)]
+                    suggestions = process.extract(query_normalized, all_options_normalized, limit=3, scorer=process.fuzz.partial_ratio)
                     suggestions = [all_options[all_options_normalized.index(s[0])] for s in suggestions if s[1] >= 80]
                     if suggestions:
-                        print(f"{Colors.RED}{Colors.BOLD}[-]{Colors.RESET} No se encontraron resultados para: {query}{Colors.RESET}\n")
+                        print(f"{Colors.RED}[-]{Colors.RESET} No se encontraron resultados para: {query}\n")
                         print(f"{Colors.BLUE}[ℹ] {Colors.RESET}¿Quizás quisiste decir: {', '.join(suggestions)}?")
                     else:
-                        print(f"{Colors.RED}{Colors.BOLD}[-]{Colors.RESET} No se encontraron resultados para: {query}{Colors.RESET}\n")
+                        print(f"{Colors.RED}[-]{Colors.RESET} No se encontraron resultados para: {query}\n")
                     self.last_command_success = False
                     self.last_query = ""
 
@@ -1091,9 +1120,17 @@ class SearchCommand:
                     print(f"\n\t\t\t{Colors.RED}{Colors.BOLD}H4PPY H4CK1NG{Colors.RESET}")
                     sys.exit(0)
         finally:
+            signal.signal(signal.SIGWINCH, signal.SIG_DFL)
             print(f"{Colors.RESET}", end="")
 
     def run_query(self, query: str):
+        query_normalized = normalize_text(query)
+        if query_normalized is None:
+            self._clear_screen()
+            print(f"{Colors.BLUE}🔍 Resultados de Búsqueda{Colors.RESET}\n")
+            print(f"{Colors.RED}[-]{Colors.RESET} Consulta inválida: usa caracteres alfanuméricos.\n")
+            return
+
         category_results = self.search_by_category(query)
         if category_results:
             self._display_results(category_results, f"{Colors.LIGHT_BLUE}Resultados para Categoría: {Colors.RESET}{query.upper()}")
@@ -1106,12 +1143,12 @@ class SearchCommand:
 
         self._clear_screen()
         print(f"{Colors.BLUE}🔍 Resultados de Búsqueda{Colors.RESET}\n")
-        print(f"{Colors.RED}{Colors.BOLD}[-]{Colors.RESET} No se encontraron resultados para: {Colors.WHITE}{query}{Colors.RESET}")
+        print(f"{Colors.RED}[-]{Colors.RESET} No se encontraron resultados para: {Colors.WHITE}{query}{Colors.RESET}")
         print(f"{Colors.BLUE}──────────────────────────────────────────────────────{Colors.RESET}")
         
         all_options = list(self.categories.keys()) + [tool for tools in self.tools_by_category.values() for tool in tools]
-        all_options_normalized = [normalize_text(opt) for opt in all_options]
-        suggestions = process.extract(normalize_text(query), all_options_normalized, limit=3, scorer=process.fuzz.partial_ratio)
+        all_options_normalized = [normalize_text(opt) for opt in all_options if normalize_text(opt)]
+        suggestions = process.extract(query_normalized, all_options_normalized, limit=3, scorer=process.fuzz.partial_ratio)
         suggestions = [all_options[all_options_normalized.index(s[0])] for s in suggestions if s[1] >= 80]
         
         if suggestions:
@@ -1127,8 +1164,8 @@ class EnhancedCompleter(Completer):
     def __init__(self, categories: List[str], tools: List[str], tools_by_category: Dict[str, List[str]], recent_ips: List[str], recent_urls: List[str], tool_to_category: Dict[str, str], tool_to_file: Dict[str, str]):
         self.original_categories = categories
         self.original_tools = [tool for tool in tools if tool in tool_to_file]
-        self.categories_normalized = [normalize_text(cat) for cat in categories]
-        self.tools_normalized = [normalize_text(tool) for tool in self.original_tools]
+        self.categories_normalized = [normalize_text(cat) for cat in categories if normalize_text(cat)]
+        self.tools_normalized = [normalize_text(tool) for tool in self.original_tools if normalize_text(tool)]
         self.tools_by_category = tools_by_category
         self.recent_ips = recent_ips
         self.recent_urls = recent_urls
@@ -1136,7 +1173,7 @@ class EnhancedCompleter(Completer):
         self.tool_to_file = tool_to_file
 
         if not categories or not self.original_tools or not tools_by_category:
-            print(f"{Colors.RED}{Colors.BOLD}[-]{Colors.RESET} Error: Datos de autocompletado vacíos o inválidos{Colors.RESET}")
+            print(f"{Colors.RED}[-]{Colors.RESET} Error: Datos de autocompletado vacíos o inválidos")
 
         self.internal_commands = [
             ('help', 'Mostrar menú de ayuda'),
@@ -1181,6 +1218,8 @@ class EnhancedCompleter(Completer):
         text = document.text_before_cursor
         word = document.get_word_before_cursor()
         word_normalized = normalize_text(word)
+        if word_normalized is None:
+            return
         completions = []
 
         parts = text.strip().split()
@@ -1233,8 +1272,9 @@ class EnhancedCompleter(Completer):
 
         if is_edit_arg:
             for tool in self.original_tools:
-                if word_normalized in normalize_text(tool):
-                    match_priority = 0 if normalize_text(tool) == word_normalized else 1
+                tool_normalized = normalize_text(tool)
+                if tool_normalized and word_normalized in tool_normalized:
+                    match_priority = 0 if tool_normalized == word_normalized else 1
                     category = self.tool_to_category.get(tool, "")
                     completions.append((match_priority, Completion(
                         tool,
@@ -1246,7 +1286,7 @@ class EnhancedCompleter(Completer):
 
         if not (is_setip_arg or is_seturl_arg or is_refresh_arg or is_edit_arg or is_update_arg):
             for orig_cat, norm_cat in zip(self.original_categories, self.categories_normalized):
-                if word_normalized in norm_cat:
+                if norm_cat and word_normalized in norm_cat:
                     match_priority = 0 if norm_cat == word_normalized else 1
                     completions.append((match_priority, Completion(
                         orig_cat,
@@ -1258,7 +1298,7 @@ class EnhancedCompleter(Completer):
 
         if not (is_setip_arg or is_seturl_arg or is_refresh_arg or is_edit_arg or is_update_arg):
             for orig_tool, norm_tool in zip(self.original_tools, self.tools_normalized):
-                if word_normalized in norm_tool:
+                if norm_tool and word_normalized in norm_tool:
                     match_priority = 0 if norm_tool == word_normalized else 1
                     category = self.tool_to_category.get(orig_tool, "")
                     completions.append((match_priority, Completion(
@@ -1271,8 +1311,9 @@ class EnhancedCompleter(Completer):
 
         if is_setip_arg:
             for ip in self.recent_ips:
-                if word_normalized in normalize_text(ip):
-                    match_priority = 0 if normalize_text(ip) == word_normalized else 1
+                ip_normalized = normalize_text(ip)
+                if ip_normalized and word_normalized in ip_normalized:
+                    match_priority = 0 if ip_normalized == word_normalized else 1
                     completions.append((match_priority, Completion(
                         ip,
                         start_position=-len(word),
@@ -1284,8 +1325,9 @@ class EnhancedCompleter(Completer):
         if is_seturl_arg:
             for url in self.recent_urls:
                 normalized_url = self._normalize_url(url)
-                if word_normalized in normalize_text(normalized_url):
-                    match_priority = 0 if normalize_text(normalized_url) == word_normalized else 1
+                url_normalized = normalize_text(normalized_url)
+                if url_normalized and word_normalized in url_normalized:
+                    match_priority = 0 if url_normalized == word_normalized else 1
                     completions.append((match_priority, Completion(
                         url,
                         start_position=-len(word),
@@ -1308,7 +1350,7 @@ def main():
         args = parser.parse_args()
     except SystemExit as e:
         if e.code != 0:
-            print(f"{Colors.RED}{Colors.BOLD}[-]{Colors.RESET} Error al parsear argumentos{Colors.RESET}")
+            print(f"{Colors.RED}[-]{Colors.RESET} Error al parsear argumentos")
             sys.exit(1)
         sys.exit(0)
 
@@ -1319,8 +1361,8 @@ def main():
             search_tool.run_query(args.query)
         else:
             search_tool.interactive_menu()
-    except (FileNotFoundError, ValueError) as e:
-        print(f"{Colors.RED}{Colors.BOLD}[-]{Colors.RESET} Error en la ejecución: {e}{Colors.RESET}")
+    except (FileNotFoundError, PermissionError, ValueError) as e:
+        print(f"{Colors.RED}[-]{Colors.RESET} Error en la ejecución: {e}")
         sys.exit(1)
     except KeyboardInterrupt:
         print(f"{Colors.RESET}", end="")
