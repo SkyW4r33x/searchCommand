@@ -308,7 +308,7 @@ class SearchCommand:
         url = Config.UPDATE_URL
 
         if os.geteuid() != 0:
-            print(f"{Colors.RED}[-]{Colors.RESET} Se requieren permisos de root para actualizar.")
+            print(f"{Colors.RED}[-]{Colors.RESET} Se requieren permisos de root para actualizar.\n")
             return
 
         if not os.access(os.path.dirname(script_path), os.W_OK):
