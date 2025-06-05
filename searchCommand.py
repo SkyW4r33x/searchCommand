@@ -904,7 +904,7 @@ class SearchCommand:
             sys.exit(0)
         elif command == 'setip':
             if len(args) > 255:
-                print(f"{Colors.RED}[-]{Colors.RESET} Entrada demasiado larga. Máximo 255 caracteres.")
+                print(f"{Colors.RED}[-] {Colors.RESET}Entrada demasiado larga. Máximo 255 caracteres.")
                 return True
             if not args:
                 if self.ip_value:
@@ -925,9 +925,9 @@ class SearchCommand:
                     self.ip_value = args
                     try:
                         socket.gethostbyname(args)
-                        print(f"{Colors.GREEN}[✔] {Colors.RESET} $IP resuelve correctamente: {args}")
+                        print(f"{Colors.GREEN}[✔] {Colors.RESET}$IP resuelve correctamente: {args}")
                     except socket.gaierror:
-                        print(f"{Colors.ORANGE}[-] {Colors.RESET} $IP no resuelve en DNS, pero se acepta: alumno")
+                        print(f"{Colors.ORANGE}[-] {Colors.RESET}$IP no resuelve en DNS, pero se acepta: alumno")
                 except ValueError:
                     domain_pattern = r'^([a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$'
                     if re.match(domain_pattern, args) and 1 < len(args) <= 255:
@@ -936,10 +936,10 @@ class SearchCommand:
                             self.ip_value = args
                             print(f"{Colors.GREEN}[✔] {Colors.RESET}Dominio resuelve correctamente: {args}")
                         except socket.gaierror:
-                            print(f"{Colors.ORANGE}[-] {Colors.RESET} Dominio no resuelve en DNS, pero se acepta: {args}")
+                            print(f"{Colors.ORANGE}[-] {Colors.RESET}Dominio no resuelve en DNS, pero se acepta: {args}")
                             self.ip_value = args
                     else:
-                        print(f"{Colors.RED}[-] {Colors.RESET} Entrada inválida. Debe ser una IP válida (ej: 192.168.1.1) o dominio (ejemplo: example.com).")
+                        print(f"{Colors.RED}[-] {Colors.RESET}Entrada inválida. Debe ser una IP válida (ej: 192.168.1.1) o dominio (ejemplo: example.com).")
                         return True
                 if self.ip_value and args not in self.recent_ips:
                     self.recent_ips.append(args)
@@ -949,7 +949,7 @@ class SearchCommand:
                 return True
         elif command == 'seturl':
             if len(args) > 2048:
-                print(f"{Colors.RED}[-]{Colors.RESET} Entrada demasiado larga. Máximo 2048 caracteres.")
+                print(f"{Colors.RED}[-]{Colors.RESET}Entrada demasiado larga. Máximo 2048 caracteres.")
                 return True
             if not args:
                 if self.url_value:
@@ -968,7 +968,7 @@ class SearchCommand:
                 try:
                     parsed = urlparse(args)
                     if parsed.scheme not in ['http', 'https']:
-                        print(f"{Colors.RED}[-]{Colors.RESET}Solo se permiten URLs con protocolo http o https.")
+                        print(f"{Colors.RED}[-] {Colors.RESET}Solo se permiten URLs con protocolo http o https.")
                         return True
                     if not parsed.netloc:
                         print(f"{Colors.RED}[-] {Colors.RESET}Entrada inválida. Debe ser una URL válida (ej: http://example.com).\n")
