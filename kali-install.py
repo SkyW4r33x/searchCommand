@@ -391,13 +391,15 @@ def install_search_command(full_install=True):
                 subprocess.run(["python3", "-m", "venv", VENV_DIR], check=True, capture_output=True, text=True)
 
             pip_path = os.path.join(VENV_DIR, "bin", "pip")
-            
+
             required_packages = [
-                "fuzzywuzzy>=0.18.0",
-                "prompt_toolkit>=3.0.0",
                 "requests>=2.28.0",
-                "packaging>=23.0"
+                "urllib3>=1.26.16",
+                "prompt_toolkit>=3.0.0",
+                "fuzzywuzzy>=0.18.0",
+                "python-Levenshtein>=0.12.2",
             ]
+
             with open("requirements.txt", "r") as f:
                 req_packages = [line.strip().split("#")[0].strip() for line in f if line.strip() and not line.strip().startswith("#")]
             all_packages = list(set(required_packages + req_packages))
