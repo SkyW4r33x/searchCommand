@@ -50,7 +50,7 @@ from fuzzywuzzy import process
 # Suprimir solo advertencias específicas de urllib3
 warnings.filterwarnings("ignore", category=InsecureRequestWarning, module="urllib3")
 
-__version__ = "2.4"
+__version__ = "2.6"
 
 if os.name == 'nt':
     print(f"{Colors.RED}{Colors.BOLD}[-]{Colors.RESET} Este programa está diseñado para Linux/macOS. En Windows, usa WSL para mejor compatibilidad.")
@@ -976,7 +976,7 @@ class SearchCommand:
                 try:
                     parsed = urlparse(args)
                     if parsed.scheme not in ['http', 'https']:
-                        print(f"{Colors.RED}[-] {Colors.RESET}Solo se permiten URLs con protocolo http o https.")
+                        print(f"{Colors.RED}[-] {Colors.RESET}Solo se permiten URLs con protocolo http o https.\n")
                         return True
                     if not parsed.netloc:
                         print(f"{Colors.RED}[-] {Colors.RESET}Entrada inválida. Debe ser una URL válida (ej: http://example.com).")
