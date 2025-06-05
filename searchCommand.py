@@ -50,7 +50,7 @@ from fuzzywuzzy import process
 # Suprimir solo advertencias específicas de urllib3
 warnings.filterwarnings("ignore", category=InsecureRequestWarning, module="urllib3")
 
-__version__ = "2.3"
+__version__ = "2.4"
 
 if os.name == 'nt':
     print(f"{Colors.RED}{Colors.BOLD}[-]{Colors.RESET} Este programa está diseñado para Linux/macOS. En Windows, usa WSL para mejor compatibilidad.")
