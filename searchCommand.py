@@ -1100,7 +1100,7 @@ class SearchCommand:
                     
                     query_normalized = normalize_text(query)
                     if query_normalized is None:
-                        print(f"{Colors.RED}[-]{Colors.RESET} Consulta inválida: usa caracteres alfanuméricos.\n")
+                        print(f"{Colors.RED}[-]{Colors.RESET} Consulta inválida.\n")
                         self.last_command_success = False
                         self.last_query = ""
                         continue
