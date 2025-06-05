@@ -927,7 +927,7 @@ class SearchCommand:
                         socket.gethostbyname(args)
                         print(f"{Colors.GREEN}[✔] {Colors.RESET} $IP resuelve correctamente: {args}")
                     except socket.gaierror:
-                        print(f"{Colors.ORANGE}[-] {Colors.RESET} $IP no resuelve en DNS, pero se acepta: {args}")
+                        print(f"{Colors.ORANGE}[-] {Colors.RESET} $IP no resuelve en DNS, pero se acepta: alumno")
                 except ValueError:
                     domain_pattern = r'^([a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$'
                     if re.match(domain_pattern, args) and 1 < len(args) <= 255:
@@ -949,7 +949,7 @@ class SearchCommand:
                 return True
         elif command == 'seturl':
             if len(args) > 2048:
-                print(f"{Colors.RED}[-] {Colors.RESET} Entrada demasiado larga. Máximo 2048 caracteres.")
+                print(f"{Colors.RED}[-]{Colors.RESET} Entrada demasiado larga. Máximo 2048 caracteres.")
                 return True
             if not args:
                 if self.url_value:
@@ -968,10 +968,16 @@ class SearchCommand:
                 try:
                     parsed = urlparse(args)
                     if parsed.scheme not in ['http', 'https']:
-                        print(f"{Colors.RED}[-] {Colors.RESET}Solo se permiten URLs con protocolo http o https.")
+                        print(f"{Colors.RED}[-]{Colors.RESET}Solo se permiten URLs con protocolo http o https.")
                         return True
                     if not parsed.netloc:
-                        print(f"{Colors.RED}[-] {Colors.RESET}Entrada inválida. Debe ser una URL válida (ej: http://example.com).")
+                        print(f"{Colors.RED}[-] {Colors.RESET}Entrada inválida. Debe ser una URL válida (ej: http://example.com).\n")
+                        return True
+                    # Verificar si el dominio es resoluble
+                    try:
+                        socket.gethostbyname(parsed.netloc)
+                    except socket.gaierror:
+                        print(f"{Colors.RED}[-] {Colors.RESET}El dominio {parsed.netloc} no es válido o no se resuelve. Verifica la URL.\n")
                         return True
                     self.url_value = args
                     normalized_url = self._normalize_url(args)
@@ -984,8 +990,8 @@ class SearchCommand:
                             print(f"{Colors.GREEN}[✔] {Colors.RESET}$URL accesible: {Colors.BLUE}{args}{Colors.RESET} (Código: {response.status_code})")
                         else:
                             print(f"{Colors.ORANGE}[-] {Colors.RESET}URL no accesible (código: {response.status_code}), pero se agregó con éxito")
-                    except requests.exceptions.SSLError as e:
-                        print(f"{Colors.RED}[-]{Colors.RESET} Error de verificación SSL: {e}.")
+                    except requests.exceptions.SSLError:
+                        print(f"{Colors.RED}[-] {Colors.RESET}URL inválida o certificado SSL no verificable. Verifica el dominio.\n")
                         return True
                     except requests.RequestException:
                         print(f"{Colors.ORANGE}[-] {Colors.RESET}URL no accesible, pero se agregó con éxito")
@@ -995,7 +1001,7 @@ class SearchCommand:
                             self.recent_urls.pop(0)
                     print(f"{Colors.GREEN}[✔] {Colors.RESET}$URL configurado como: {Colors.GREEN}{args}{Colors.RESET}\n")
                 except ValueError:
-                    print(f"{Colors.RED}[-] {Colors.RESET}Entrada inválida. Debe ser una URL válida (ej: http://example.com).")
+                    print(f"{Colors.RED}[-] {Colors.RESET}Entrada inválida. Debe ser una URL válida (ej: http://example.com).\n")
                 return True
         elif command == 'refresh':
             if args.lower() == 'config':
@@ -1019,14 +1025,14 @@ class SearchCommand:
                 if self.last_query and self.last_query in self.tool_to_file:
                     editor = self._get_safe_editor()
                     if not editor:
-                        print(f"{Colors.RED}[-] {Colors.RESET} No se encontró un editor compatible (nano, vim, vi).")
+                        print(f"{Colors.RED}[-]{Colors.RESET} No se encontró un editor compatible (nano, vim, vi).")
                         return True
                     try:
                         file_path = self._sanitize_file_path(self.tool_to_file[self.last_query])
                         subprocess.run([editor, file_path], check=True)
                         print(f"{Colors.GREEN}[✔] {Colors.RESET}Abriendo {self.last_query} en {editor}. Usa 'refresh' para recargar cambios.")
                     except (subprocess.CalledProcessError, FileNotFoundError, ValueError) as e:
-                        print(f"{Colors.RED}[-] {Colors.RESET} Error al abrir el editor: {e}")
+                        print(f"{Colors.RED}[-]{Colors.RESET} Error al abrir el editor: {e}")
                 else:
                     self._display_edit_help()
             else:
@@ -1034,17 +1040,17 @@ class SearchCommand:
                 if tool in self.tool_to_file:
                     editor = self._get_safe_editor()
                     if not editor:
-                        print(f"{Colors.RED}[-] {Colors.RESET} No se encontró un editor compatible (nano, vim, vi).")
+                        print(f"{Colors.RED}[-]{Colors.RESET} No se encontró un editor compatible (nano, vim, vi).")
                         return True
                     try:
                         file_path = self._sanitize_file_path(self.tool_to_file[tool])
                         subprocess.run([editor, file_path], check=True)
                         print(f"{Colors.GREEN}[✔] {Colors.RESET}Abriendo {tool} en {editor}. Usa 'refresh' para recargar cambios.")
                     except (subprocess.CalledProcessError, FileNotFoundError, ValueError) as e:
-                        print(f"{Colors.RED}[-] {Colors.RESET} Error al abrir el editor: {e}")
+                        print(f"{Colors.RED}[-]{Colors.RESET} Error al abrir el editor: {e}")
                 else:
                     self._clear_screen()
-                    print(f"{Colors.RED}[-] {Colors.RESET} Herramienta '{tool}' no encontrada.")
+                    print(f"{Colors.RED}[-]{Colors.RESET} Herramienta '{tool}' no encontrada.")
                     self._display_edit_help()
             return True
         elif command == 'update':
