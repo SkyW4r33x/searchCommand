@@ -130,7 +130,7 @@ El prompt interactivo de **`searchCommand`** te guía con un sistema de **autoco
 | **Categoría o herramienta actual** | Muestra el contexto actual de navegación.          | ![Categoría actual](https://i.imgur.com/8pSYSkR.png)                              |
 | **Visualización del autocompletado** | Sugerencias dinámicas mientras escribes.          | ![enter image description here](https://i.imgur.com/7aSifEC.png)     |
 
-🎥 [Ver demostración en video](https://i.imgur.com/OkKMFUy.mp4)
+![Ver demostración en video](https://i.imgur.com/OkKMFUy.mp4)
 
 
 ## 🗑️ Desinstalación
