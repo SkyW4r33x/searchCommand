@@ -53,7 +53,7 @@ from fuzzywuzzy import process
 
 warnings.filterwarnings("ignore", category=InsecureRequestWarning, module="urllib3")
 
-__version__ = "2.7.2"
+__version__ = "2.8.2"
 
 if os.name == 'nt':
     print(f"{Colors.RED}{Colors.BOLD}[-]{Colors.RESET} Este programa está diseñado para Linux/macOS. En Windows, usa WSL para mejor compatibilidad.")
