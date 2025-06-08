@@ -195,6 +195,7 @@ class SearchCommand:
             event.app.invalidate()
 
         @kb.add(Keys.ControlR)
+
         def refresh_tools(event):
             try:
                 self._load_tools()
@@ -210,14 +211,18 @@ class SearchCommand:
         @kb.add(Keys.ControlE)
         def edit_last_tool(event):
             if self.last_query and self.last_query in self.tool_to_file:
-                editor = self._get_safe_editor()
-                if not editor:
+                editor_path = self._get_safe_editor()
+                if not editor_path:
                     print(f"{Colors.RED}[-]{Colors.RESET} No se encontró un editor compatible (nano, vim, vi).")
                     return
                 try:
                     file_path = self._sanitize_file_path(self.tool_to_file[self.last_query])
-                    subprocess.run([editor, file_path], check=True)
-                    print(f"{Colors.GREEN}[✔] {Colors.RESET}Abriendo {Colors.GREEN}{self.last_query}{Colors.RESET} en {editor}. Usa {Colors.BLUE}refresh{Colors.RESET} para recargar cambios.\n")
+                    subprocess.run([editor_path, file_path], check=True)
+                    
+                    # Extraer solo el nombre del editor de la ruta completa
+                    editor_name = os.path.basename(editor_path)
+                    
+                    print(f"{Colors.GREEN}[✔] {Colors.RESET}Abriendo {Colors.GREEN}{self.last_query}{Colors.RESET} con {editor_name}. Usa {Colors.BLUE}refresh{Colors.RESET} para recargar cambios.\n")
                 except (subprocess.CalledProcessError, FileNotFoundError, ValueError) as e:
                     print(f"{Colors.RED}[-]{Colors.RESET} Error al abrir el editor: {e}")
             else:
@@ -226,6 +231,7 @@ class SearchCommand:
             event.app.invalidate()
 
         @kb.add(Keys.ControlC)
+
         def exit_program(event):
             print(f"\n\t\t\t{Colors.RED}{Colors.BOLD}H4PPY H4CK1NG{Colors.RESET}")
             sys.exit(0)
@@ -1123,14 +1129,17 @@ class SearchCommand:
         elif command == 'edit':
             if not args:
                 if self.last_query and self.last_query in self.tool_to_file:
-                    editor = self._get_safe_editor()
-                    if not editor:
+                    editor_path = self._get_safe_editor()
+                    if not editor_path:
                         print(f"{Colors.RED}[-]{Colors.RESET} No se encontró un editor compatible (nano, vim, vi).")
                         return True
                     try:
                         file_path = self._sanitize_file_path(self.tool_to_file[self.last_query])
-                        subprocess.run([editor, file_path], check=True)
-                        print(f"{Colors.GREEN}[✔] {Colors.RESET}Abriendo {self.last_query} en {editor}. Usa 'refresh' para recargar cambios.")
+                        subprocess.run([editor_path, file_path], check=True)
+
+                        editor_name = os.path.basename(editor_path)
+
+                        print(f"\n{Colors.GREEN}[✔] {Colors.RESET}Abriendo {Colors.GREEN}{self.last_query}{Colors.RESET} con {editor_name}. Usa {Colors.BLUE}refresh{Colors.RESET} para recargar cambios.\n")
                     except (subprocess.CalledProcessError, FileNotFoundError, ValueError) as e:
                         print(f"{Colors.RED}[-]{Colors.RESET} Error al abrir el editor: {e}")
                 else:
@@ -1138,16 +1147,20 @@ class SearchCommand:
             else:
                 tool = args.strip()
                 if tool in self.tool_to_file:
-                    editor = self._get_safe_editor()
-                    if not editor:
+                    editor_path = self._get_safe_editor()
+                    if not editor_path:
                         print(f"{Colors.RED}[-]{Colors.RESET} No se encontró un editor compatible (nano, vim, vi).")
                         return True
                     try:
                         file_path = self._sanitize_file_path(self.tool_to_file[tool])
-                        subprocess.run([editor, file_path], check=True)
-                        print(f"{Colors.GREEN}[✔] {Colors.RESET}Abriendo {tool} en {editor}. Usa 'refresh' para recargar cambios.")
+                        subprocess.run([editor_path, file_path], check=True)
+
+                        editor_name = os.path.basename(editor_path)
+                
+                        print(f"\n{Colors.GREEN}[✔] {Colors.RESET}Abriendo {Colors.GREEN}{tool}{Colors.RESET} con {editor_name}. Usa {Colors.BLUE}refresh{Colors.RESET} para recargar cambios.\n")
+           
                     except (subprocess.CalledProcessError, FileNotFoundError, ValueError) as e:
-                        print(f"{Colors.RED}[-]{Colors.RESET} Error al abrir el editor: {e}")
+                        print(f"\n{Colors.RED}[-]{Colors.RESET} Error al abrir el editor: {e}\n")
                 else:
                     self._clear_screen()
                     print(f"{Colors.RED}[-]{Colors.RESET} Herramienta '{tool}' no encontrada.")
