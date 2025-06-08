@@ -139,7 +139,7 @@ class SearchCommand:
         try:
             self.prompt_style = Style.from_dict({
                 'prompt.parens': '#5EBDAB',
-                'prompt.name': ' #FF8A18 bold' ,
+                'prompt.name': ' #fe013a bold' ,
                 'prompt.dash': ' #5EBDAB',
                 'prompt.brackets': '#5EBDAB',
                 'prompt.success': '#5EBDAB',
