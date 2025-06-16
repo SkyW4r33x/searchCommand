@@ -392,8 +392,7 @@ def install_search_command(full_install=True):
         print(SEPARATOR)
         action = "Instalación completa" if full_install else "Actualización completada"
         log_info(f"{action} crack 😎", delay=0.2)
-        print(f"[{GREEN}✓{RESET}] Usa {BLUE}searchCommand{RESET} desde la terminal (desde /usr/bin)")
-        print(f"[{GREEN}✓{RESET}] Scripts Python en {BIN_DIR}: {', '.join(PYTHON_SCRIPTS)}")
+        print(f"[{GREEN}✓{RESET}] Usa {BLUE}searchCommand{RESET} desde la terminal.")
         print(f"[{RED}#{RESET}] Hecha con corazón, en un mundo de mierda.")
         print(f"\n\t\t{BOLD}{RED}H4PPY H4CK1NG{RESET}\n")
 
