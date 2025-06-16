@@ -169,7 +169,7 @@ def get_user_choice():
         try:
             os.system("clear")
             print(BANNER)
-            print(f"\n{GREEN}[1]{RESET} Instalar searchCommand completo (searchCommand + gtfsearch + referencestuff + .data)")
+            print(f"\n{GREEN}[1]{RESET} Instalar searchCommand completo (searchCommand + gtfsearch)")
             print(f"{GREEN}[2]{RESET} Actualizar solo scripts de Python (searchCommand + gtfsearch)")  
             print(f"{GREEN}[3]{RESET} Actualizar solo referencestuff")
             print(f"{GREEN}[4]{RESET} Desinstalar searchCommand")
