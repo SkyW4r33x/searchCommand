@@ -1,113 +1,193 @@
-![Banner](https://i.imgur.com/NII8Wbr.jpeg)  
-*Herramienta de búsqueda interactiva para comandos de pentesting en Linux.*
+![Banner](https://i.imgur.com/NII8Wbr.jpeg)
 
-**searchCommand** es una herramienta escrita en Python diseñada para pentesters y entusiastas de la seguridad informática. Permite buscar y explorar comandos organizados por categorías y herramientas de manera interactiva, con autocompletado, resaltado de sintaxis y un diseño inspirado en Kali Linux. Ideal para aprender, consultar o ejecutar comandos rápidamente desde la terminal.
+<div align="center"> <h3>Herramienta de búsqueda interactiva para comandos de pentesting y GTFOBins en Linux</h3>
 
-**Autor**: Jordan aka SkyW4r33x  
-**Versión**: 0.1  
+[![Versión](https://img.shields.io/badge/versi%C3%B3n-0.2-blue.svg)](https://github.com/SkyW4r33x/searchCommand) [![Python](https://img.shields.io/badge/python-3.6+-green.svg)](https://python.org/) [![Licencia](https://img.shields.io/badge/licencia-MIT-red.svg)](https://claude.ai/chat/LICENSE) [![Plataforma](https://img.shields.io/badge/plataforma-Linux-orange.svg)](https://www.linux.org/)
+
+</div>
+
+## Tabla de Contenido
+
+-   [Descripción](#descripción)
+-   [Características](#características)
+-   [Requisitos](#requisitos)
+-   [Instalación](#instalación)
+    -   [Importante para usuarios existentes](#importante-para-usuarios-existentes)
+    -   [Prerrequisitos](#prerrequisitos)
+    -   [Pasos de instalación](#pasos-de-instalación)
+-   [Uso](#uso)
+    -   [searchCommand - Modo interactivo](#searchcommand---modo-interactivo)
+    -   [gtfsearch - GTFOBins Local](#gtfsearch---gtfobins-local)
+-   [Configuración](#configuración)
+    -   [Formato de utilscommon](#formato-de-utilscommon)
+    -   [Estructura de archivos](#estructura-de-archivos)
+-   [Capturas de pantalla](#capturas-de-pantalla)
+-   [Terminales compatibles](#terminales-compatibles)
+-   [Desinstalación](#desinstalación)
+-   [Problemas conocidos](#problemas-conocidos)
+-   [Créditos](#créditos)
+-   [Autor](#autor)
+
+## Descripción
+
+**searchCommand** es una herramienta escrita en Python diseñada para pentesters y entusiastas de la seguridad informática. Permite buscar y explorar comandos organizados por categorías y herramientas de manera interactiva, con autocompletado, resaltado de sintaxis y un diseño inspirado en Kali Linux.
+
+### Nueva funcionalidad
+
+Ahora incluye **gtfsearch** para acceso local a GTFOBins, permitiendo consultas offline de técnicas de escalación de privilegios y bypass de restricciones.
 
 ## Características
 
-- **Interfaz interactiva**: Busca comandos con un prompt estilo Kali, con soporte para autocompletado (Tab) y atajos de teclado.
-- **Categorías y herramientas**: Organiza comandos en categorías definidas en `utilscommon` para fácil acceso.
-- **Resaltado de sintaxis**: Colorea comandos, parámetros y comentarios para mayor claridad.
-- **Sugerencias**: Si no encuentras un comando, te sugiere opciones similares.
-- **Personalizable**: Usa un archivo `utilscommon` para definir tus propios comandos y categorías.
+| Característica | Descripción |
+|---|---|
+| **Interfaz interactiva** | Busca comandos con un prompt estilo Kali, con soporte para autocompletado (Tab) y atajos de teclado |
+| **Categorías y herramientas** | Organiza comandos en categorías definidas en `utilscommon` para fácil acceso |
+| **Resaltado de sintaxis** | Colorea comandos, parámetros y comentarios para mayor claridad |
+| **Sugerencias inteligentes** | Si no encuentras un comando, te sugiere opciones similares |
+| **GTFOBins integrado** | Accede a GTFOBins de forma local con `gtfsearch` |
+| **Personalizable** | Usa un archivo `utilscommon` para definir tus propios comandos y categorías |
 
-## 📋 Requisitos
 
-- **Sistema operativo**: Linux (no compatible con Windows).
-- **Python**: 3.6 o superior (debe incluir `venv` y `pip`, normalmente instalados por defecto en Kali Linux).
+## Requisitos
 
-*Nota*: No necesitas instalar ninguna librería manualmente. El instalador (`kali-install.py`) se encarga de todo, incluyendo sus propias dependencias, creando entornos virtuales automáticamente.
+| Requisito | Versión | Notas |
+|---|---|---|
+| **Sistema operativo** | Linux | No compatible con Windows |
+| **Python** | 3.6+ | Debe incluir `venv` y `pip` |
+| **Dependencias** | Automáticas | El instalador se encarga de todo |
 
-## 🚀 Instalación
+> **Nota**: No necesitas instalar ninguna librería manualmente. El instalador (`kali-install.py`) se encarga de todo, incluyendo la creación de entornos virtuales automáticamente.
+
+
+## Instalación
+
+### Importante para usuarios existentes
+
+**Si ya tienes searchCommand instalado y quieres acceder a la nueva funcionalidad `gtfsearch`, debes realizar una instalación limpia:**
+
+1.  **Desinstala la versión anterior:**
+    
+    ```bash
+    sudo ./kali-install.py
+    # Selecciona [2] Desinstalar searchCommand
+    ```
+    
+2.  **Descarga la nueva versión:**
+    
+    ```bash
+    cd ..
+    rm -rf searchCommand  # Elimina el directorio anterior
+    git clone https://github.com/SkyW4r33x/searchCommand.git
+    cd searchCommand
+    ```
+    
+3.  **Instala la nueva versión siguiendo los pasos de instalación.**
+    
+
+> **Importante**: La actualización directa desde searchCommand no incluye gtfsearch. Es necesario descargar el repositorio completo para acceder a todas las funcionalidades.
 
 ### Prerrequisitos
-Asegúrate de tener Python 3 con `venv` y `pip`. En Kali Linux, esto suele venir preinstalado. Si no, instala con:
+
+Asegúrate de tener Python 3 con `venv` y `pip`. En Kali Linux, esto suele venir preinstalado. Si no:
+
 ```bash
 sudo apt update && sudo apt install python3 python3-pip python3-venv -y
 ```
-## Pasos
-1. Clona el repositorio:
-```bash
-git clone https://github.com/SkyW4r33x/searchCommand.git
-cd searchCommand
-```
-2. Ejecuta el instalador: El script `kali-install.py` configura un entorno virtual y instala todas las dependencias automáticamente, sin requerir instalaciones previas.
 
-```bash
-chmod +x kali-install.py # dando permiso de ejecución
-sudo ./kali-install.py
-```
-* Selecciona `[1] Instalar searchCommand` en el menú.
-* Asegúrate de que `searchCommand.py`, `requirements.txt` y `referencestuff/utilscommon` estén en el directorio actual antes de ejecutar el instalador.
+### Pasos de instalación
 
-3. Verifica la instalación: Una vez instalado, ejecuta:
-```bash
-searchCommand
-```
-Deberías ver el banner y el prompt interactivo.
+1.  **Clona el repositorio:**
+    
+    ```bash
+    git clone https://github.com/SkyW4r33x/searchCommand.git
+    cd searchCommand
+     ```
+    
+2.  **Ejecuta el instalador:**
+    
+    ```bash
+    chmod +x kali-install.py
+    sudo ./kali-install.py
+    
+    ```
+    
+    -   Selecciona `[1] Instalar searchCommand` en el menú
+    -   Asegúrate de que todos los archivos estén en el directorio actual
+3.  **Verifica la instalación:**
+    
+    ```bash
+    searchCommand
+    gtfsearch
+    ```
 
-# 🖥️ Uso
-## Modo interactivo
+## Uso
+
+### searchCommand - Modo interactivo
+
 Ejecuta `searchCommand` sin argumentos para entrar en el modo interactivo:
+
 ```bash
 searchCommand
 ```
-* Usa `Tab` para autocompletar categorías o herramientas.
-* Escribe `help` para ver los comandos disponibles.
-* Atajos de teclado:
-    * `Ctrl + L`: Limpiar pantalla.
-    * `Ctrl + T`: Listar herramientas.
-    * `Ctrl + K`: Listar categorías.
-    * `Ctrl + C`: Salir.
-## Ejemplo de comandos internos
-* `list tools` (o `lt`): Muestra todas las herramientas.
-* `list categories` (o `lc`): Muestra todas las categorías.
-* `setip <IP> `: Configurar $IP para comandos
-* `seturl <URL>`: Configurar $URL para comandos.
-* `exit` (o `q`): Sale del programa.
-## Búsqueda directa
-Busca un comando específico y sal:
+
+#### Atajos de teclado
+
+| Atajo | Función |
+|---|---|
+| `Tab` | Autocompletar categorías o herramientas |
+| `Ctrl + L` | Limpiar pantalla |
+| `Ctrl + T` | Listar herramientas |
+| `Ctrl + K` | Listar categorías |
+| `Ctrl + C` | Salir |
+
+#### Comandos internos
+
+| Comando | Alias | Descripción |
+|---|---|---|
+| `list tools` | `lt` | Muestra todas las herramientas |
+| `list categories` | `lc` | Muestra todas las categorías |
+| `setip <IP>` | - | Configurar $IP para comandos |
+| `seturl <URL>` | - | Configurar $URL para comandos |
+| `help` | - | Mostrar ayuda |
+| `exit` | `q` | Salir del programa |
+
+#### Búsqueda directa
+
 ```bash
 searchCommand -q nmap
 ```
-## ⚙️ Formato de `utilscommon`
 
-La herramienta `utilscommon` ahora organiza los comandos en una estructura de carpetas dentro del directorio `~/referencestuff`. Cada categoría es una carpeta, y dentro de cada carpeta se encuentran archivos que representan las herramientas con sus respectivos comandos.
+### gtfsearch - GTFOBins Local
 
-## Estructura de Archivos
+**gtfsearch** te permite acceder a la base de datos de GTFOBins de forma local y offline.
 
-- **Categorías**: Las categorías se definen como carpetas dentro de `~/referencestuff`. Por ejemplo, una categoría como "RECONOCIMIENTO" sería una carpeta llamada `RECONOCIMIENTO`.
+#### Uso básico
 
-- **Herramientas**: Dentro de cada carpeta de categoría, las herramientas se definen como archivos de texto. Cada archivo lleva el nombre de la herramienta (por ejemplo, `NMAP.txt`) y contiene una descripción del comando seguida del comando en sí.
+```bash
+# Modo interactivo
+gtfsearch
 
-### Formato de un archivo de herramienta
-
-Cada archivo de herramienta debe seguir este formato:
-
-```
-Descripción:▶ [Descripción del comando]
-Comando: [Comando completo]
+# Búsqueda directa
+gtfsearch -q vim
+gtfsearch -q sudo
 ```
 
-**Ejemplo** (`~/referencestuff/RECONOCIMIENTO/NMAP.txt`):
-```
-Descripción:▶ Escaneo Rápido (Puertos abiertos rápidamente):
-Comando: nmap -p- --open -sS --min-rate 5000 -vvv -n -Pn $IP -oG allPorts
-```
-## Notas Importantes
+#### Capturas de gtfsearch
 
-- **Ubicación**: Los archivos de herramientas deben estar dentro de sus respectivas carpetas de categorías en `~/referencestuff`.
-- **Formato estricto**: Cada archivo de herramienta debe contener las líneas `Descripción:` y `Comando:` exactamente como se indica, con el texto correspondiente después de cada una.
-- **Errores**: Si una carpeta de categoría o un archivo de herramienta no se encuentra, o si el formato no es correcto, la herramienta generará un error similar a:
-  ```
-  ⚠️ Error al leer el archivo: Archivo no encontrado en /home/usuario/referencestuff/[CATEGORÍA]/[HERRAMIENTA]
-  ```
-  Se está trabajando en mejorar la gestión de errores en futuras versiones.
+| Funcionalidad | Captura |
+|---|---|
+| **Ayuda** | ![Ayuda gtfsearch](https://imgur.com/xmZEIAN.png) |
+| **Lista de binarios** | ![Lista binarios](https://imgur.com/6tC6u4U.png) |
+| **Información del binario** | ![Ejemplo binario](https://imgur.com/rZRjXzR.png) |
+| **Autocompletado** | ![Autocompletado](https://imgur.com/9cq2GAC.png) |
 
-## Ejemplo de Estructura
+## Configuración
+
+### Formato de utilscommon
+
+La herramienta `utilscommon` organiza los comandos en una estructura de carpetas dentro del directorio `~/referencestuff`.
+
+### Estructura de archivos
 
 ```
 ~/referencestuff/
@@ -117,47 +197,83 @@ Comando: nmap -p- --open -sS --min-rate 5000 -vvv -n -Pn $IP -oG allPorts
 ├── EXPLOTACIÓN/
 │   ├── METASPLOIT.txt
 │   └── OTRA_HERRAMIENTA.txt
+└── ...
 ```
 
-## 🖥️ Prompt de `searchCommand`
+#### Formato de archivo de herramienta
 
-El prompt interactivo de **`searchCommand`** te guía con un sistema de **autocompletado** intuitivo y muestra en tiempo real la **categoría** o **herramienta** en la que estás navegando. A continuación, se detallan los diferentes escenarios de uso con ejemplos visuales:
+Cada archivo debe seguir este formato:
+```
+Descripción:▶ [Descripción del comando]
+Comando: [Comando completo]
+```
 
-| **Escenario**                | **Descripción**                                      | **Ejemplo Visual**                                                                 |
-|------------------------------|-----------------------------------------------------|------------------------------------------------------------------------------------|
-| **Entrada correcta**         | El usuario ingresa un comando válido.               | ![Entrada correcta](https://i.imgur.com/H6NeYAn.png)                              |
-| **Entrada errónea**          | El usuario introduce un comando no reconocido.      | ![Entrada errónea](https://i.imgur.com/7jJQM7S.png)                               |
-| **Categoría o herramienta actual** | Muestra el contexto actual de navegación.          | ![Categoría actual](https://i.imgur.com/8pSYSkR.png)                              |
-| **Visualización del autocompletado** | Sugerencias dinámicas mientras escribes.          | ![enter image description here](https://i.imgur.com/7aSifEC.png)     |
+**Ejemplo** (`~/referencestuff/RECONOCIMIENTO/NMAP.txt`):
 
+```
+Descripción:▶ Escaneo Rápido (Puertos abiertos rápidamente):
+Comando: nmap -p- --open -sS --min-rate 5000 -vvv -n -Pn $IP -oG allPorts
+```
+
+
+## Capturas de pantalla
+
+| Funcionalidad | Captura |
+|---|---|
+| **Entrada correcta** | ![Entrada correcta](https://i.imgur.com/H6NeYAn.png) |
+| **Entrada errónea** | ![Entrada errónea](https://i.imgur.com/7jJQM7S.png) |
+| **Categoría actual** | ![Categoría actual](https://i.imgur.com/8pSYSkR.png) |
+| **Autocompletado** | ![Autocompletado](https://i.imgur.com/7aSifEC.png) |
+
+### Demostración en video
 [Ver demostración en video](https://i.imgur.com/OkKMFUy.mp4)
 
 
-## 🗑️ Desinstalación
-### Para desinstalar:
+
+## Terminales compatibles
+
+| Terminal | Estado | Notas |
+|---|---|---|
+| **Terminator** | ✅ Funciona perfectamente | Sin problemas conocidos |
+| **GNOME Terminal** | ✅ Funciona perfectamente | Sin problemas conocidos |
+| **Parrot Terminal** | ✅ Funciona perfectamente | Sin problemas conocidos |
+| **Kitty** | ⚠️ Limitaciones | Problemas con `Ctrl + L` y renderizado de iconos |
+
+> **Recomendación**: Para una experiencia óptima, usa Terminator, GNOME Terminal o Parrot Terminal.
+
+
+## Desinstalación
+
+Para desinstalar completamente searchCommand y gtfsearch:
+
 ```bash
 sudo ./kali-install.py
 ```
-Selecciona `[2] Desinstalar searchCommand`. Esto elimina todos los archivos instalados.
 
-## Terminales Probadas
-La herramienta ha sido probada en las siguientes terminales en entornos Linux:
-## ✅ Terminales Probadas  
+Selecciona `[4] Desinstalar searchCommand`. Esto elimina todos los archivos instalados, incluyendo gtfsearch.
 
-| Terminal        | Estado                                              |
-|-----------------|-----------------------------------------------------|
-| Kitty           | Funciona con limitaciones: problemas al limpiar pantalla con Ctrl + L (el historial reaparece al desplazar hacia arriba) y renderizado parcial de íconos. |
-| Terminator      | Funciona correctamente sin problemas conocidos      |
-| GNOME Terminal  | Funciona correctamente sin problemas conocidos      |
-| Parrot Terminal | Funciona correctamente sin problemas conocidos      |
+## Problemas conocidos
 
-**Nota**: En Kitty, `Ctrl + L` limpia la pantalla, pero el historial reaparece al desplazar hacia arriba.
-Si usas Kitty y encuentras este problema, considera usar Terminator, GNOME Terminal o en caso si estas en Parrot usar Parrot Terminal para una experiencia más fluida.
+| Problema | Descripción | Solución |
+|---|---|---|
+| **utilscommon faltante** | La herramienta no funciona sin este archivo | Asegúrate de incluirlo al instalar |
+| **Kitty Terminal** | Problemas con `Ctrl + L` y renderizado | Usa otros terminales recomendados |
+| **Actualización directa** | gtfsearch no está disponible tras actualizar | Realiza una instalación limpia |
+----------
 
-## ⚠️ Problemas conocidos
-* Si utilscommon no está presente o tiene un formato incorrecto, la herramienta no funcionará. Asegúrate de incluirlo al instalar.
-* En Kitty, limpiar la pantalla tiene el problema descrito arriba. Otros emuladores podrían mostrar colores o formato inconsistente.
+## Créditos
 
-📌 Esta herramienta está inspirada en los  `utilscommon` de **[S1R3N](https://github.com/OHDUDEOKNICE)** los cuales consistían principalmente en apuntes accesibles desde la terminal mediante alias. A partir de ahí, fue modificada y optimizada, incorporando una útil función de búsqueda de comandos para facilitar su uso y mejorar la experiencia general.
+-   **Inspiración**: Esta herramienta está inspirada en los `utilscommon` de **[S1R3N](https://github.com/OHDUDEOKNICE)**, consistentes principalmente en apuntes accesibles desde la terminal mediante alias.
+    
+-   **GTFOBins**: La funcionalidad de GTFOBins se basa en el proyecto **[GTFOBins](https://gtfobins.github.io/)** para proporcionar acceso offline a técnicas de escalación de privilegios y bypass de restricciones.
+    
+## Autor
 
-# **H4PPY H4CK1NG**
+**Jordan aka SkyW4r33x**  
+[GitHub](https://github.com/SkyW4r33x/searchCommand)
+
+<div align="center"> <h2>🧠 H4PPY H4CK1NG</h2>
+
+![Hacking](https://img.shields.io/badge/Keep-Hacking-brightgreen.svg) ![Security](https://img.shields.io/badge/Stay-Secure-red.svg) ![Learning](https://img.shields.io/badge/Never_Stop-Learning-blue.svg)
+
+</div>
