@@ -147,7 +147,7 @@ searchCommand -q nmap
 ### gtfsearch - GTFOBins Local
 
 **gtfsearch** te permite acceder a la base de datos de GTFOBins de forma local y offline.
-<div align="center"> <h2> Capturas de gtfsearch</h2>
+<h2> Capturas de gtfsearch</h2>
 
 | Funcionalidad | Captura |
 |---|---|
@@ -187,7 +187,7 @@ echo -e "Descripción:▶ Escaneo Rápido (Puertos abiertos rápidamente):\nComa
 ├── EXPLOTACIÓN/
 │   ├── METASPLOIT.txt
 │   └── OTRA_HERRAMIENTA.txt
-└── ...
+└── 
 ```
 
 #### Formato de archivo de herramienta
