@@ -56,14 +56,12 @@ Ahora incluye **gtfsearch** para acceso local a GTFOBins, permitiendo consultas 
     
     ```bash
     sudo ./kali-install.py
-    # Selecciona [2] Desinstalar searchCommand
+    # Selecciona [4] Desinstalar searchCommand
     ```
     
 2.  **Descarga la nueva versión:**
     
     ```bash
-    cd ..
-    rm -rf searchCommand  # Elimina el directorio anterior
     git clone https://github.com/SkyW4r33x/searchCommand.git
     cd searchCommand
     ```
