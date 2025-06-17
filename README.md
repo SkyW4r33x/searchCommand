@@ -179,7 +179,7 @@ echo -e "Descripción:▶ Escaneo Rápido (Puertos abiertos rápidamente):\nComa
 
 ### Estructura de archivos
 
-```
+```bash
 ~/referencestuff/
 ├── RECONOCIMIENTO/
 │   ├── NMAP.txt
@@ -194,14 +194,14 @@ echo -e "Descripción:▶ Escaneo Rápido (Puertos abiertos rápidamente):\nComa
 
 Cada archivo debe seguir este formato:
 
-```
+```bash
 Descripción:▶ [Descripción del comando]
 Comando: [Comando completo]
 ```
 
 **Ejemplo** (`~/referencestuff/RECONOCIMIENTO/NMAP.txt`):
 
-```
+```bash
 Descripción:▶ Escaneo Rápido (Puertos abiertos rápidamente):
 Comando: nmap -p- --open -sS --min-rate 5000 -vvv -n -Pn $IP -oG allPorts
 ```
