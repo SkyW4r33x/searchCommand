@@ -1,31 +1,33 @@
-![Banner](https://i.imgur.com/NII8Wbr.jpeg)
+![Banner de searchCommand](https://i.imgur.com/NII8Wbr.jpeg)
 
 <div align="center"> <h3>Herramienta de búsqueda interactiva para comandos de pentesting y GTFOBins en Linux</h3>
 
-[![Versión](https://img.shields.io/badge/versi%C3%B3n-0.2-blue.svg)](https://github.com/SkyW4r33x/searchCommand) [![Python](https://img.shields.io/badge/python-3.6+-green.svg)](https://python.org/) [![Licencia](https://img.shields.io/badge/licencia-MIT-red.svg)](https://claude.ai/chat/LICENSE) [![Plataforma](https://img.shields.io/badge/plataforma-Linux-orange.svg)](https://www.linux.org/)
+[![Versión](https://img.shields.io/badge/versi%C3%B3n-0.2-blue.svg)](https://github.com/SkyW4r33x/searchCommand) [![Python](https://img.shields.io/badge/python-3.6+-green.svg)](https://python.org/) [![Licencia](https://img.shields.io/badge/licencia-MIT-red.svg)](https://github.com/SkyW4r33x/searchCommand/blob/main/LICENSE) [![Plataforma](https://img.shields.io/badge/plataforma-Linux-orange.svg)](https://www.linux.org/)
 
 </div>
 
 ## Tabla de Contenido
 
--   [Descripción](#descripción)
--   [Características](#características)
--   [Instalación](#instalación)
-    -   [Importante para usuarios existentes](#importante-para-usuarios-existentes)
-    -   [Prerrequisitos](#prerrequisitos)
-    -   [Pasos de instalación](#pasos-de-instalación)
--   [Uso](#uso)
-    -   [searchCommand - Modo interactivo](#searchcommand---modo-interactivo)
-    -   [gtfsearch - GTFOBins Local](#gtfsearch---gtfobins-local)
--   [Configuración](#configuración)
-    -   [Formato de utilscommon](#formato-de-utilscommon)
-    -   [Estructura de archivos](#estructura-de-archivos)
--   [Capturas de pantalla](#capturas-de-pantalla)
--   [Terminales compatibles](#terminales-compatibles)
--   [Desinstalación](#desinstalación)
--   [Problemas conocidos](#problemas-conocidos)
--   [Créditos](#créditos)
--   [Autor](#autor)
+- [Descripción](#descripción)
+- [Características](#características)
+- [Instalación](#instalación)
+  - [Importante para usuarios existentes](#importante-para-usuarios-existentes)
+  - [Prerrequisitos](#prerrequisitos)
+  - [Pasos de instalación](#pasos-de-instalación)
+- [Uso](#uso)
+  - [searchCommand - Modo interactivo](#searchcommand---modo-interactivo)
+  - [gtfsearch - GTFOBins Local](#gtfsearch---gtfobins-local)
+- [Configuración](#configuración)
+  - [Formato de utilscommon](#formato-de-utilscommon)
+  - [Estructura de archivos](#estructura-de-archivos)
+- [Capturas de pantalla](#capturas-de-pantalla)
+- [Terminales compatibles](#terminales-compatibles)
+- [Distribuciones soportadas](#distribuciones-soportadas)
+- [Desinstalación](#desinstalación)
+- [Problemas conocidos](#problemas-conocidos)
+- [Contribuciones](#contribuciones)
+- [Créditos](#créditos)
+- [Autor](#autor)
 
 ## Descripción
 
@@ -52,26 +54,25 @@ Ahora incluye **gtfsearch** para acceso local a GTFOBins, permitiendo consultas 
 
 **Si ya tienes searchCommand instalado y quieres acceder a la nueva funcionalidad `gtfsearch`, debes realizar una instalación limpia:**
 
-1.  **Desinstala la versión anterior:**
-    
-    ```bash
-    sudo ./kali-install.py
-    # Selecciona [4] Desinstalar searchCommand
-    ```
-    
-2.  **Descarga la nueva versión:**
-    
-    ```bash
-    git clone https://github.com/SkyW4r33x/searchCommand.git
-    cd searchCommand
-    ```
-    
-3.  **Instala la nueva versión siguiendo los pasos de instalación.**
-    
+1. **Desinstala la versión anterior:**
+
+   ```bash
+   sudo ./kali-install.py
+   # Selecciona [4] Desinstalar searchCommand
+   ```
+
+2. **Descarga la nueva versión:**
+
+   ```bash
+   git clone https://github.com/SkyW4r33x/searchCommand.git
+   cd searchCommand
+   ```
+
+3. **Instala la nueva versión siguiendo los pasos de instalación.**
 
 > **Importante**: La actualización directa desde searchCommand no incluye gtfsearch. Es necesario descargar el repositorio completo para acceder a todas las funcionalidades.
 
-### Prerrequisitos
+### Prerrequisitos - usuarios nuevos.
 
 Asegúrate de tener Python 3 con `venv` y `pip`. En Kali Linux, esto suele venir preinstalado. Si no:
 
@@ -81,29 +82,21 @@ sudo apt update && sudo apt install python3 python3-pip python3-venv -y
 
 ### Pasos de instalación
 
-1.  **Clona el repositorio:**
-    
-    ```bash
-    git clone https://github.com/SkyW4r33x/searchCommand.git
-    cd searchCommand
-     ```
-    
-2.  **Ejecuta el instalador:**
-    
-    ```bash
-    chmod +x kali-install.py
-    sudo ./kali-install.py
-    
-    ```
-    
-    -   Selecciona `[1] Instalar searchCommand` en el menú
-    -   Asegúrate de que todos los archivos estén en el directorio actual
-3.  **Verifica la instalación:**
-    
-    ```bash
-    searchCommand
-    gtfsearch
-    ```
+1. **Clona el repositorio:**
+
+   ```bash
+   git clone https://github.com/SkyW4r33x/searchCommand.git
+   cd searchCommand
+   ```
+
+2. **Ejecuta el instalador:**
+
+   ```bash
+   chmod +x kali-install.py
+   sudo ./kali-install.py
+   ```
+
+   - Selecciona `[1] Instalar searchCommand` en el menú
 
 ## Uso
 
@@ -115,26 +108,35 @@ Ejecuta `searchCommand` sin argumentos para entrar en el modo interactivo:
 searchCommand
 ```
 
-#### Atajos de teclado
-
-| Atajo | Función |
-|---|---|
-| `Tab` | Autocompletar categorías o herramientas |
-| `Ctrl + L` | Limpiar pantalla |
-| `Ctrl + T` | Listar herramientas |
-| `Ctrl + K` | Listar categorías |
-| `Ctrl + C` | Salir |
-
 #### Comandos internos
 
-| Comando | Alias | Descripción |
-|---|---|---|
-| `list tools` | `lt` | Muestra todas las herramientas |
-| `list categories` | `lc` | Muestra todas las categorías |
-| `setip <IP>` | - | Configurar $IP para comandos |
-| `seturl <URL>` | - | Configurar $URL para comandos |
-| `help` | - | Mostrar ayuda |
-| `exit` | `q` | Salir del programa |
+| Comando               | Alias | Descripción                              |
+|-----------------------|-------|------------------------------------------|
+| `<herramienta>`       | -     | Buscar una herramienta (ej: NMAP)       |
+| `<categoría>`         | -     | Buscar una categoría (ej: RECONOCIMIENTO)|
+| `gtfsearch`           | `gtf` | Buscar en GTFOBins                      |
+| `help`                | `h`   | Mostrar este menú de ayuda              |
+| `list tools`          | `lt`  | Listar todas las herramientas           |
+| `list categories`     | `lc`  | Listar todas las categorías             |
+| `setip <IP>`          | `si`  | Configurar $IP                          |
+| `seturl <URL>`        | `su`  | Configurar $URL                         |
+| `edit <herramienta>`  | `e`   | Editar herramienta                      |
+| `refresh [config]`    | `r`   | Recargar herramientas o limpiar config  |
+| `update [-r]`         | `u`   | Actualizar o restaurar versión anterior |
+| `clear`               | `c`   | Limpiar la pantalla                     |
+| `exit`                | `q`   | Salir del programa                      |
+
+#### Atajos de teclado
+
+| Atajo       | Descripción                              |
+|-------------|------------------------------------------|
+| `Tab`       | Autocompletar categorías o herramientas |
+| `Ctrl + L`  | Limpiar pantalla                        |
+| `Ctrl + T`  | Listar herramientas rápidamente         |
+| `Ctrl + K`  | Listar categorías rápidamente           |
+| `Ctrl + E`  | Editar última herramienta buscada       |
+| `Ctrl + R`  | Recargar herramientas                   |
+| `Ctrl + C`  | Salir inmediatamente                    |
 
 #### Búsqueda directa
 
@@ -145,19 +147,7 @@ searchCommand -q nmap
 ### gtfsearch - GTFOBins Local
 
 **gtfsearch** te permite acceder a la base de datos de GTFOBins de forma local y offline.
-
-#### Uso básico
-
-```bash
-# Modo interactivo
-gtfsearch
-
-# Búsqueda directa
-gtfsearch -q vim
-gtfsearch -q sudo
-```
-
-#### Capturas de gtfsearch
+<div align="center"> <h2> Capturas de gtfsearch</h2>
 
 | Funcionalidad | Captura |
 |---|---|
@@ -171,6 +161,21 @@ gtfsearch -q sudo
 ### Formato de utilscommon
 
 La herramienta `utilscommon` organiza los comandos en una estructura de carpetas dentro del directorio `~/referencestuff`.
+
+#### Inicializar utilscommon
+
+Si el directorio `~/referencestuff` no existe, créalo con:
+
+```bash
+mkdir -p ~/referencestuff
+```
+
+Crea un archivo para una herramienta, por ejemplo:
+
+```bash
+mkdir ~/referencestuff/RECONOCIMIENTO
+echo -e "Descripción:▶ Escaneo Rápido (Puertos abiertos rápidamente):\nComando: nmap -p- --open -sS --min-rate 5000 -vvv -n -Pn \$IP -oG allPorts" > ~/referencestuff/RECONOCIMIENTO/NMAP.txt
+```
 
 ### Estructura de archivos
 
@@ -188,6 +193,7 @@ La herramienta `utilscommon` organiza los comandos en una estructura de carpetas
 #### Formato de archivo de herramienta
 
 Cada archivo debe seguir este formato:
+
 ```
 Descripción:▶ [Descripción del comando]
 Comando: [Comando completo]
@@ -199,7 +205,6 @@ Comando: [Comando completo]
 Descripción:▶ Escaneo Rápido (Puertos abiertos rápidamente):
 Comando: nmap -p- --open -sS --min-rate 5000 -vvv -n -Pn $IP -oG allPorts
 ```
-
 
 ## Capturas de pantalla
 
@@ -213,8 +218,6 @@ Comando: nmap -p- --open -sS --min-rate 5000 -vvv -n -Pn $IP -oG allPorts
 ### Demostración en video
 [Ver demostración en video](https://i.imgur.com/OkKMFUy.mp4)
 
-
-
 ## Terminales compatibles
 
 | Terminal | Estado | Notas |
@@ -226,10 +229,15 @@ Comando: nmap -p- --open -sS --min-rate 5000 -vvv -n -Pn $IP -oG allPorts
 
 > **Recomendación**: Para una experiencia óptima, usa Terminator, GNOME Terminal o Parrot Terminal.
 
+## Distribuciones soportadas
+
+- **Kali Linux**: Probado y completamente funcional.
+- **Ubuntu/Debian**: Funcional, pero puede requerir instalación adicional de dependencias.
+- **Otras**: No probado, pero debería funcionar en sistemas con Python 3.6+.
 
 ## Desinstalación
 
-Para desinstalar completamente searchCommand y gtfsearch:
+Para desinstalar completamente **searchCommand** y **gtfsearch**:
 
 ```bash
 sudo ./kali-install.py
@@ -244,14 +252,20 @@ Selecciona `[4] Desinstalar searchCommand`. Esto elimina todos los archivos inst
 | **utilscommon faltante** | La herramienta no funciona sin este archivo | Asegúrate de incluirlo al instalar |
 | **Kitty Terminal** | Problemas con `Ctrl + L` y renderizado | Usa otros terminales recomendados |
 | **Actualización directa** | gtfsearch no está disponible tras actualizar | Realiza una instalación limpia |
-----------
+
+## Contribuciones
+
+¡Las contribuciones son bienvenidas! Si deseas mejorar searchCommand, sigue estos pasos:
+1. Haz un fork del repositorio.
+2. Crea una rama para tu funcionalidad (`git checkout -b feature/nueva-funcionalidad`).
+3. Realiza tus cambios y haz commit (`git commit -m "Agrega nueva funcionalidad"`).
+4. Envía un pull request.
 
 ## Créditos
 
--   **Inspiración**: Esta herramienta está inspirada en los `utilscommon` de **[S1R3N](https://github.com/OHDUDEOKNICE)**, consistentes principalmente en apuntes accesibles desde la terminal mediante alias.
-    
--   **GTFOBins**: La funcionalidad de GTFOBins se basa en el proyecto **[GTFOBins](https://gtfobins.github.io/)** para proporcionar acceso offline a técnicas de escalación de privilegios y bypass de restricciones.
-    
+- **Inspiración**: Basado en los `utilscommon` de **[S1R3N](https://github.com/OHDUDEOKNICE)**. ¡Gracias por la inspiración!
+- **GTFOBins**: Integración local basada en el proyecto **[GTFOBins](https://gtfobins.github.io/)**.
+
 ## Autor
 
 **Jordan aka SkyW4r33x**  
@@ -259,6 +273,6 @@ Selecciona `[4] Desinstalar searchCommand`. Esto elimina todos los archivos inst
 
 <div align="center"> <h2>🧠 H4PPY H4CK1NG</h2>
 
-![Hacking](https://img.shields.io/badge/Keep-Hacking-brightgreen.svg) ![Security](https://img.shields.io/badge/Stay-Secure-red.svg) ![Learning](https://img.shields.io/badge/Never_Stop-Learning-blue.svg)
+![Hacking](https://img.shields.io/badge/Sigue-Hackeando-brightgreen.svg) ![Security](https://img.shields.io/badge/Mantente-Seguro-red.svg) ![Learning](https://img.shields.io/badge/Nunca_Parar_de-Aprender-blue.svg)
 
 </div>
