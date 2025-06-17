@@ -10,7 +10,6 @@
 
 -   [Descripción](#descripción)
 -   [Características](#características)
--   [Requisitos](#requisitos)
 -   [Instalación](#instalación)
     -   [Importante para usuarios existentes](#importante-para-usuarios-existentes)
     -   [Prerrequisitos](#prerrequisitos)
@@ -46,18 +45,6 @@ Ahora incluye **gtfsearch** para acceso local a GTFOBins, permitiendo consultas 
 | **Sugerencias inteligentes** | Si no encuentras un comando, te sugiere opciones similares |
 | **GTFOBins integrado** | Accede a GTFOBins de forma local con `gtfsearch` |
 | **Personalizable** | Usa un archivo `utilscommon` para definir tus propios comandos y categorías |
-
-
-## Requisitos
-
-| Requisito | Versión | Notas |
-|---|---|---|
-| **Sistema operativo** | Linux | No compatible con Windows |
-| **Python** | 3.6+ | Debe incluir `venv` y `pip` |
-| **Dependencias** | Automáticas | El instalador se encarga de todo |
-
-> **Nota**: No necesitas instalar ninguna librería manualmente. El instalador (`kali-install.py`) se encarga de todo, incluyendo la creación de entornos virtuales automáticamente.
-
 
 ## Instalación
 
