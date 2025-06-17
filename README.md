@@ -272,6 +272,7 @@ Selecciona `[4] Desinstalar searchCommand`. Esto elimina todos los archivos inst
 [GitHub](https://github.com/SkyW4r33x/searchCommand)
 
 <div align="center"> <h2>🧠 H4PPY H4CK1NG</h2>
+<div align="center"> <h2>Hecha con corazón, en un mundo de mierda.</h2>
 
 ![Hacking](https://img.shields.io/badge/Sigue-Hackeando-brightgreen.svg) ![Security](https://img.shields.io/badge/Mantente-Seguro-red.svg) ![Learning](https://img.shields.io/badge/Nunca_Parar_de-Aprender-blue.svg)
 
