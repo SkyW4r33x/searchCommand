@@ -5,6 +5,7 @@ import json
 import os
 import re
 import sys
+import pwd
 from rich import box
 from pathlib import Path
 from rich.console import Console
@@ -45,7 +46,6 @@ class SecurityValidator:
         if not isinstance(user_input, str):
             return ""
         
-        # Permitir \n y caracteres imprimibles
         sanitized = ''.join(char for char in user_input if char.isprintable() or char == '\n')
         sanitized = sanitized[:SecurityValidator.MAX_QUERY_LENGTH]
         sanitized = re.sub(r'\s+', ' ', sanitized).strip()
@@ -73,9 +73,30 @@ class SecurityValidator:
     def validate_file_path(file_path: str) -> tuple[bool, str]:
         try:
             path = Path(file_path).resolve()
-            home_dir = Path.home().resolve()
-            if not str(path).startswith(str(home_dir)):
-                return False, "Acceso denegado: archivo fuera del directorio home"
+            
+            allowed_dirs = []
+            
+            allowed_dirs.append(Path.home().resolve())
+            
+            if 'SUDO_USER' in os.environ:
+                try:
+                    original_user = os.environ['SUDO_USER']
+                    user_info = pwd.getpwnam(original_user)
+                    allowed_dirs.append(Path(user_info.pw_dir).resolve())
+                except (KeyError, ImportError):
+                    pass
+            
+            path_allowed = False
+            for allowed_dir in allowed_dirs:
+                try:
+                    if str(path).startswith(str(allowed_dir)):
+                        path_allowed = True
+                        break
+                except (OSError, ValueError):
+                    continue
+            
+            if not path_allowed:
+                return False, "Acceso denegado: archivo fuera de directorios permitidos"
             
             if len(str(path)) > SecurityValidator.MAX_PATH_LENGTH:
                 return False, f"Ruta demasiado larga (máximo {SecurityValidator.MAX_PATH_LENGTH} caracteres)"
@@ -108,7 +129,7 @@ class SecureFileHandler:
             
             with open(file_path, 'r', encoding='utf-8') as f:
                 data = json.load(f)
-                
+            
             return True, data, "Éxito"
             
         except json.JSONDecodeError as e:
@@ -135,7 +156,6 @@ class Colors:
 class SecureCustomCompleter(Completer):
     def __init__(self, command_pairs: List[tuple], binaries: List[str]):
         self.command_pairs = command_pairs
-        # Reducir la sanitización para mantener nombres de binarios completos
         self.binaries = [binary for binary in binaries if binary]
         self.all_completions = [f"[{alias}] {cmd}" for alias, cmd in command_pairs] + self.binaries
 
@@ -148,7 +168,7 @@ class SecureCustomCompleter(Completer):
         for alias, cmd in self.command_pairs:
             if completion_count >= max_completions:
                 break
-                
+            
             display_text = f"[{alias}] {cmd}"
             if text in alias.lower() or text in cmd.lower() or text in display_text.lower():
                 yield Completion(
@@ -161,7 +181,7 @@ class SecureCustomCompleter(Completer):
         for binary in self.binaries:
             if completion_count >= max_completions:
                 break
-                
+            
             if text in binary.lower():
                 yield Completion(
                     binary,
@@ -176,8 +196,10 @@ class GTFSearch:
         
         root_dir = SecurityValidator.sanitize_input(root_dir)
         
-        home_dir = Path.home()
-        self.gtfobins_file = str(home_dir / '.data' / 'gtfobins.json')
+        self.original_home = self._get_original_user_home()
+        self.gtfobins_file = str(self.original_home / '.data' / 'gtfobins.json')
+        
+        self._debug_paths()
         
         self.gtfobins_data = self._load_gtfobins_secure()
         self.last_command_success = True
@@ -200,6 +222,43 @@ class GTFSearch:
         
         self.prompt_session = self._init_secure_prompt_session()
 
+    def _get_original_user_home(self) -> Path:
+        methods_to_try = [
+            lambda: os.environ.get('SUDO_USER'),
+            lambda: os.environ.get('LOGNAME'),
+            lambda: os.environ.get('USER') if os.environ.get('USER') != 'root' else None,
+        ]
+        
+        for method in methods_to_try:
+            try:
+                original_user = method()
+                if original_user and original_user != 'root':
+                    user_info = pwd.getpwnam(original_user)
+                    user_home = Path(user_info.pw_dir)
+                    
+                    if user_home.exists():
+                        print(f"{Colors.GREEN}[✔]{Colors.RESET} Usando directorio del usuario original: {Colors.BLUE}{original_user}{Colors.RESET} -> {user_home}")
+                        return user_home
+                    else:
+                        print(f"{Colors.YELLOW}[!]{Colors.RESET} Directorio home del usuario {original_user} no existe: {user_home}")
+                        
+            except (KeyError, OSError, AttributeError):
+                continue
+        
+        current_home = Path.home()
+        print(f"{Colors.YELLOW}[!]{Colors.RESET} No se pudo determinar el usuario original, usando directorio actual: {current_home}")
+        return current_home
+
+    def _debug_paths(self):
+        print(f"{Colors.BLUE}[DEBUG]{Colors.RESET} Información de rutas:")
+        print(f"  - Usuario actual: {Colors.GREEN}{os.getenv('USER', 'desconocido')}{Colors.RESET}")
+        print(f"  - SUDO_USER: {Colors.GREEN}{os.getenv('SUDO_USER', 'no definido')}{Colors.RESET}")
+        print(f"  - UID actual: {Colors.GREEN}{os.getuid()}{Colors.RESET}")
+        print(f"  - Directorio home detectado: {Colors.GREEN}{self.original_home}{Colors.RESET}")
+        print(f"  - Archivo GTFObins: {Colors.GREEN}{self.gtfobins_file}{Colors.RESET}")
+        print(f"  - Archivo existe: {Colors.GREEN if os.path.exists(self.gtfobins_file) else Colors.RED}{'Sí' if os.path.exists(self.gtfobins_file) else 'No'}{Colors.RESET}")
+        print()
+
     def _clear_screen_only(self):
         if os.name == 'nt':
             os.system('cls')
@@ -214,8 +273,25 @@ class GTFSearch:
         success, data, error_msg = SecureFileHandler.safe_read_json(self.gtfobins_file)
         
         if not success:
-            print(f"{Colors.RED}[-] Error de seguridad: {error_msg}{Colors.RESET}")
-            return []
+            print(f"{Colors.RED}[-] Error al cargar GTFObins: {error_msg}{Colors.RESET}")
+            
+            alternative_paths = [
+                Path.home() / '.data' / 'gtfobins.json',
+                Path('/usr/share/gtfobins/gtfobins.json'),
+                Path('./gtfobins.json'),
+            ]
+            
+            for alt_path in alternative_paths:
+                if alt_path.exists() and str(alt_path) != self.gtfobins_file:
+                    print(f"{Colors.YELLOW}[!]{Colors.RESET} Intentando ruta alternativa: {alt_path}")
+                    success, data, error_msg = SecureFileHandler.safe_read_json(str(alt_path))
+                    if success:
+                        print(f"{Colors.GREEN}[✔]{Colors.RESET} Archivo cargado desde: {alt_path}")
+                        break
+            
+            if not success:
+                print(f"{Colors.RED}[-] No se pudo cargar el archivo GTFObins desde ninguna ubicación{Colors.RESET}")
+                return []
         
         if not isinstance(data, list):
             print(f"{Colors.RED}[-] Formato de datos inválido{Colors.RESET}")
@@ -225,18 +301,17 @@ class GTFSearch:
         for item in data:
             if not isinstance(item, dict):
                 continue
-                
+            
             if 'name' not in item or 'functions' not in item:
                 continue
-                
+            
             name = str(item.get('name', '')).strip()
             if not name:
                 continue
             
-            # Validación menos restrictiva para nombres de binarios
             if not re.match(r'^[a-zA-Z0-9\-_.+]+$', name):
                 continue
-                
+            
             validated_item = {
                 'name': name,
                 'functions': []
@@ -249,7 +324,6 @@ class GTFSearch:
                         
                         for field in ['function', 'description']:
                             if field in func:
-                                # Mantener el texto completo sin truncar
                                 value = str(func[field]).strip()
                                 validated_func[field] = value
                         
@@ -260,7 +334,6 @@ class GTFSearch:
                                     validated_example = {}
                                     for ex_field in ['code', 'description']:
                                         if ex_field in example:
-                                            # Mantener código y descripciones completas
                                             value = str(example[ex_field]).strip()
                                             validated_example[ex_field] = value
                                     
@@ -279,7 +352,7 @@ class GTFSearch:
 
     def _init_secure_prompt_session(self) -> PromptSession:
         kb = KeyBindings()
-
+        
         @kb.add(Keys.ControlC)
         def _(event):
             print(f"\n\n{Colors.ORANGE}[!]{Colors.WHITE} Para salir correctamente, utiliza el comando {Colors.RED}{Colors.BOLD}q{Colors.RESET} o {Colors.RED}{Colors.BOLD}exit{Colors.RESET}.{Colors.RESET}\n")
@@ -321,8 +394,8 @@ class GTFSearch:
         
         binaries = sorted({tool.get('name', '') for tool in self.gtfobins_data if tool.get('name')})
         completer = SecureCustomCompleter(command_pairs, binaries)
-
-        history_file = str(Path.home() / '.gtfsearch_history')
+        
+        history_file = str(self.original_home / '.gtfsearch_history')
         
         return PromptSession(
             completer=completer,
@@ -341,30 +414,26 @@ class GTFSearch:
         total_width = 60
         title = " AYUDA - GTFsearch "
         side_width = (total_width - len(title)) // 2
-
         print(f"{Colors.BLUE}{Colors.BOLD}╓{'─' * side_width}╢{Colors.WHITE}{Colors.BOLD}{title}{Colors.BLUE}╟{'─' * side_width}╖{Colors.RESET}\n")
+
         print(f"  {Colors.GREEN}{'Comando'.ljust(20)}{Colors.GREEN}{'Alias'.ljust(8)}{Colors.GREEN}{'Descripción'.ljust(32)}{Colors.RESET}")
         print(f"  {'─' * 20}{'─' * 8}{'─' * 32}")
-
         commands = [
             ("help", "h", "Mostrar este menú de ayuda"),
             ("list binaries", "lb", "Listar binarios"),
             ("exit", "q", "Volver a searchCommand"),
         ]
-
         for cmd, alias, desc in commands:
             print(f"  {Colors.GREEN}➜ {Colors.RESET}{cmd.ljust(19)}{Colors.GRAY}{alias.ljust(7)}{Colors.WHITE}{desc.ljust(32)}{Colors.RESET}")
 
         print("")
         print(f"  {Colors.GREEN}{'Atajo'.ljust(20)}{Colors.GREEN}{'Descripción'.ljust(32)}{Colors.RESET}")
         print(f"  {'─' * 20}{'─' * 32}")
-
         shortcuts = [
             ("Ctrl + L", "Limpiar la pantalla y mostrar ayuda"),
             ("Ctrl + C", "Mostrar mensaje de salida"),
             ("Ctrl + K", "Listar binarios rápidamente"),
         ]
-
         for shortcut, desc in shortcuts:
             print(f"  {Colors.GREEN}• {Colors.RESET}{shortcut.ljust(18)}{Colors.WHITE}{desc.ljust(32)}{Colors.RESET}")
 
@@ -376,9 +445,7 @@ class GTFSearch:
             return
 
         self._clear_screen_only()
-
         self.console.print(f"\n[bold #fe013a]🔰 GTFSearch [/bold #fe013a] [dim bright_white]Security Toolkit[/dim bright_white]")
-
         total_binaries = len([tool for tool in self.gtfobins_data if 'name' in tool and 'functions' in tool])
         self.console.print(f"[bold bright_blue]Available:[/bold bright_blue] [bright_yellow]{total_binaries}[/bright_yellow] [dim #ffff]binarios disponibles[/dim #ffff]")
         self.console.print()
@@ -403,15 +470,11 @@ class GTFSearch:
 
             binary_name = tool['name']
             functions = tool.get('functions', [])
-
             function_names = sorted(set(
                 f.get('function', '') for f in functions if f.get('function')
             ))
-
             functions_str = ", ".join(function_names) if function_names else "Sin funciones"
-
             row_style = "bold" if i % 2 == 0 else ""
-
             table.add_row(binary_name, functions_str, style=row_style)
 
         self.console.print(table)
@@ -420,7 +483,6 @@ class GTFSearch:
     def _handle_internal_command(self, query: str) -> Optional[bool]:
         query = query.lower().strip()
         
-        # Validación menos restrictiva para comandos internos
         if len(query) > 100:
             print(f"{Colors.RED}[-] Comando demasiado largo{Colors.RESET}")
             return None
@@ -452,21 +514,21 @@ class GTFSearch:
         for entry in self.gtfobins_data:
             if result_count >= max_results:
                 break
-                
+            
             binary = entry.get("name", "").lower()
             if not binary:
                 continue
-                
+            
             if binary == query:
                 for function in entry.get("functions", []):
                     if result_count >= max_results:
                         break
-                        
+                    
                     function_name = function.get("function", "")
                     for example in function.get("examples", []):
                         if result_count >= max_results:
                             break
-                            
+                        
                         results.append({
                             "binary": entry.get("name", ""),
                             "function": function_name,
@@ -484,7 +546,6 @@ class GTFSearch:
         self.console.print(f"\n[dim #23242f]  {separator_line}[/dim #23242f]\n")
 
     def _format_text_with_wrap(self, text: str, max_line_length: int = 90) -> str:
-        """Formatea texto manteniendo saltos de línea y dividiendo líneas largas"""
         if not text:
             return ""
         
@@ -496,12 +557,10 @@ class GTFSearch:
             if not line:
                 formatted_lines.append("")
                 continue
-                
-            # Si la línea es más corta que el máximo, agregarla tal como está
+            
             if len(line) <= max_line_length:
                 formatted_lines.append(line)
             else:
-                # Dividir líneas largas por palabras
                 words = line.split()
                 current_line = []
                 current_length = 0
@@ -559,11 +618,9 @@ class GTFSearch:
                 self.console.print()
                 self.console.print(f"[bold blue]🔒 {function.upper()}[/bold blue]\n")
                 
-                # Mostrar descripción completa de la función
                 if func_results[0].get("function_desc"):
                     self.console.print(f"[bold #05A1F7] ▌ Description:[/bold #05A1F7]")
                     
-                    # Formatear descripción manteniendo el texto completo
                     desc_text = func_results[0]["function_desc"]
                     formatted_desc = self._format_text_with_wrap(desc_text)
                     
@@ -575,32 +632,26 @@ class GTFSearch:
                     
                     self.console.print()
                 
-                # Mostrar ejemplos completos
                 for example_idx, result in enumerate(func_results):
                     if len(func_results) > 1:
                         self.console.print(f"[dim #fe013a]• Ejemplo: {example_idx + 1}[/dim #fe013a]")
                     else:
                         self.console.print(f"[blue]➤ Implementation[/blue]")
                     
-                    # Mostrar descripción del ejemplo completa
                     if result.get("example_desc"):
                         example_desc = self._format_text_with_wrap(result["example_desc"])
                         for line in example_desc.split('\n'):
                             if line.strip():
                                 self.console.print(f"  [italic yellow]{line}[/italic yellow]")
                     
-                    # Mostrar código completo
                     if code := result.get("code"):
-                        # Convertir \n literales en saltos de línea reales
                         code = code.replace('\\n', '\n').strip()
                         
-                        # No truncar el código, mantenerlo completo
                         if result.get("example_desc"):
                             self.console.print(f"💻 [bold white]Código:[/bold white]")
                         
                         self.console.print()
                         
-                        # Crear panel con el código completo
                         code_text = Text(code, style="#ea382d")
                         code_panel = Panel(
                             code_text,
@@ -613,8 +664,15 @@ class GTFSearch:
                         
                         if example_idx < len(func_results) - 1:
                             self.console.print()
-            
-            self._print_separator()
+
+                
+
+        self.console.print()
+        # Agregar separador final después de mostrar todos los resultados
+        terminal_width = self.console.size.width
+        final_separator = "━" * (terminal_width - 4)
+        self.console.print(f"[dim #23242f]  {final_separator}[/dim #23242f]")
+        self.console.print()
 
     def run(self):
         self._clear_screen()
@@ -633,7 +691,6 @@ class GTFSearch:
                 if query_clean.startswith('['):
                     query_clean = query_clean.split(']')[-1].strip()
                 
-                # Validación menos restrictiva para búsquedas
                 if len(query_clean) > 100:
                     self._clear_screen()
                     self.last_command_success = False
@@ -659,7 +716,7 @@ class GTFSearch:
                     if not results:
                         self._clear_screen()
                         print(f"{Colors.RED}{Colors.BOLD}[-]{Colors.RESET} No se encontraron resultados para {Colors.GRAY}{query_clean}{Colors.RESET}.\n")
-                        
+                
             except KeyboardInterrupt:
                 print(f"\n{Colors.ORANGE}[!]{Colors.WHITE} Usa 'exit' o 'q' para salir correctamente.{Colors.RESET}")
                 continue
