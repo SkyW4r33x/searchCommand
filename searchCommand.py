@@ -39,7 +39,7 @@ from gtfsearch import GTFSearch
 
 warnings.filterwarnings("ignore", category=InsecureRequestWarning, module="urllib3")
 
-__version__ = "3.1.2"
+__version__ = "3.1.3"
 
 if os.name == 'nt':
     print(f"{Colors.RED}{Colors.BOLD}[-]{Colors.RESET} Este programa está diseñado para Linux/macOS. En Windows, usa WSL para mejor compatibilidad.")
@@ -1296,7 +1296,7 @@ class SearchCommand:
                     if category_results:
                         self._display_results(
                             category_results, 
-                            f"{Colors.BLUE}{Colors.BOLD}📂 Categoría: {Colors.WHITE}{query.upper()}{Colors.RESET}\n"
+                            f"{Colors.BLUE}{Colors.BOLD}▌ {Colors.WHITE}{Colors.BOLD}Categoría: {Colors.RESET}{Colors.GRAY}{query.upper()}{Colors.RESET}\n"
                         )
                         self.last_command_success = True
                         continue
@@ -1305,7 +1305,7 @@ class SearchCommand:
                     if tool_results:
                         self._display_results(
                             tool_results, 
-                            f"{Colors.ORANGE}{Colors.BOLD}🔧 Herramienta: {Colors.WHITE}{query.upper()}{Colors.RESET}\n"
+                            f"{Colors.ORANGE}{Colors.BOLD}▌ {Colors.WHITE}{Colors.BOLD}Herramienta: {Colors.RESET}{Colors.GRAY}{query.upper()}{Colors.RESET}\n"
                         )
                         self.last_command_success = True
                         continue
@@ -1352,6 +1352,71 @@ class SearchCommand:
         finally:
             signal.signal(signal.SIGWINCH, signal.SIG_DFL)
             print(f"{Colors.RESET}", end="")
+
+    def run_query(self, query: str):
+    
+        query = query.strip()
+        if not query:
+            print(f"{Colors.RED}[-]{Colors.RESET} Error: No se proporcionó una consulta válida.")
+            sys.exit(1)
+
+        if not self.tools_by_category:
+            # modo no interactifo forzado
+            self._load_tools(interactive=False)
+
+        if self._handle_internal_command(query):
+            return
+
+        query_normalized = normalize_text(query)
+        if query_normalized is None:
+            print(f"{Colors.RED}[✘]{Colors.RESET} Consulta inválida.")
+            sys.exit(1)
+
+        category_results = self.search_by_category(query)
+        if category_results:
+            self._display_results(
+                category_results,
+                f"{Colors.BLUE}{Colors.BOLD}▌ {Colors.WHITE}{Colors.BOLD}Categoría: {Colors.RESET}{Colors.GRAY}{query.upper()}{Colors.RESET}\n"
+            )
+            return
+
+        tool_results = self.search_by_tool(query)
+        if tool_results:
+            self._display_results(
+                tool_results,
+                f"{Colors.ORANGE}{Colors.BOLD}▌ {Colors.WHITE}{Colors.BOLD}Herramienta: {Colors.RESET}{Colors.GRAY}{query.upper()}{Colors.RESET}\n"
+            )
+            return
+
+        all_options = (
+            list(self.categories.keys()) +
+            [tool for tools in self.tools_by_category.values() for tool in tools]
+        )
+        all_options_normalized = [
+            normalize_text(opt) for opt in all_options if normalize_text(opt)
+        ]
+
+        suggestions = process.extract(
+            query_normalized,
+            all_options_normalized,
+            limit=3,
+            scorer=process.fuzz.partial_ratio
+        )
+
+        valid_suggestions = [
+            all_options[all_options_normalized.index(s[0])]
+            for s in suggestions if s[1] >= 80
+        ]
+
+        print(f"{Colors.RED}{Colors.BOLD}[✘] {Colors.RESET}Sin resultados para: {Colors.WHITE}{query}")
+        if valid_suggestions:
+            print(f"{Colors.LIGHT_BLUE}💡 ¿Quizás quisiste decir?{Colors.RESET}")
+            for suggestion in valid_suggestions:
+                print(f"   {Colors.GREEN}▶{Colors.RESET} {Colors.CYAN}{suggestion}{Colors.RESET}")
+        else:
+            print(f"{Colors.ORANGE}[!]{Colors.RESET} No hay sugerencias disponibles.")
+        print()
+        sys.exit(1)
 
 class EnhancedCompleter(Completer):
     def __init__(self, categories: List[str], tools: List[str], tools_by_category: Dict[str, List[str]], 
