@@ -9,6 +9,7 @@ readonly RED=$'\033[0;31m'
 readonly YELLOW=$'\033[1;33m'
 readonly CYAN=$'\033[38;2;73;174;230m'
 readonly PINK=$'\033[38;2;254;1;58m'
+readonly WHITE=$'\033[38;2;255;255;255m'
 readonly BOLD=$'\033[1m'
 readonly RESET=$'\033[0m'
 
@@ -81,13 +82,13 @@ uninstall_searchcommand() {
 
 show_banner() {
     clear
-    echo -e "${PINK}"
+    echo -e "${PINK}${BOLD}"
     echo -e "\t\t┌─┐┌─┐┌─┐┬─┐┌─┐┬ ┬╔═╗┌─┐┌┬┐┌┬┐┌─┐┌┐┌┌┬┐"
     echo -e "\t\t└─┐├┤ ├─┤├┬┘│  ├─┤║  │ │││││││├─┤│││ ││"
     echo -e "\t\t└─┘└─┘┴ ┴┴└─└─┘┴ ┴╚═╝└─┘┴ ┴┴ ┴┴ ┴┘└┘─┴┘"
     echo -e "${RESET}\n"
-    echo -e "       ${BLUE}+ -- --=[${RESET} ${YELLOW}${BOLD}+${RESET} Created by ${BLUE}${BOLD}:${RESET} Jordan (SkyW4r33x) 🐉 ${BLUE}${BOLD}       ]${RESET}"
-    echo -e "       ${BLUE}+ -- --=[${RESET} ${YELLOW}${BOLD}+${RESET} Repository ${BLUE}${BOLD}:${RESET} https://github.com/SkyW4r33x ${BLUE}${BOLD}]${RESET}\n\n"
+    echo -e "       ${BLUE}+ -- --=[${RESET} ${YELLOW}${BOLD}+${RESET} Created by ${BLUE}${BOLD}:${RESET} Jordan (SkyW4r33x) 🐉 ${BLUE}${BOLD}${RED}█${RESET}${WHITE}█${RESET}${RED}█${RESET}    ${BLUE}${BOLD}]${RESET}"
+    echo -e "       ${BLUE}+ -- --=[${RESET} ${YELLOW}${BOLD}+${RESET} Repository ${BLUE}${BOLD}:${RESET} https://github.com/SkyW4r33x ${BLUE}${BOLD}]${RESET}\n\n"                                                    
 }
 
 show_menu() {
