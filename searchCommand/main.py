@@ -14,7 +14,7 @@ def main():
     parser = argparse.ArgumentParser(description="Command search tool for pentesting.")
     parser.add_argument('--list-categories', action='store_true', help="Show available categories.")
     parser.add_argument('--list-tools', action='store_true', help="Show all tools organized by category.")
-    parser.add_argument('query_positional', nargs='?', help="Direct query (without flag, ex: 'searchCommand main.py nmap').")
+    parser.add_argument('query_positional', nargs='?', help="Direct query (without flag, ex: 'searchCommand nmap').")
 
     try:
         args = parser.parse_args()
