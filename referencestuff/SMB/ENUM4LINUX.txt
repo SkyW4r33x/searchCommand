@@ -1,0 +1,20 @@
+▶ Enumeración Completa (Obtener toda la información disponible):
+  enum4linux -a $IP
+
+▶ Enumeración de Usuarios (Listar usuarios del sistema):
+  enum4linux -U $IP
+
+▶ Enumeración de Shares (Listar recursos compartidos):
+  enum4linux -S $IP
+
+▶ Enumeración de Información del Sistema Operativo (Detectar OS):
+  enum4linux -o $IP
+
+▶ Enumeración de Grupos (Listar grupos del dominio):
+  enum4linux -G $IP
+
+▶ Enumeración de Políticas de Contraseña (Ver políticas de seguridad):
+  enum4linux -P $IP
+
+▶ Enumeración con Credenciales (Usar autenticación):
+  enum4linux -u user -p password -a $IP

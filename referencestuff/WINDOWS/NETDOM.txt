@@ -1,0 +1,2 @@
+▶ Habilitar Historial de SID (Permitir explotación de extra SID entre dominios):
+  netdom trust <source_domain> /d:<target_domain> /enablesidhistory:yes

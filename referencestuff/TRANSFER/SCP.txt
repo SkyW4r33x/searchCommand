@@ -1,0 +1,17 @@
+▶ Copiar Archivo Local a Remoto (Subir archivo):
+  scp archivo.txt usuario@$IP:/ruta/destino/
+
+▶ Copiar Archivo Remoto a Local (Descargar archivo):
+  scp usuario@$IP:/ruta/archivo.txt /ruta/local/
+
+▶ Copiar Directorio Completo (Transferir directorio recursivo):
+  scp -r /ruta/local/directorio usuario@$IP:/ruta/destino/
+
+▶ Copiar con Puerto Específico (Usar puerto personalizado):
+  scp -P 2222 archivo.txt usuario@$IP:/ruta/destino/
+
+▶ Copiar Preservando Permisos (Mantener atributos):
+  scp -p archivo.txt usuario@$IP:/ruta/destino/
+
+▶ Copiar con Compresión (Reducir tamaño en transferencia):
+  scp -C archivo.txt usuario@$IP:/ruta/destino/

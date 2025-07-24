@@ -1,0 +1,2 @@
+▶ Listar Hosts Conocidos (Ver tabla ARP):
+  arp -a

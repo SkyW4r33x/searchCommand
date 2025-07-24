@@ -1,0 +1,24 @@
+▶ Escaneo Básico (Identificar tecnologías en un sitio web):
+  whatweb $URL
+  # Ejemplo: whatweb https://ejemplo.com
+
+▶ Modo Detallado (Obtener más información sobre tecnologías):
+  whatweb -v $URL
+
+▶ Guardar Resultados (Exportar salida a un archivo):
+  whatweb --log=output.txt $URL
+
+▶ Modo Pasivo (Evitar enviar solicitudes adicionales):
+  whatweb --passive $URL
+
+▶ Usar Expresiones Regulares (Buscar patrones específicos):
+  whatweb --match-regex $URL
+
+▶ Modo Agresivo (Detectar más tecnologías):
+  whatweb -a 3 $URL
+
+▶ Usar Proxy (Enviar solicitudes a través de un proxy):
+  whatweb --proxy=http://127.0.0.1:8080 $URL
+
+▶ Personalizar User-Agent (Cambiar el agente de usuario):
+  whatweb --useragent="Mozilla/5.0 (Windows NT 10.0; Win64; x64)" $URL

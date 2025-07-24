@@ -1,0 +1,11 @@
+▶ Escaneo Básico (Análisis de servidor web):
+  nikto -h $URL
+
+▶ Escaneo con Autenticación (Usar credenciales):
+  nikto -h $URL -id admin:password
+
+▶ Escaneo con Plugin Específico (Ejemplo XSS):
+  nikto -h $URL -Plugins "apache_expect_xss"
+
+▶ Escaneo con Proxy (Usar proxy local):
+  nikto -h $URL -useproxy http://127.0.0.1:8080

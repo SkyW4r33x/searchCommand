@@ -1,0 +1,35 @@
+▶ Enumerar Recursos SMB (Listar shares y permisos):
+  smbmap -H $IP -u user -p password
+
+▶ Listar Todos los Shares (Enumerar recursos disponibles):
+  smbmap -H $IP -u anonymous
+
+▶ Descargar Archivo de un Share (Obtener archivo específico):
+  smbmap -H $IP -u user -p password -R share_name --download filename
+
+▶ Descargar Todos los Archivos de un Share (Copiar todo el contenido):
+  smbmap -H $IP -u user -p password -R share_name --download '*'
+
+▶ Ejecutar Comando Remoto (Ejecutar comando en el sistema):
+  smbmap -H $IP -u user -p password -x "ipconfig"
+
+▶ Enumerar con Null Session (Sesión nula sin credenciales):
+  smbmap -H $IP -u "" -p ""
+
+▶ Listar Permisos de Archivos en un Share (Ver accesos detallados):
+  smbmap -H $IP -u user -p password -R share_name -A '*'
+
+▶ Comprobar Acceso de Escritura en un Share (Testear permisos de escritura):
+  smbmap -H $IP -u user -p password -R share_name -W
+
+▶ Explorar Recursos con Puerto Específico (Usar puerto alternativo):
+  smbmap -H $IP -P 445 -u user -p password
+
+▶ Guardar Resultados en un Archivo (Exportar salida):
+  smbmap -H $IP -u user -p password > resultados.txt
+
+▶ Buscar un Archivo Específico en Todos los Shares (Localizar archivo):
+  smbmap -H $IP -u user -p password -F filename
+
+▶ Listar Usuarios y Sesiones Activas (Obtener info de usuarios):
+  smbmap -H $IP -u user -p password -L

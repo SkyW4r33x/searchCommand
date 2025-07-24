@@ -1,0 +1,33 @@
+▶ Crackeo Básico con Diccionario (Usar wordlist):
+  john --wordlist=/usr/share/wordlists/rockyou.txt unshadowed.txt
+
+▶ Mostrar Contraseñas Crackeadas (Ver resultados):
+  john --show unshadowed.txt
+
+▶ Crackear un Hash Específico (Formato definido):
+  john --format=sha512crypt --wordlist=/usr/share/wordlists/rockyou.txt hash.txt
+
+▶ Usar Reglas de Mutación (Modificar wordlist):
+  john --rules --wordlist=/usr/share/wordlists/rockyou.txt unshadowed.txt
+
+▶ Crackeo en Modo Incremental (Fuerza bruta):
+  john --incremental unshadowed.txt
+
+▶ Crackear Archivo ZIP Protegido (Extraer y crackear hash):
+  zip2john archivo.zip > zip.hash
+  john zip.hash
+
+▶ Crackear Archivo RAR Protegido (Extraer y crackear hash):
+  rar2john archivo.rar > rar.hash
+  john rar.hash
+
+▶ Crackear Archivo PDF Protegido (Extraer y crackear hash):
+  pdf2john archivo.pdf > pdf.hash
+  john pdf.hash
+
+▶ Crackear Hash de SSH (Clave privada):
+  ssh2john id_rsa > ssh.hash
+  john ssh.hash
+
+▶ Crackear Hash NTLM (Windows):
+  john --format=NT --wordlist=/usr/share/wordlists/rockyou.txt hash.txt

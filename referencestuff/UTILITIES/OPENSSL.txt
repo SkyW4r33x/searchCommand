@@ -1,0 +1,56 @@
+▶ Crear Solicitud de Firma y Clave Nueva (Generar CSR y clave):
+  openssl req -new -newkey rsa:<RSA_LENGTH> -nodes -out <OUTPUT_CSR> -keyout <OUTPUT_KEY>
+
+▶ Crear Certificado Autofirmado (Generar certificado autofirmado):
+  openssl req -x509 -sha256 -nodes -days <VALIDITY> -newkey rsa:<RSA_LENGTH> -out <OUTPUT_CRT> -keyout <OUTPUT_KEY>
+
+▶ Crear Solicitud de Firma desde Clave Existente (Generar CSR desde clave):
+  openssl req -out <OUTPUT_CSR> -key <INPUT_KEY> -new
+
+▶ Crear Solicitud de Firma desde Certificado y Clave (Generar CSR desde certificado):
+  openssl x509 -x509toreq -out <OUTPUT_CSR> -in <INPUT_CRT> -signkey <INPUT_KEY>
+
+▶ Eliminar Frase de Contraseña de Clave Privada (Quitar passphrase):
+  openssl rsa -in <INPUT_KEY> -out <OUTPUT_PLAINTEXT_KEY>
+
+▶ Convertir Archivo DER a PEM (Cambiar formato de DER a PEM):
+  openssl x509 -inform der -in <INPUT_CRT> -out <OUTPUT_PEM>
+
+▶ Convertir Archivo PEM a DER (Cambiar formato de PEM a DER):
+  openssl x509 -outform der -in <INPUT_PEM> -out <OUTPUT_CRT>
+
+▶ Convertir Archivo PKCS12 a PEM (Incluye clave privada y certificados):
+  openssl pkcs12 -in <INPUT_PKCS12> -out <OUTPUT_PEM> -nodes
+
+▶ Extraer Clave Privada de Archivo PKCS12 (Obtener solo la clave):
+  openssl pkcs12 -in <INPUT_PKCS12> -out <OUTPUT_PEM> -nodes -nocerts
+
+▶ Extraer Certificado de Archivo PKCS12 (Obtener solo el certificado):
+  openssl pkcs12 -in <INPUT_PKCS12> -out <OUTPUT_PEM> -nodes -nokeys
+
+▶ Convertir Certificado PEM y Clave a PKCS12 (Generar archivo PKCS12):
+  openssl pkcs12 -export -out <OUTPUT_PKCS12> -inkey <INPUT_KEY> -in <INPUT_CRT> -certfile <INPUT_CRT>
+
+▶ Validar Solicitud de Firma (Verificar CSR):
+  openssl req -text -noout -verify -in <OUTPUT_CSR>
+
+▶ Validar Clave Privada (Verificar integridad de la clave):
+  openssl rsa -in <INPUT_KEY> -check
+
+▶ Validar Certificado (Verificar detalles del certificado):
+  openssl x509 -in <INPUT_CRT> -text -noout
+
+▶ Validar Archivo PKCS12 (Verificar archivo .pfx o .p12):
+  openssl pkcs12 -info -in <INPUT_PKCS12>
+
+▶ Comparar Hash MD5 de Certificado (Verificar MD5 del certificado):
+  openssl x509 -noout -modulus -in <INPUT_CRT> | openssl md5
+
+▶ Comparar Hash MD5 de Clave Privada (Verificar MD5 de la clave):
+  openssl rsa -noout -modulus -in <INPUT_KEY> | openssl md5
+
+▶ Comparar Hash MD5 de Solicitud de Firma (Verificar MD5 del CSR):
+  openssl req -noout -modulus -in <INPUT_CSR> | openssl md5
+
+▶ Mostrar Cadena de Certificados del Servidor (Ver certificados del servidor):
+  openssl s_client -connect $URL:<PORT>

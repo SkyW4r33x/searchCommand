@@ -1,0 +1,56 @@
+▶ Escaneo Completo (Puertos, servicios y detección agresiva):
+  nmap -p- -sS -sV -A $IP -oN targeted
+
+▶ Escaneo de Servicios (Scripts y versiones):
+  nmap -p- -sC -sV $IP --open -oN targeted -oX targetedXML
+
+▶ Escaneo de Vulnerabilidades (Scripts NSE vuln):
+  nmap -p- --script=vuln $IP -oN vulns
+
+▶ Escaneo Rápido (Puertos abiertos rápidamente):
+  nmap -p- --open -sS --min-rate 5000 -vvv -n -Pn $IP -oG allPorts
+
+▶ Versiones/Servicios (Análisis detallado de puertos):
+  nmap -sCV -p<puertos> $IP -oN targeted
+
+▶ Salida XML (Exportar en múltiples formatos):
+  nmap -sCV -p<puertos> $IP -oN targeted -oX targetedXML
+
+▶ Generar HTML (Convertir XML a HTML):
+  xsltproc targetedXML -o index.html
+
+▶ Escaneo UDP (Puertos UDP abiertos):
+  nmap -p- -sU --min-rate 10000 -n -Pn $IP -oG allPortsUDP
+
+▶ Escaneo de Vulnerabilidades NSE (Scripts específicos):
+  nmap --script vuln $IP -p<puertos>
+
+▶ Escaneo de Scripts Específicos (Ejemplo HTTP):
+  nmap --script=http-enum $IP -p80,443
+
+▶ Escaneo de Red (Descubrir hosts vivos):
+  nmap -sn 192.168.1.0/24
+
+▶ Detección de Sistema Operativo (Identificar OS):
+  nmap -O $IP
+
+▶ Escaneo Sigiloso SYN (Escaneo silencioso):
+  nmap -sS $IP
+
+▶ Escaneo de Versiones Agresivo (Máxima precisión):
+  nmap -sV --version-intensity 9 $IP
+
+▶ Escaneo con Evasión de Firewall/IDS (Evitar detección):
+  nmap -f -t 0 -n -Pn --data-length 200 -D RND:10 $IP
+
+▶ Escaneo Puertos Comunes (Puertos frecuentes):
+  nmap -p 21,22,23,80,443,445,3389 $IP -sV
+
+▶ Escaneo con Traceroute (Rastrear ruta):
+  nmap --traceroute -Pn $IP
+
+▶ Escaneo con Fragmentación (Evadir filtros):
+  nmap -sS -f --mtu 8 $IP
+  
+▶ Escaneo por IPV6:
+  nmap -p- -6 -sS --min-rate 10000 -n -Pn dead:beef:0000:0000:0250:56ff:fe94:a48b -oG allPort_IPV6

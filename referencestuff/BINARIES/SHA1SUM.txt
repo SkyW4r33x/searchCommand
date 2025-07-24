@@ -1,0 +1,2 @@
+▶ Hash SHA1 (Verificación más robusta): 
+  sha1sum <binario>

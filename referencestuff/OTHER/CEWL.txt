@@ -1,0 +1,23 @@
+▶ Generar Lista de Palabras desde Contenido Web:
+  cewl $URL -w pass.dic  
+
+▶ Especificar Profundidad de Rastreo:  
+  cewl -d 3 $URL -w pass.dic  
+
+▶ Establecer Longitud Mínima de Palabras:  
+  cewl -m 5 $URL -w pass.dic  
+
+▶ Incluir Números en la Lista:  
+  cewl --with-numbers $URL -w pass.dic  
+
+▶ Extraer Correos Electrónicos:  
+  cewl -e --email_file emails.txt $URL  
+
+▶ Extraer Metadatos de Documentos:  
+  cewl -a --meta_file meta.txt $URL  
+
+▶ Usar Proxy para Anonimato:  
+  cewl --proxy_host 192.168.1.1 --proxy_port 8080 $URL -w pass.dic  
+
+# CeWL rastrea sitios web para crear listas de palabras para pruebas de penetración y cracking de contraseñas.
+

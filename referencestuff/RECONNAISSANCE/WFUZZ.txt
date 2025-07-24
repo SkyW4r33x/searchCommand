@@ -1,0 +1,29 @@
+▶ Fuzzing Básico (Búsqueda de directorios):
+  wfuzz -c --hc=404 -t 200 -w /usr/share/wordlists/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt $URL/FUZZ
+
+▶ Mostrar Líneas (Filtrar por líneas):
+  wfuzz -c --sl=216 --hc=404,403 -t 200 -w /usr/share/wordlists/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt $URL/FUZZ/
+
+▶ Probar Extensiones (Fuzzing con extensiones):
+  wfuzz -c --hl=216 --hc=404,403 -t 200 -w /usr/share/wordlists/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt -z file,html-php-txt $URL/FUZZ.FUZ2Z
+
+▶ Rango de Números (Fuzzing numérico):
+  wfuzz -c -t 200 -z range,1-2000 $URL/FUZZ
+
+▶ Fuzzing de Parámetros (Probar parámetros POST):
+  wfuzz -c -z file,/usr/share/wordlists/seclists/Discovery/Web-Content/burp-parameter-names.txt -d "FUZZ=test" $URL
+
+▶ Fuzzing en Parámetro POST (Probar valores en parámetros POST):
+  wfuzz -z file,/usr/share/wordlists/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt -X post -u $URL -d 'FUZZ=1'
+
+▶ Fuzzing de Cookies (Probar valores de cookies):
+  wfuzz -c -z file,/usr/share/wordlists/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt -b "session=FUZZ" $URL
+
+▶ Fuzzing con Proxy (Usar proxy local):
+  wfuzz -c --sc=200 -t 200 -w /usr/share/wordlists/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt -p 127.0.0.1:8080 $URL/FUZZ/
+
+▶ Fuzzing de Parámetros GET (Probar parámetros en URL):
+  wfuzz -c -u "$URL/index.php?FUZZ=" -w /usr/share/wordlists/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt -t 50 --hw 169
+
+▶ Fuzzing de subdominios:
+  wfuzz -c -u $URL -H "Host: FUZZ.<Domain>" -w /usr/share/wordlists/seclists/Discovery/DNS/subdomains-top1million-110000.txt -t 150 --hl=9

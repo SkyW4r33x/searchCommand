@@ -1,0 +1,19 @@
+▶ Capturar Tráfico en Interfaz (Capturar paquetes en una interfaz específica):
+  wireshark -i <interface> -k
+
+▶ Filtrar por IP (Capturar tráfico de una IP específica):
+  wireshark -i <interface> -f "host $IP" -k
+
+▶ Filtrar por Puerto (Capturar tráfico en un puerto específico):
+  wireshark -i <interface> -f "port <port>" -k
+
+▶ Guardar Captura en Archivo (Guardar paquetes capturados en un archivo):
+  wireshark -i <interface> -w capture.pcap -k
+
+▶ Analizar Archivo PCAP (Abrir un archivo de captura existente):
+  wireshark -r capture.pcap
+
+▶ Filtrar por Protocolo (Capturar tráfico de un protocolo específico):
+  wireshark -i <interface> -f "<protocol>" -k
+
+  # Ejemplo: wireshark -i eth0 -f "tcp" -k

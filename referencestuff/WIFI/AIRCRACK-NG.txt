@@ -1,0 +1,2 @@
+▶ Crackear Handshake WPA/WPA2 (Obtener PSK usando diccionario):
+  aircrack-ng -w <dictionary> <input_file>

@@ -1,0 +1,58 @@
+▶ Listar Servicios Iniciados (Ver servicios en ejecución):
+  net start
+▶ Listar Usuarios Locales (Ver todos los usuarios del sistema):
+  net users
+▶ Información de un Usuario (Obtener detalles de un usuario):
+  net user <username>
+▶ Información de Política de Contraseñas (Ver política de contraseñas local):
+  net accounts
+▶ Agregar Usuario Local (Crear un nuevo usuario):
+  net user <username> <password> /ADD
+▶ Agregar Usuario al Dominio (Crear usuario en el dominio):
+  net user <username> <password> /ADD /DOMAIN
+▶ Agregar Usuario a Administradores Locales (Dar privilegios de administrador):
+  net localgroup administrators <username> /add
+▶ Listar Grupos Locales (Ver grupos locales):
+  net localgroup
+▶ Mostrar Miembros de un Grupo Local (Ver usuarios de un grupo local):
+  net localgroup <group_name>
+▶ Listar Computadoras Conectadas (Ver equipos en la red):
+  net view
+▶ Listar Recursos Compartidos en el Dominio (Ver shares del dominio):
+  net view /all /domain <domain_name>
+▶ Listar Recursos Compartidos de un Equipo (Ver shares de un equipo específico):
+  net view \\$IP \ALL
+▶ Montar Recurso Compartido Localmente (Montar un share en una letra de unidad):
+  net use x: \\$IP\<share_name>
+▶ Ver Recursos Compartidos Actuales (Listar shares actuales del sistema):
+  net share
+▶ Obtener Nombre del Dominio (Ver dominio del usuario actual):
+  echo %USERDOMAIN%
+▶ Obtener Nombre DNS del Dominio (Ver dominio DNS del usuario):
+  echo %USERDNSDOMAIN%
+▶ Obtener Nombre del Controlador de Dominio (Ver nombre del DC):
+  echo %logonserver%
+▶ Obtener Nombre del DC Alternativo (Ver nombre del DC con set):
+  set logonserver
+▶ Listar Grupos del Dominio (Ver grupos del dominio):
+  net group /domain
+▶ Listar Computadoras del Dominio (Ver equipos conectados al dominio):
+  net group "domain computers" /domain
+▶ Listar Equipos del Dominio (Ver todos los PCs del dominio):
+  net view /domain
+▶ Listar Controladores de Dominio (Ver cuentas de DCs):
+  net group "Domain Controllers" /domain
+▶ Listar Usuarios con Privilegios de Admin del Dominio (Ver administradores del dominio):
+  net group "Domain Admins" /domain
+▶ Agregar Usuario a Admins del Dominio (Añadir usuario a Domain Admins):
+  net group "Domain Admins" <username> /add /domain
+▶ Agregar Usuario a Admins del Dominio (Versión francesa):
+  net group "Admins du domaine" <username> /add /domain
+▶ Listar Usuarios del Grupo Administradores en el Dominio (Ver admins locales del dominio):
+  net localgroup administrators /domain
+▶ Listar Todos los Usuarios del Dominio (Ver usuarios del dominio):
+  net user /domain
+▶ Obtener Información de Usuario del Dominio (Detalles de un usuario del dominio):
+  net user <username> /domain
+▶ Ver Política de Contraseñas del Dominio (Política de contraseñas y bloqueo):
+  net accounts /domain

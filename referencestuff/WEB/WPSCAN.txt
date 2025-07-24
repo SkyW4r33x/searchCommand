@@ -1,0 +1,36 @@
+▶ Escaneo Básico (Reconocimiento inicial):
+  wpscan --url $URL -e vp,u --random-user-agent --api-token="B1jhNBwjLPaOWqXZhYzFYFcrksDe4a9uD8VHYeLzErU"
+
+▶ Fuerza Bruta (Ataque de contraseñas):
+  wpscan --url $URL -U admin -P /usr/share/wordlists/rockyou.txt
+
+▶ Enumeración de Usuarios (Listar usuarios):
+  wpscan --url $URL --enumerate u
+
+▶ Detección de Plugins Vulnerables (Buscar plugins inseguros):
+  wpscan --url $URL --enumerate vp
+
+▶ Escaneo Agresivo (Análisis exhaustivo):
+  wpscan --url $URL --enumerate vp,vt,tt,cb,dbe,u,m --plugins-detection aggressive --api-token="B1jhNBwjLPaOWqXZhYzFYFcrksDe4a9uD8VHYeLzErU"
+
+▶ Escaneo de Plugins (Modo Agresivo):
+  wpscan --url $URL --plugins-detection aggressive -e ap -o wpscan  
+  
+▶ Detección de Temas (Identificar temas):
+  wpscan --url $URL --enumerate vt
+
+▶ Escaneo de Vulnerabilidades en Medios (Buscar fallos en medios):
+  wpscan --url $URL --enumerate m
+
+▶ Fuerza Bruta con Lista de Usuarios (Probar múltiples credenciales):
+  wpscan --url $URL -U /usr/share/wordlists/seclists/Usernames/top-usernames-shortlist.txt -P /usr/share/wordlists/seclists/Passwords/Common-Credentials/10-million-password-list-top-1000000.txt
+
+▶ Escaneo con Proxy (Usar proxy local):
+  wpscan --url $URL --proxy http://127.0.0.1:8080 --enumerate vp
+
+▶ Escaneo con Salida (Guardar resultados):
+  wpscan --url $URL -e vp,u --output wpscan_results.txt
+
+# Notas:
+# - Descomprimir rockyou.txt si está comprimido: gunzip /usr/share/wordlists/rockyou.txt.gz
+# - Usa un API token válido para acceder a la base de datos de vulnerabilidades.

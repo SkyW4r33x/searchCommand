@@ -1,0 +1,4 @@
+▶ Solicitud DNS para Controlador de Dominio (Buscar DC mediante DNS):
+  nslookup -type=any <userdnsdomain>.
+▶ Consulta DNS para Active Directory (Buscar registros LDAP del dominio):
+  nslookup -type=SRV _ldap._tcp.dc._msdcs.<domain_name>

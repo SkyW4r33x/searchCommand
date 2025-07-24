@@ -1,0 +1,8 @@
+▶ Capturar PMKID WPA2-PSK (Obtener PMKID para cracking):
+  hcxdumptool -i wlan0mon -o capture.pcapng --enable_status=1 -c <channel>
+▶ Convertir Captura a Formato Hashcat (Preparar PMKID para cracking):
+  hcxpcaptool -z test.16800 test.pcapng
+
+  # Notas:
+  # - wlan0 y wlan0mon son ejemplos; ajusta según tu interfaz WiFi.
+  # - Reemplaza <mac_address>, <client_mac_address>, <channel>, <output_file>, y <dictionary> según corresponda.

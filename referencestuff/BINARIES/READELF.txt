@@ -1,0 +1,8 @@
+▶ Leer Cabeceras ELF (Información básica):
+  readelf -h <binario>
+
+▶ Listar Secciones ELF (Estructura interna):
+  readelf -S <binario>
+
+▶ Listar Símbolos ELF (Funciones y variables):
+  readelf -s <binario>

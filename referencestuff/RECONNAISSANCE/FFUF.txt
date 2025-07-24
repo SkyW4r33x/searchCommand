@@ -1,0 +1,26 @@
+▶ Escaneo Básico (Búsqueda de directorios):
+  ffuf -c -t 200 -w /usr/share/wordlists/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt -u $URL/FUZZ --mc=200,301
+
+▶ Fuzzing de Subdominios (Descubrir subdominios):
+  ffuf -w /usr/share/wordlists/seclists/Discovery/DNS/subdomains-top1million-5000.txt -u http://FUZZ.<dominio.com>
+
+▶ Fuzzing de Host con Filtro por Tamaño (Filtrar por tamaño de respuesta):
+  ffuf -w /usr/share/wordlists/seclists/Discovery/DNS/subdomains-top1million-5000.txt -u $URL -H "Host: FUZZ" -fs <response_size>
+
+▶ Fuzzing de Parámetro GET (Probar valores en parámetros GET):
+  ffuf -w /usr/share/wordlists/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt -u $URL?<param>=FUZZ -fs <response_size>
+
+▶ Fuzzing de Parámetro POST con Filtro 401 (Filtrar respuestas 401):
+  ffuf -w /usr/share/wordlists/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt -u $URL -X POST -d "username=admin\&password=FUZZ" -fc 401
+
+▶ Fuzzing Recursivo (Búsqueda en profundidad):
+  ffuf -w /usr/share/wordlists/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt -u $URL/FUZZ -recursion -recursion-depth 2
+
+▶ Fuzzing con Proxy (Usar proxy local):
+  ffuf -w /usr/share/wordlists/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt -u $URL/FUZZ -x http://127.0.0.1:8080
+
+▶ Fuzzing con Cabeceras (Personalizar headers):
+  ffuf -w /usr/share/wordlists/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt -u $URL/FUZZ -H "User-Agent: MiNavegador/1.0"
+
+▶ Fuzzing de subdominios:
+  ffuf -c -u $URL -H "Host: FUZZ.<Domain>" -w /usr/share/wordlists/seclists/Discovery/DNS/subdomains-top1million-110000.txt -t 150 -fl=10

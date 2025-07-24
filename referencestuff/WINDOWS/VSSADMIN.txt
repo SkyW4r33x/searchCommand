@@ -1,0 +1,2 @@
+▶ Listar Copias de Sombra (Ver shadow copies existentes):
+  vssadmin list shadows

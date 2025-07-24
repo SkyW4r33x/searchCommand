@@ -1,0 +1,26 @@
+▶ Consulta SNMP Básica (Recopilación de datos específicos):
+  snmpbulkwalk -v 2c -c public $IP | tee snmp
+
+▶ Consulta SNMP Completa (Grupo system):
+  snmpbulkwalk -v 2c -c public -t 2 $IP system | tee snmp_Sneaky
+
+▶ Consulta SNMP Básica (Grupo system):
+  snmpbulkwalk -v 2c -c public -t 2 $IP system | tee snmp_system
+
+▶ Consulta SNMP con OID Específico (Grupo system):
+  snmpbulkwalk -v 2c -c public -t 2 $IP 1.3.6.1.2.1.1 | tee snmp_specific
+
+▶ Consulta SNMP con Salida Formateada (Grupo system):
+  snmpbulkwalk -v 2c -c public -t 2 -O qv $IP system | tee snmp_clean
+
+▶ Consulta SNMP Rápida con Límite de Respuestas (Grupo system):
+  snmpbulkwalk -v 2c -c public -t 2 -Cr10 $IP system | tee snmp_system_fast
+
+▶ Consulta SNMP con Comunidad Personalizada (Grupo system):
+  snmpbulkwalk -v 2c -c $COMMUNITY -t 2 $IP system | tee snmp_custom
+
+▶ Consulta SNMP con Versión 3 (Grupo system):
+  snmpbulkwalk -v 3 -u $USER -a SHA -A $PASS -x AES -X $KEY -t 2 $IP system | tee snmp_v3
+
+▶ Consulta SNMP a Múltiples IPs (Grupo system):
+  for IP in $(cat ips.txt); do snmpbulkwalk -v 2c -c public -t 2 $IP system | tee snmp_$IP; done

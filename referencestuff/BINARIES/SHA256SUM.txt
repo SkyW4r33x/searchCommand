@@ -1,0 +1,2 @@
+▶ Hash SHA256 (Más seguro):
+  sha256sum <binario>

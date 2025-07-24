@@ -1,0 +1,14 @@
+▶ Configurar /etc/proxychains.conf (Definir proxy SOCKS):
+  socks5 127.0.0.1 9050
+
+▶ Usar con Cualquier Comando (Ejecutar a través de proxy):
+  proxychains nmap -sT -p80,443 $IP
+
+▶ Usar con Herramientas Específicas (Ejemplo con navegador):
+  proxychains firefox
+
+▶ Encadenar Múltiples Proxies (Usar archivo de configuración personalizado):
+  proxychains4 -f /ruta/a/config curl $URL
+
+▶ Verificar Conexión (Probar proxy con curl):
+  proxychains curl ifconfig.me

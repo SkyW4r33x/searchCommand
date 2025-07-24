@@ -1,0 +1,5 @@
+▶ Detectar Empaquetado:
+  upx -t <binario>  # Prueba si está comprimido con UPX
+
+▶ Desempaquetar Binario:
+  upx -d <binario>

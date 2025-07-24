@@ -1,0 +1,17 @@
+▶ Descargar Archivo (Obtener archivo desde URL):
+  wget $URL/archivo.txt
+
+▶ Descargar y Renombrar (Guardar con nombre personalizado):
+  wget -O nuevo_nombre.txt $URL/archivo.txt
+
+▶ Descargar Recursivamente (Copiar sitio completo):
+  wget -r $URL/
+
+▶ Descargar con Autenticación (Acceso protegido):
+  wget --user=usuario --password=contraseña $URL/archivo_protegido.txt
+
+▶ Limitar Velocidad de Descarga (Controlar ancho de banda):
+  wget --limit-rate=200k $URL/archivo_grande.zip
+
+▶ Continuar Descarga Interrumpida (Reanudar transferencia):
+  wget -c $URL/archivo_grande.zip

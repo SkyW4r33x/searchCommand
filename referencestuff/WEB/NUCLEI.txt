@@ -1,0 +1,32 @@
+▶ Enumerar Plugins en WordPress (Detectar plugins específicos):
+  nuclei -u $URL -tags cms -t /usr/share/nuclei-templates/http/cms/wordpress-detect.yaml
+
+▶ Detectar Vulnerabilidades Comunes (CVE críticas y altas):
+  nuclei -u $URL -tags cve -severity critical,high -o resultados.txt
+
+▶ Escanear Directorios Expuestos (Buscar configuraciones expuestas):
+  nuclei -u $URL -tags exposure,config
+
+▶ Buscar Paneles de Login (Identificar páginas de acceso):
+  nuclei -u $URL -tags login
+
+▶ Detectar Tecnologías Web (Identificar tecnologías):
+  nuclei -u $URL -tags tech
+
+▶ Buscar Vulnerabilidades SQLi (Detección de inyecciones SQL):
+  nuclei -u $URL -tags sqli
+
+▶ Escanear Vulnerabilidades XSS (Detección de scripts cruzados):
+  nuclei -u $URL -tags xss
+
+▶ Detectar Archivos de Backup (Buscar copias expuestas):
+  nuclei -u $URL -tags backup
+
+▶ Buscar Información Sensible Expuesta (Datos filtrados):
+  nuclei -u $URL -tags exposure
+
+▶ Escanear Vulnerabilidades de CMS (Fallos en sistemas CMS):
+  nuclei -u $URL -tags cms
+
+▶ Escaneo Masivo (Analizar múltiples URLs):
+  nuclei -l urls.txt -tags cve -silent

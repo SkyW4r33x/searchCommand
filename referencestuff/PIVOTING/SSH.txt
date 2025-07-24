@@ -1,0 +1,26 @@
+▶ Conexión por SSH (Acceder a máquina remota):
+  ssh usuario@$IP
+
+▶ Local Port Forwarding (Redirigir puerto local a remoto):
+  ssh -L 8080:localhost:80 usuario@$IP
+
+▶ Dynamic Port Forwarding (Crear proxy SOCKS):
+  ssh -D 9050 usuario@$IP
+
+▶ Remote Port Forwarding (Redirigir puerto remoto a local):
+  ssh -R 8080:localhost:80 usuario@$IP
+
+▶ Jump Host (Usar máquina intermedia):
+  ssh -J usuario@jump_host usuario@$IP
+
+▶ Túnel SSH con Autenticación de Clave (Usar clave privada):
+  ssh -i id_rsa -L 8080:localhost:80 usuario@$IP
+  
+▶ Autenticación de Clave (Usar clave privada):
+  ssh -i id_rsa usuario@$IP
+
+▶ Túnel SSH Persistente (Mantener túnel activo):
+  autossh -M 0 -f -N -L 8080:localhost:80 usuario@$IP
+
+▶ SSH con Puerto Específico (Conectar a puerto no estándar):
+  ssh -p 2222 usuario@$IP

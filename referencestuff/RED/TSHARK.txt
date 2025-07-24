@@ -1,0 +1,35 @@
+▶ Capturar Tráfico en Interfaz (Capturar paquetes en una interfaz específica):
+  tshark -i <interface>
+  # Ejemplo: tshark -i eth0
+
+▶ Filtrar por IP (Capturar tráfico de una IP específica):
+  tshark -i <interface> -f "host $IP"
+  # Ejemplo: tshark -i eth0 -f "host 192.168.1.100"
+
+▶ Filtrar por Puerto (Capturar tráfico en un puerto específico):
+  tshark -i <interface> -f "port <port>"
+  # Ejemplo: tshark -i eth0 -f "port 80"
+
+▶ Filtrar por Protocolo (Capturar tráfico de un protocolo específico):
+  tshark -i <interface> -f "<protocol>"
+  # Ejemplo: tshark -i eth0 -f "tcp"
+
+▶ Limitar Captura (Capturar un número específico de paquetes):
+  tshark -i <interface> -c <count>
+  # Ejemplo: tshark -i eth0 -c 100
+
+▶ Guardar Captura en Archivo (Guardar paquetes capturados en un archivo):
+  tshark -i <interface> -w capture.pcap
+  # Ejemplo: tshark -i eth0 -w capture.pcap
+
+▶ Analizar Archivo PCAP (Leer un archivo de captura existente):
+  tshark -r capture.pcap
+
+▶ Extraer Campos Específicos (Mostrar direcciones IP de origen y destino):
+  tshark -r capture.pcap -T fields -e ip.src -e ip.dst
+
+▶ Filtrar Tráfico HTTP (Aplicar filtro de visualización para tráfico HTTP):
+  tshark -r capture.pcap -Y "http"
+
+▶ Generar Estadísticas (Obtener estadísticas de entrada/salida):
+  tshark -r capture.pcap -z io,stat,1

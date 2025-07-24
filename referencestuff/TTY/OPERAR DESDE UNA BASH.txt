@@ -1,0 +1,38 @@
+▶ Iniciar una Sesión de Script (Grabar sesión en bash):
+  script /dev/null -c bash
+
+▶ Iniciar Bash con PTY (Mejorar shell con pseudo-terminal):
+  python3 -c 'import pty; pty.spawn("/bin/bash")'
+
+* MANTENER ACCESO TRAS CTRL + C
+▶ Recuperar Shell tras CTRL + Z (Mantener acceso al fondo):
+  # 1. Presionar CTRL + Z
+  stty raw -echo; fg
+  # 2. Ejecutar: reset xterm
+
+* LIMPIAR Y CONFIGURAR LA SHELL DE LA VÍCTIMA
+▶ Configurar Terminal (Establecer tipo de terminal):
+  export TERM=xterm-256color
+
+▶ Alias Útiles - Listar Archivos (Crear alias para ls detallado):
+  alias ll='clear; ls -lsaht --color=auto'
+
+▶ Alias Útiles - Subir Directorio (Simplificar navegación):
+  alias ..='cd ..'
+
+▶ Configurar PATH Seguro (Definir rutas confiables):
+  export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/tmp
+
+* OBTENER TAMAÑO DE SHELL ATACANTE
+▶ Ver Dimensiones del Atacante (Consultar tamaño actual):
+  stty size
+  # Salida esperada: 46 190
+
+* OBTENER TAMAÑO DE SHELL VÍCTIMA
+▶ Ver Dimensiones de la Víctima (Consultar tamaño actual):
+  stty size
+  # Salida esperada: 24 80
+
+* AJUSTAR TAMAÑO DE SHELL VÍCTIMA
+▶ Ajustar Tamaño de la Víctima (Usar dimensiones del atacante):
+  stty rows 46 columns 190

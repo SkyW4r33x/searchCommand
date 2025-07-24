@@ -1,0 +1,11 @@
+▶ Escaneo Básico SNMP (Exploración inicial de servicios SNMP):
+  onesixtyone $IP
+
+▶ Escaneo con Comunidad Predeterminada (Probar comunidad conocida como 'public'):
+  onesixtyone -c public $IP
+
+▶ Escaneo con Diccionario de Comunidades (Usar archivo de comunidades):
+  onesixtyone -c /usr/share/seclists/Discovery/SNMP/common-snmp-community-strings-onesixtyone.txt $IP
+
+▶ Escaneo Silencioso con Retardo (Evitar detección):
+  onesixtyone -w 100 $IP

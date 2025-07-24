@@ -1,0 +1,34 @@
+▶ Abrir Binario:
+  r2 <binario>
+
+▶ Analizar Todo (Automático):
+  [0x00000000]> aaa
+
+▶ Listar Funciones:
+  [0x00000000]> afl
+
+▶ Desensamblar Función:
+  [0x00000000]> pdf @<nombre_funcion>  (Ejemplo: pdf @main)
+
+▶ Buscar Cadenas:
+  [0x00000000]> iz
+
+▶ Buscar Referencias a Función:
+  [0x00000000]> axt <nombre_funcion>
+
+▶ Mostrar Gráfico de Función:
+  [0x00000000]> agf @<nombre_funcion>
+
+▶ Depurar Binario:
+  [0x00000000]> ood    # Abrir en modo depuración
+  [0x00000000]> dc     # Continuar ejecución
+
+▶ Establecer Breakpoint:
+  [0x00000000]> db <dirección>
+
+▶ Paso a Paso:
+  [0x00000000]> ds    # Step
+  [0x00000000]> dn    # Next
+
+▶ Mostrar Registros:
+  [0x00000000]> dr

@@ -1,0 +1,41 @@
+▶ Enumerar Usuarios del Dominio (Listar usuarios del dominio):
+  rpcclient $IP -U "<user>%<password>" -c "enumdomusers;quit"
+
+▶ Información del Servidor (Obtener detalles del servidor):
+  rpcclient $IP -U "<user>%<password>" -c "srvinfo;quit"
+
+▶ Obtener SID de Usuario (Consultar SID por nombre):
+  rpcclient $IP -c "lookupnames <name>;quit"
+
+▶ Información del Dominio (Detalles del dominio):
+  rpcclient $IP -U "<user>%<password>" -c "querydominfo;quit"
+
+▶ Política de Contraseñas del Dominio (Obtener política de contraseñas):
+  rpcclient $IP -U "<user>%<password>" -c "getdompwinfo;quit"
+
+▶ Enumerar Recursos Compartidos (Listar shares disponibles):
+  rpcclient $IP -U "<user>%<password>" -c "netshareenum;quit"
+
+▶ Enumerar Dominios (Listar dominios actuales):
+  rpcclient $IP -U "<user>%<password>" -c "enumdomains;quit"
+
+▶ Enumerar Grupos del Dominio (Listar grupos del dominio):
+  rpcclient $IP -U "<user>%<password>" -c "enumdomgroups;quit"
+
+▶ Información de Grupo (Detalles de un grupo por RID):
+  rpcclient $IP -U "<user>%<password>" -c "querygroup <RID>;quit"
+
+▶ Miembros de Grupo (Enumerar miembros de un grupo por RID):
+  rpcclient $IP -U "<user>%<password>" -c "querygroupmem <RID>;quit"
+
+▶ Información de Usuario (Detalles de usuario o equipo por RID):
+  rpcclient $IP -U "<user>%<password>" -c "queryuser <RID>;quit"
+
+▶ Políticas de Contraseña de Usuario (Obtener políticas por RID):
+  rpcclient $IP -U "<user>%<password>" -c "getusrdompwinfo <RID>;quit"
+
+▶ Enumerar SIDs Locales (Listar SIDs usando LSA):
+  rpcclient $IP -U "<user>%<password>" -c "lsaenumsid;quit"
+
+▶ Consultar SID (Obtener información de un SID específico):
+  rpcclient $IP -U "<user>%<password>" -c "lookupsid <SID>;quit"

@@ -1,0 +1,4 @@
+▶ Listar Tareas Programadas (Ver todas las tareas programadas):
+  schtasks /query /fo LIST /v
+▶ Listar Tarea Programada Específica (Buscar una tarea específica):
+  schtasks /query /fo LIST 2>nul | findstr <taskname>

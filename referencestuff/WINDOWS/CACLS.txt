@@ -1,0 +1,2 @@
+▶ Verificar Permisos de Archivo o Carpeta (Comprobar permisos con cacls):
+  cacls "<file>"

@@ -1,0 +1,62 @@
+▶ Escaneo Básico (Escanear puertos específicos en un objetivo):
+  masscan -p<port> $IP
+  # Ejemplo: masscan -p80 192.168.1.100
+
+▶ Escaneo Masivo (Escanear puertos en toda la Internet):
+  masscan -p80 0.0.0.0/0 --rate 100000
+
+▶ Escaneo de Rango de IPs (Escanear puertos en un rango específico):
+  masscan -p443 192.168.1.0/24
+
+▶ Escaneo de Puertos Múltiples (Probar varios puertos a la vez):
+  masscan -p80,443 $IP --rate 100000
+
+▶ Escaneo con Banners (Capturar información de servicios):
+  masscan -p80 10.0.0.0/8 --banners
+
+▶ Escaneo UDP (Probar puertos UDP):
+  masscan -sU -p<port> $IP
+  # Ejemplo: masscan -sU -p161 192.168.1.0/24
+
+▶ Escaneo SYN (Realizar escaneo SYN para mayor velocidad):
+  masscan -sS -p<port> $IP
+
+▶ Lista de Hosts (Listar hosts sin enviar paquetes):
+  masscan -sL $IP
+
+▶ Guardar en Formato XML (Exportar resultados a XML):
+  masscan -p80 192.168.1.0/24 -oX scan.xml
+
+▶ Ajustar Velocidad (Configurar tasa de paquetes por segundo):
+  masscan -p80 $IP --rate 100000
+
+▶ Configurar IP del Adaptador (Especificar IP del adaptador de red):
+  masscan -p80 $IP --adapter-ip <adapter_ip>
+
+▶ Configurar MAC del Adaptador (Especificar MAC del adaptador):
+  masscan -p80 $IP --adapter-mac <adapter_mac>
+
+▶ Configurar MAC del Router (Especificar MAC del router):
+  masscan -p80 $IP --router-mac <router_mac>
+
+▶ Excluir Hosts (Evitar escanear hosts específicos):
+  masscan -p80 $IP --exclude-file <exclude_file>
+
+▶ Formato de Salida Personalizado (Especificar formato de salida):
+  masscan -p80 $IP --output-format <format>
+  # Formatos: xml, binary, grepable, list, json
+
+▶ Guardar Resultados (Definir archivo de salida):
+  masscan -p80 $IP --output-filename <file>
+
+▶ Cambiar User-Agent HTTP (Personalizar agente HTTP):
+  masscan -p80 $IP --http-user-agent "<agent>"
+
+▶ Solo Puertos Abiertos (Reportar únicamente puertos abiertos):
+  masscan -p80 $IP --open-only
+
+▶ Guardar en Formato PCAP (Capturar paquetes en PCAP):
+  masscan -p80 $IP --pcap <file>
+
+▶ Trazar Paquetes (Mostrar paquetes enviados en terminal):
+  masscan -p80 $IP --packet-trace

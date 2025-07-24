@@ -1,0 +1,4 @@
+▶ Obtener Información Completa del Sistema (Detalles del sistema operativo y configuración):
+  systeminfo
+▶ Obtener Información Limitada del Sistema (Nombre y versión del SO):
+  systeminfo | findstr /B /C:"OS Name" /C:"OS Version"

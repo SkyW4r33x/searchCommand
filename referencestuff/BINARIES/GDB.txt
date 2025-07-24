@@ -1,0 +1,45 @@
+▶ Iniciar GDB (Modo silencioso):
+  gdb ./<binario> -q
+
+▶ Generar Patrón (GEF - Para explotación):
+  gef> pattern create 200
+
+▶ Calcular Offset (GEF - Encontrar desplazamiento):
+  gef> pattern offset $eip
+
+▶ Verificar Protecciones (Checksec):
+  gef> checksec
+
+▶ Establecer Breakpoint:
+  break <función>  (Ejemplo: break main)
+
+▶ Ejecutar Programa:
+  run <argumentos>
+
+▶ Ejecutar con Entrada Redirigida:
+  run < input.txt
+
+▶ Examinar Memoria (32 palabras en hexadecimal):
+  x/64wx $esp    # También: x/s (strings), x/i (instrucciones)
+
+▶ Desensamblar Función:
+  disassemble <función>  (Ejemplo: disassemble main)
+
+▶ Mostrar Registros:
+  info registers
+
+▶ Continuar Ejecución:
+  continue
+
+▶ Paso a Paso (Instrucción o línea):
+  step    # Entra en funciones
+  next    # No entra en funciones
+
+▶ Mostrar Backtrace (Pila de llamadas):
+  backtrace
+
+▶ Mostrar Variables Locales:
+  info locals
+
+▶ Modificar Registro:
+  set $<registro> = <valor>  (Ejemplo: set $eax = 0x0)

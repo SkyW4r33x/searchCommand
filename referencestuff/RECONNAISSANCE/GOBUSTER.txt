@@ -1,0 +1,41 @@
+▶ Enumeración de Directorios (Búsqueda de directorios):
+  gobuster dir -u $URL -w /usr/share/wordlists/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt -t 50 -b 403,404
+
+▶ Enumeración de Directorios (Búsqueda de directorios y archivos):
+  gobuster dir -u $URL -w /usr/share/wordlists/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt -t 50 -b 403,404 -x php,txt,html,php.bak,bak,tar
+
+▶ Enumeración de Directorios con Más Extensiones (Fuzzing con extensiones adicionales):
+  gobuster dir -u $URL -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt -x json,html,php,txt,xml,md
+
+▶ Escaneo Alta Velocidad (Fuzzing con mayor tasa de hilos):
+  gobuster dir -u $URL -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt -t 30
+
+▶ Enumeración de Subdominios (Descubrir subdominios):
+  gobuster vhost -u $URL -w /usr/share/wordlists/seclists/Discovery/DNS/subdomains-top1million-5000.txt -t 200 --append-domain -q
+  gobuster vhost -u $URL -w /usr/share/wordlists/seclists/Discovery/DNS/subdomains-top1million-110000.txt --append-domain --follow-redirect -t 200 -q
+
+▶ Solo Estado 200 (Filtrar respuestas válidas):
+  gobuster dir -u $URL -w /usr/share/wordlists/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt -t 50 -x html -s 200
+
+▶ Agregar Barra (Forzar barra al final):
+  gobuster dir -u $URL -w /usr/share/wordlists/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt -t 20 --add-slash
+
+▶ Escaneo CGI-BIN (Búsqueda en CGI):
+  gobuster dir -u $URL/cgi-bin/ -w /usr/share/wordlists/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt -t 20 -x sh,pl,cgi
+
+▶ Escaneo con Autenticación (Usar credenciales):
+  gobuster dir -u $URL -w /usr/share/wordlists/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt -U usuario -P contraseña
+
+▶ Escaneo DNS (Bruteforce de subdominios):
+  gobuster dns -d $URL -w /usr/share/wordlists/seclists/Discovery/DNS/subdomains-top1million-5000.txt
+
+▶ Escaneo con Retraso (Evitar bloqueos):
+  gobuster dir -u $URL -w /usr/share/wordlists/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt -t 50 --delay 500ms
+
+▶ Escaneo con Fuzzing de Parámetros en URL:
+  gobuster fuzz -u "$URL/index.php?FUZZ" -w /usr/share/wordlists/seclists/Discovery/Web-Content/common.txt -t 50 --exclude-length 2596 -b 400 
+
+▶ Fuzzing para Vulnerabilidades de Local File Inclusion (LFI):
+  gobuster fuzz -u "$URL/index.php?secret=FUZZ" -w /usr/share/wordlists/seclists/Fuzzing/LFI/LFI-LFISuite-pathtotest.txt -t 50 --exclude-length 2596 -b 400 --exclude-length 2582
+_
+# Nota: --exclude-length 2596,2582 "por ejemplo" excluye respuestas con longitudes de 2596 o 2582 bytes, y -b 400 excluye respuestas con código de estado 400.
