@@ -148,7 +148,7 @@ Commands are stored in the `~/referencestuff` directory, organized by categories
 
 ### Tool File Format
 
-Each tool file (e.g., `NMAP.txt`) follows this format:
+Each tool file (e.g., `SEARCHCOMMAND.txt`) follows this format:
 ```
 Descripción:▶ [Command description]
 Comando: [Full command]
