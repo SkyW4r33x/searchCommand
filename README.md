@@ -10,7 +10,7 @@
 - [Features](#features)
 - [Prerequisites](#prerequisites)
 - [Installation](#installation)
-- [Usage](#usage)
+- [SearchCommand Usage](#SearchCommand-Usage)
   - [Interactive Mode](#interactive-mode)
   - [Internal Commands](#internal-commands)
   - [Non-Interactive Search](#non-interactive-search)
