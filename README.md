@@ -233,8 +233,8 @@ The tool has been tested on the following Linux terminals:
 ## Known Issues
 
 - **Configuration Errors**: If `referencestuff` is missing or incorrectly formatted, the tool will fail to load. Ensure proper setup during installation.
+
 - **Kitty Terminal**: `Ctrl + L` clears the screen, but scroll-up history reappears. Other terminals may show inconsistent colors or formatting.
-- **GTFOBins**: Limited to supported binaries; ensure a stable internet connection for queries.
 
 ## Troubleshooting
 
